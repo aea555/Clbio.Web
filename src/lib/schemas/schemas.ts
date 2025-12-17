@@ -178,10 +178,15 @@ export const resetPasswordSchema = z.object({
 export type ResetPasswordRequestDto = z.infer<typeof resetPasswordSchema>;
 
 export const verifyEmailOtpSchema = z.object({
-	userId: z.string().uuid({ message: "Invalid User ID" }),
+	email: z.email({ message: "Invalid email" }).max(320, { message: "Email too long" }),
 	otp: z.string().max(6, { message: "OTP too long" }),
 });
 export type VerifyEmailOtpRequestDto = z.infer<typeof verifyEmailOtpSchema>;
+
+export const resendVerificationOtpSchema = z.object({
+	email: z.email({ message: "Invalid email" }).max(320, { message: "Email too long" }),
+});
+export type ResendVerificationOtpRequestDto = z.infer<typeof resendVerificationOtpSchema>;
 
 export const verifyEmailSchema = z.object({
 	token: z.string().max(200, { message: "Token too long" }),

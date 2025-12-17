@@ -9,29 +9,46 @@ export async function POST(request: Request) {
 
   try {
     // 1. Call .NET Backend
-    const resp: ApiResponse<TokenResponseDto> = await axios.post(
+    const resp = await axios.post(
       `${process.env.NEXT_PUBLIC_API_URL}/auth/login`,
       body
     );
     
+    const apiResponse = resp.data as ApiResponse<TokenResponseDto>;
+
+    if (!apiResponse.success) {
+      console.error("Login failed:", apiResponse);
+      return NextResponse.json(
+        { error: apiResponse.error || "Login failed" },
+        { status: 401 }
+      );
+    }
+
     // 2. Extract Tokens 
-    const { accessToken, refreshToken } = resp.data as TokenResponseDto;
+    const { accessToken, refreshToken } = apiResponse.data || {};
+
+    if (!accessToken || !refreshToken) {
+      console.error("Login successful but some tokens are not found in response:", apiResponse);
+      return NextResponse.json({ error: "Invalid Token Response" }, { status: 500 });
+    }
 
     // 3. Set HttpOnly Cookies
     const cookieStore = await cookies();
-    
+    const isProduction = process.env.NODE_ENV === "production";
+    const isSecure = isProduction && !request.url.includes("localhost");
+
     cookieStore.set("accessToken", accessToken, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
+      secure: isSecure,
+      sameSite: "lax",
       path: "/",
       maxAge: 15 * 60, 
     });
 
     cookieStore.set("refreshToken", refreshToken, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
+      secure: isSecure,
+      sameSite: "lax",
       path: "/",
       maxAge: 7 * 24 * 60 * 60, 
     });

@@ -1,8 +1,9 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
-export function middleware(request: NextRequest) {
-  const token = request.cookies.get("accessToken")?.value;
+export function proxy(request: NextRequest) {
+  const accessToken = request.cookies.get("accessToken")?.value;
+  const refreshToken = request.cookies.get("refreshToken")?.value;
   const { pathname } = request.nextUrl;
 
   const authRoutes = ["/auth"];
@@ -13,14 +14,14 @@ export function middleware(request: NextRequest) {
   const isProtectedRoute = protectedRoutes.some((route) => pathname.startsWith(route));
 
   // 2. Redirect Unauthenticated Users
-  if (isProtectedRoute && !token) {
+  if (isProtectedRoute && !accessToken && !refreshToken) {
     const loginUrl = new URL("/auth/login", request.url);
     loginUrl.searchParams.set("returnUrl", pathname); 
     return NextResponse.redirect(loginUrl);
   }
 
   // 3. Redirect Authenticated Users away from Login
-  if (isAuthRoute && token) {
+  if (isAuthRoute && (accessToken || refreshToken)) {
     return NextResponse.redirect(new URL("/dashboard", request.url));
   }
 

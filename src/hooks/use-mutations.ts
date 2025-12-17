@@ -8,15 +8,25 @@ import { commentService } from "@/services/comment-service";
 import { workspaceService } from "@/services/workspace-service";
 import { boardService } from "@/services/board-service";
 import { columnService } from "@/services/column-service";
+import { authService } from "@/services/auth-service";
+import { getErrorMessage } from "@/lib/error-utils";
 
 export function useWorkspaceMutations() {
   const queryClient = useQueryClient();
 
   const createWorkspace = useMutation({
     mutationFn: workspaceService.create,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["workspaces"] });
-      toast.success("Workspace created");
+    onSuccess: (newWorkspace) => {
+      console.log("Create Workspace Response:", newWorkspace);
+      queryClient.setQueryData(["workspaces"], (oldData: any) => {
+        const currentList = Array.isArray(oldData) ? oldData : [];
+        if (currentList.find((w: any) => w.id === newWorkspace?.id)) {
+            return currentList;
+        }
+
+        return [...currentList, newWorkspace];
+      });
+      toast.success("Workspace created successfully");
     },
   });
 
@@ -286,62 +296,61 @@ export function useInteractionMutations(workspaceId: string) {
   });
 
   return { createComment, deleteComment, uploadAttachment, deleteAttachment };
-
-  return useMutation({
-    mutationFn: ({ taskId, data }: { taskId: string; data: MoveTaskItemDto }) =>
-      taskService.move(workspaceId, taskId, data),
-
-    // OPTIMISTIC UPDATE START
-    onMutate: async ({ taskId, data }) => {
-      // 1. Cancel outgoing refetches so they don't overwrite our optimistic update
-      await queryClient.cancelQueries({ queryKey: ["columns"] });
-
-      // 2. Snapshot the previous value (for rollback)
-      const previousColumns = queryClient.getQueryData<ReadColumnDto[]>(["columns"]);
-
-      // 3. Optimistically update the cache
-      queryClient.setQueriesData({ queryKey: ["columns"] }, (old: ReadColumnDto[] | undefined) => {
-        if (!old) return [];
-
-        // Deep clone to avoid mutating state directly
-        const newColumns = JSON.parse(JSON.stringify(old));
-
-        // Find source and target columns
-        let sourceCol = newColumns.find((c: any) => c.items.some((t: any) => t.id === taskId));
-        let targetCol = newColumns.find((c: any) => c.id === data.targetColumnId);
-        
-        if (!sourceCol || !targetCol) return old;
-
-        // Remove task from source
-        const taskIndex = sourceCol.items.findIndex((t: any) => t.id === taskId);
-        const [task] = sourceCol.items.splice(taskIndex, 1);
-
-        // Update task position locally
-        task.position = data.targetPosition;
-        
-        // Insert into target (at specific index if needed, or simple push for now)
-        // Note: Ideally 'newPosition' logic needs to map to array index
-        targetCol.items.splice(data.targetPosition, 0, task);
-
-        return newColumns;
-      });
-
-      return { previousColumns };
-    },
-    // OPTIMISTIC UPDATE END
-
-    onError: (err, newTodo, context) => {
-      // Rollback on error
-      toast.error("Failed to move task");
-      if (context?.previousColumns) {
-        queryClient.setQueryData(["columns"], context.previousColumns);
-      }
-    },
-
-    onSettled: () => {
-      // Always refetch after error or success to ensure sync with server
-      queryClient.invalidateQueries({ queryKey: ["columns"] });
-    },
-  });
 }
 
+export function useAuthMutations() {
+  const loginMutation = useMutation({
+    mutationFn: authService.login,
+    onError: (error: any) => {
+      toast.error(getErrorMessage(error));
+    },
+  });
+
+  const registerMutation = useMutation({
+    mutationFn: authService.register,
+    onError: (error: any) => {
+      toast.error(getErrorMessage(error));
+    }
+  });
+
+  // 1. Forgot Password (Send Email)
+  const forgotPasswordMutation = useMutation({
+    mutationFn: authService.forgotPassword,
+    onError: (error: any) => {
+      toast.error(getErrorMessage(error));
+    }
+  });
+
+  // 2. Reset Password (Submit Code + New Password)
+  const resetPasswordMutation = useMutation({
+    mutationFn: authService.resetPassword,
+    onError: (error: any) => {
+      toast.error(getErrorMessage(error));
+    }
+  });
+
+  const verifyEmailMutation = useMutation({
+    mutationFn: authService.verifyEmail,
+    onError: (error: any) => {
+      toast.error(getErrorMessage(error));
+    },
+  });
+
+  const resendVerificationMutation = useMutation({
+    mutationFn: authService.resendVerification,
+    onSuccess: () => {
+    },
+    onError: (error: any) => {
+      toast.error(getErrorMessage(error));
+    },
+  });
+
+  return { 
+    loginMutation, 
+    registerMutation, 
+    forgotPasswordMutation, 
+    resetPasswordMutation,
+    verifyEmailMutation,
+    resendVerificationMutation
+  };
+}

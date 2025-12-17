@@ -33,9 +33,15 @@ export function useWorkspaceRealtime(workspaceId: string) {
   }, [connection, isConnected, workspaceId]);
 
   // =========================================================
-  // WORKSPACE EVENTS (New!)
+  // WORKSPACE EVENTS 
   // =========================================================
   
+  useSocketEventListener("WorkspaceCreated", (data: ReadWorkspaceDto) => {
+    queryClient.invalidateQueries({ queryKey: ["workspaces"] });
+    queryClient.invalidateQueries({ queryKey: ["workspaceById", data.id] });
+    toast.success("New workspace created");
+  });
+
   useSocketEventListener("WorkspaceUpdated", (data: ReadWorkspaceDto) => {
     // Update the specific workspace cache
     queryClient.setQueryData(["workspaces", data.id], data);

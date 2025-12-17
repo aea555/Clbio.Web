@@ -8,6 +8,7 @@ import { attachmentService } from "@/services/attachment-service";
 import { notificationService } from "@/services/notification-service";
 import { activityLogService } from "@/services/activity-log-service";
 import { authService } from "@/services/auth-service";
+import { presenceService } from "@/services/presence-service";
 
 // --- WORKSPACES ---
 export function useWorkspaces() {
@@ -19,7 +20,7 @@ export function useWorkspaces() {
 
 export function useWorkspace(workspaceId: string) {
   return useQuery({
-    queryKey: ["workspaces", workspaceId],
+    queryKey: ["workspaceById", workspaceId],
     queryFn: () => workspaceService.getById(workspaceId),
     enabled: !!workspaceId,
   });
@@ -102,10 +103,30 @@ export function useNotifications() {
 }
 
 // --- USERS ---
-export function useGetMe(query: string) {
+export function useGetMe() {
   return useQuery({
-    queryKey: ["users", "search", query],
+    queryKey: ["me"], 
     queryFn: () => authService.getMe(),
-    enabled: !!query, 
+    retry: 1, 
+    staleTime: 1000 * 60 * 5, 
+  });
+}
+
+export function usePresenceHeartbeat(isAuthenticated: boolean) {
+  return useQuery({
+    queryKey: ["presence-heartbeat"],
+    queryFn: async () => {
+      // FIX: Wait for the call, then return 'true' so data is not undefined
+      await presenceService.heartbeat(); 
+      return true; 
+    },
+    // Only run if we are authenticated
+    enabled: isAuthenticated,
+    // Poll every 30 seconds
+    refetchInterval: 30 * 1000, 
+    // Do not retry on failure (if 401, the global error handler or session sync will catch it)
+    retry: false, 
+    // Keep running even if window is in background (to maintain presence)
+    refetchIntervalInBackground: true, 
   });
 }
