@@ -20,6 +20,12 @@ export const workspaceService = {
   update: (id: string, data: UpdateWorkspaceDto) => 
     put<ReadWorkspaceDto>(`/api/proxy/workspaces/${id}`, data),
 
+  archive: (id: string,) =>
+    post<void>(`/api/proxy/workspaces/${id}/archive`, {}),
+
+  unarchive: (id: string,) =>
+    post<void>(`/api/proxy/workspaces/${id}/unarchive`, {}),
+
   delete: (id: string) => 
     del(`/api/proxy/workspaces/${id}`),
 

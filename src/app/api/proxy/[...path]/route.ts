@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
-import axios, { AxiosResponse } from "axios";
+import axios, { AxiosError, AxiosResponse } from "axios";
 import { ApiResponse, TokenResponseDto } from "@/types/dtos";
 
 async function handle(
@@ -125,7 +125,7 @@ async function handle(
 
     // Pass through other errors (400, 403, 500)
     return NextResponse.json(
-      error.response?.data || { error: "Proxy Error" }, 
+      error.code || { error: "Proxy Error" }, 
       { status: error.response?.status || 500 }
     );
   }

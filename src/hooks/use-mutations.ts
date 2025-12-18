@@ -1,7 +1,5 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { taskService } from "@/services/task-service";
-import { MoveTaskItemDto } from "@/lib/schemas/schemas";
-import { ReadColumnDto } from "@/types/dtos";
 import { toast } from "sonner";
 import { attachmentService } from "@/services/attachment-service";
 import { commentService } from "@/services/comment-service";
@@ -10,6 +8,10 @@ import { boardService } from "@/services/board-service";
 import { columnService } from "@/services/column-service";
 import { authService } from "@/services/auth-service";
 import { getErrorMessage } from "@/lib/error-utils";
+import { useAuthStore } from "@/store/use-auth-store";
+import { useRouter } from "next/navigation";
+import { useWorkspaceStore } from "@/store/use-workspace-store";
+import { notificationService } from "@/services/notification-service";
 
 export function useWorkspaceMutations() {
   const queryClient = useQueryClient();
@@ -21,30 +23,33 @@ export function useWorkspaceMutations() {
       queryClient.setQueryData(["workspaces"], (oldData: any) => {
         const currentList = Array.isArray(oldData) ? oldData : [];
         if (currentList.find((w: any) => w.id === newWorkspace?.id)) {
-            return currentList;
+          return currentList;
         }
-
         return [...currentList, newWorkspace];
       });
       toast.success("Workspace created successfully");
     },
+    onError: (error: any) => toast.error(getErrorMessage(error)),
   });
 
   const updateWorkspace = useMutation({
-    mutationFn: ({ id, data }: { id: string; data: any }) => 
+    mutationFn: ({ id, data }: { id: string; data: any }) =>
       workspaceService.update(id, data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["workspaces"] });
+    onSuccess: (updatedWorkspace) => {
+      queryClient.invalidateQueries({ queryKey: ["workspaceById", updatedWorkspace?.id] });
       toast.success("Workspace updated");
     },
+    onError: (error: any) => toast.error(getErrorMessage(error)),
   });
 
   const deleteWorkspace = useMutation({
     mutationFn: workspaceService.delete,
-    onSuccess: () => {
+    onSuccess: (works) => {
       queryClient.invalidateQueries({ queryKey: ["workspaces"] });
+      queryClient.invalidateQueries({ queryKey: ["workspaceById"] });
       toast.success("Workspace deleted");
     },
+    onError: (error: any) => toast.error(getErrorMessage(error)),
   });
 
   // --- Members ---
@@ -53,8 +58,11 @@ export function useWorkspaceMutations() {
       workspaceService.inviteMember(workspaceId, data),
     onSuccess: (_, { workspaceId }) => {
       queryClient.invalidateQueries({ queryKey: ["workspace-members", workspaceId] });
+      queryClient.invalidateQueries({ queryKey: ["workspaces"] });
+      queryClient.invalidateQueries({ queryKey: ["workspaceById"] });
       toast.success("Member invited");
     },
+    onError: (error: any) => toast.error(getErrorMessage(error)),
   });
 
   const removeMember = useMutation({
@@ -62,11 +70,34 @@ export function useWorkspaceMutations() {
       workspaceService.removeMember(workspaceId, userId),
     onSuccess: (_, { workspaceId }) => {
       queryClient.invalidateQueries({ queryKey: ["workspace-members", workspaceId] });
+      queryClient.invalidateQueries({ queryKey: ["workspaces"] });
+      queryClient.invalidateQueries({ queryKey: ["workspaceById"] });
       toast.success("Member removed");
     },
+    onError: (error: any) => toast.error(getErrorMessage(error)),
   });
 
-  return { createWorkspace, updateWorkspace, deleteWorkspace, inviteMember, removeMember };
+  const archiveWorkspace = useMutation({
+    mutationFn: workspaceService.archive,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["workspaces"] });
+      queryClient.invalidateQueries({ queryKey: ["workspaceById"] });
+      toast.success("Workspace archived successfully");
+    },
+    onError: (error: any) => toast.error(getErrorMessage(error)),
+  });
+
+  const unarchiveWorkspace = useMutation({
+    mutationFn: workspaceService.unarchive,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["workspaces"] });
+      queryClient.invalidateQueries({ queryKey: ["workspaceById"] });
+      toast.success("Workspace unarchived successfully");
+    },
+    onError: (error: any) => toast.error(getErrorMessage(error)),
+  });
+
+  return { createWorkspace, updateWorkspace, deleteWorkspace, inviteMember, removeMember, archiveWorkspace, unarchiveWorkspace };
 }
 
 // ============================================================================
@@ -81,15 +112,17 @@ export function useBoardMutations(workspaceId: string) {
       queryClient.invalidateQueries({ queryKey: ["boards", workspaceId] });
       toast.success("Board created");
     },
+    onError: (error: any) => toast.error(getErrorMessage(error)),
   });
 
   const updateBoard = useMutation({
-    mutationFn: ({ id, data }: { id: string; data: any }) => 
+    mutationFn: ({ id, data }: { id: string; data: any }) =>
       boardService.update(workspaceId, id, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["boards", workspaceId] });
       toast.success("Board updated");
     },
+    onError: (error: any) => toast.error(getErrorMessage(error)),
   });
 
   const deleteBoard = useMutation({
@@ -98,6 +131,7 @@ export function useBoardMutations(workspaceId: string) {
       queryClient.invalidateQueries({ queryKey: ["boards", workspaceId] });
       toast.success("Board deleted");
     },
+    onError: (error: any) => toast.error(getErrorMessage(error)),
   });
 
   // ⚡ Optimistic Reorder
@@ -109,15 +143,14 @@ export function useBoardMutations(workspaceId: string) {
 
       queryClient.setQueryData(["boards", workspaceId], (old: any[]) => {
         if (!old) return [];
-        // Sort the local cache based on the new ID array order
         return [...old].sort((a, b) => newOrder.indexOf(a.id) - newOrder.indexOf(b.id));
       });
 
       return { previous };
     },
-    onError: (_, __, context) => {
+    onError: (error, __, context) => {
       if (context?.previous) queryClient.setQueryData(["boards", workspaceId], context.previous);
-      toast.error("Failed to reorder boards");
+      toast.error(getErrorMessage(error));
     },
     onSettled: () => queryClient.invalidateQueries({ queryKey: ["boards", workspaceId] }),
   });
@@ -137,12 +170,14 @@ export function useColumnMutations(workspaceId: string, boardId: string) {
       queryClient.invalidateQueries({ queryKey: ["columns", boardId] });
       toast.success("Column created");
     },
+    onError: (error: any) => toast.error(getErrorMessage(error)),
   });
 
   const updateColumn = useMutation({
-    mutationFn: ({ id, data }: { id: string; data: any }) => 
+    mutationFn: ({ id, data }: { id: string; data: any }) =>
       columnService.update(workspaceId, boardId, id, data),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["columns", boardId] }),
+    onError: (error: any) => toast.error(getErrorMessage(error)),
   });
 
   const deleteColumn = useMutation({
@@ -151,6 +186,7 @@ export function useColumnMutations(workspaceId: string, boardId: string) {
       queryClient.invalidateQueries({ queryKey: ["columns", boardId] });
       toast.success("Column deleted");
     },
+    onError: (error: any) => toast.error(getErrorMessage(error)),
   });
 
   // Optimistic Reorder
@@ -167,9 +203,9 @@ export function useColumnMutations(workspaceId: string, boardId: string) {
 
       return { previous };
     },
-    onError: (_, __, context) => {
+    onError: (error, __, context) => {
       if (context?.previous) queryClient.setQueryData(["columns", boardId], context.previous);
-      toast.error("Failed to reorder columns");
+      toast.error(getErrorMessage(error));
     },
     onSettled: () => queryClient.invalidateQueries({ queryKey: ["columns", boardId] }),
   });
@@ -184,21 +220,23 @@ export function useTaskMutations(workspaceId: string) {
   const queryClient = useQueryClient();
 
   const createTask = useMutation({
-    mutationFn: ({ columnId, data }: { columnId: string; data: any }) => 
+    mutationFn: ({ columnId, data }: { columnId: string; data: any }) =>
       taskService.create(workspaceId, columnId, data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["columns"] }); // Refresh board view
+      queryClient.invalidateQueries({ queryKey: ["columns"] });
       toast.success("Task created");
     },
+    onError: (error: any) => toast.error(getErrorMessage(error)),
   });
 
   const updateTask = useMutation({
-    mutationFn: ({ id, data }: { id: string; data: any }) => 
+    mutationFn: ({ id, data }: { id: string; data: any }) =>
       taskService.update(workspaceId, id, data),
     onSuccess: (data) => {
-      queryClient.setQueryData(["tasks", data?.id], data); // Update Detail View
-      queryClient.invalidateQueries({ queryKey: ["columns"] }); // Update Board View
+      queryClient.setQueryData(["tasks", data?.id], data);
+      queryClient.invalidateQueries({ queryKey: ["columns"] });
     },
+    onError: (error: any) => toast.error(getErrorMessage(error)),
   });
 
   const deleteTask = useMutation({
@@ -207,45 +245,41 @@ export function useTaskMutations(workspaceId: string) {
       queryClient.invalidateQueries({ queryKey: ["columns"] });
       toast.success("Task deleted");
     },
+    onError: (error: any) => toast.error(getErrorMessage(error)),
   });
 
-  // Optimistic Move (The complex drag & drop logic)
+  // Optimistic Move
   const moveTask = useMutation({
     mutationFn: ({ taskId, data }: { taskId: string; data: any }) =>
       taskService.move(workspaceId, taskId, data),
-    
+
     onMutate: async ({ taskId, data }) => {
       await queryClient.cancelQueries({ queryKey: ["columns"] });
       const previousColumns = queryClient.getQueryData(["columns"]);
 
       queryClient.setQueriesData({ queryKey: ["columns"] }, (old: any[] | undefined) => {
         if (!old) return [];
-        const newCols = JSON.parse(JSON.stringify(old)); // Deep clone
-        
-        // Find Source & Target
+        const newCols = JSON.parse(JSON.stringify(old));
+
         const sourceCol = newCols.find((c: any) => c.items.some((t: any) => t.id === taskId));
         const targetCol = newCols.find((c: any) => c.id === data.targetColumnId);
 
         if (!sourceCol || !targetCol) return old;
 
-        // Remove from Source
         const taskIdx = sourceCol.items.findIndex((t: any) => t.id === taskId);
         const [task] = sourceCol.items.splice(taskIdx, 1);
 
-        // Update Position
         task.position = data.newPosition;
-
-        // Add to Target
         targetCol.items.splice(data.newPosition, 0, task);
-        
+
         return newCols;
       });
 
       return { previousColumns };
     },
-    onError: (_, __, ctx) => {
+    onError: (error, __, ctx) => {
       if (ctx?.previousColumns) queryClient.setQueryData(["columns"], ctx.previousColumns);
-      toast.error("Failed to move task");
+      toast.error(getErrorMessage(error));
     },
     onSettled: () => queryClient.invalidateQueries({ queryKey: ["columns"] }),
   });
@@ -259,27 +293,24 @@ export function useTaskMutations(workspaceId: string) {
 export function useInteractionMutations(workspaceId: string) {
   const queryClient = useQueryClient();
 
-  // --- Comments ---
   const createComment = useMutation({
     mutationFn: ({ taskId, data }: { taskId: string; data: any }) =>
       commentService.create(workspaceId, taskId, data),
     onSuccess: (_, { taskId }) => {
       queryClient.invalidateQueries({ queryKey: ["comments", taskId] });
-      queryClient.invalidateQueries({ queryKey: ["tasks", taskId] }); // Update counts
+      queryClient.invalidateQueries({ queryKey: ["tasks", taskId] });
     },
+    onError: (error: any) => toast.error(getErrorMessage(error)),
   });
 
   const deleteComment = useMutation({
     mutationFn: (commentId: string) => commentService.delete(workspaceId, commentId),
     onSuccess: (_, commentId) => {
-      // We need to know taskId to invalidate, but we don't have it here easily.
-      // Usually, we just invalidate specific keys if possible, or refetch the comments list if open.
-      // Strategy: Invalidate all comments queries? Or just rely on SignalR?
-      // Simple approach: SignalR will handle it for others, local invalidation best effort.
+      // Invalidation strategy handled elsewhere or via SignalR
     },
+    onError: (error: any) => toast.error(getErrorMessage(error)),
   });
 
-  // --- Attachments ---
   const uploadAttachment = useMutation({
     mutationFn: ({ taskId, file }: { taskId: string; file: File }) =>
       attachmentService.upload(workspaceId, taskId, file),
@@ -288,69 +319,111 @@ export function useInteractionMutations(workspaceId: string) {
       queryClient.invalidateQueries({ queryKey: ["tasks", taskId] });
       toast.success("File uploaded");
     },
+    onError: (error: any) => toast.error(getErrorMessage(error)),
   });
 
   const deleteAttachment = useMutation({
     mutationFn: (attachmentId: string) => attachmentService.delete(workspaceId, attachmentId),
     onSuccess: () => toast.success("Attachment deleted"),
+    onError: (error: any) => toast.error(getErrorMessage(error)),
   });
 
   return { createComment, deleteComment, uploadAttachment, deleteAttachment };
 }
 
 export function useAuthMutations() {
+  const { logout: clearAuthStore } = useAuthStore();
+  const { clear: clearWorkspaceStore } = useWorkspaceStore();
+  const queryClient = useQueryClient();
+  const router = useRouter();
+
   const loginMutation = useMutation({
     mutationFn: authService.login,
-    onError: (error: any) => {
-      toast.error(getErrorMessage(error));
+    onError: (error: any) => toast.error(getErrorMessage(error)),
+  });
+
+  const logoutMutation = useMutation({
+    mutationFn: authService.logout,
+    onSettled: () => {
+      clearAuthStore();
+      clearWorkspaceStore();
+      queryClient.clear();
+      router.replace("/auth/login");
+      toast.success("Logged out successfully");
     },
+    onError: (error: any) => toast.error(getErrorMessage(error)),
   });
 
   const registerMutation = useMutation({
     mutationFn: authService.register,
-    onError: (error: any) => {
-      toast.error(getErrorMessage(error));
-    }
+    onError: (error: any) => toast.error(getErrorMessage(error)),
   });
 
-  // 1. Forgot Password (Send Email)
   const forgotPasswordMutation = useMutation({
     mutationFn: authService.forgotPassword,
-    onError: (error: any) => {
-      toast.error(getErrorMessage(error));
-    }
+    onError: (error: any) => toast.error(getErrorMessage(error)),
   });
 
-  // 2. Reset Password (Submit Code + New Password)
   const resetPasswordMutation = useMutation({
     mutationFn: authService.resetPassword,
-    onError: (error: any) => {
-      toast.error(getErrorMessage(error));
-    }
+    onError: (error: any) => toast.error(getErrorMessage(error)),
   });
 
   const verifyEmailMutation = useMutation({
     mutationFn: authService.verifyEmail,
-    onError: (error: any) => {
-      toast.error(getErrorMessage(error));
-    },
+    onError: (error: any) => toast.error(getErrorMessage(error)),
   });
 
   const resendVerificationMutation = useMutation({
     mutationFn: authService.resendVerification,
-    onSuccess: () => {
-    },
-    onError: (error: any) => {
-      toast.error(getErrorMessage(error));
-    },
+    onError: (error: any) => toast.error(getErrorMessage(error)),
   });
 
-  return { 
-    loginMutation, 
-    registerMutation, 
-    forgotPasswordMutation, 
+  return {
+    loginMutation,
+    logoutMutation,
+    registerMutation,
+    forgotPasswordMutation,
     resetPasswordMutation,
     verifyEmailMutation,
     resendVerificationMutation
+  };
+}
+
+export function useNotificationMutations() {
+  const queryClient = useQueryClient();
+
+  const markAsReadMutation = useMutation({
+    mutationFn: notificationService.markAsRead,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["notifications"] });
+      queryClient.invalidateQueries({ queryKey: ["notifications-unread-count"] });
+    },
+    onError: (error: any) => toast.error(getErrorMessage(error)),
+  });
+
+  const markAllReadMutation = useMutation({
+    mutationFn: notificationService.markAllAsRead,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["notifications"] });
+      queryClient.setQueryData(["notifications-unread-count"], 0);
+      toast.success("All notifications marked as read");
+    },
+    onError: (error: any) => toast.error(getErrorMessage(error)),
+  });
+
+  const deleteNotificationMutation = useMutation({
+    mutationFn: notificationService.delete,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["notifications"] });
+      queryClient.invalidateQueries({ queryKey: ["notifications-unread-count"] });
+    },
+    onError: (error: any) => toast.error(getErrorMessage(error)),
+  });
+
+  return { 
+    markAsReadMutation, 
+    markAllReadMutation,
+    deleteNotificationMutation
   };
 }

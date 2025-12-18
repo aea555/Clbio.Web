@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, keepPreviousData } from "@tanstack/react-query";
 import { workspaceService } from "@/services/workspace-service";
 import { boardService } from "@/services/board-service";
 import { columnService } from "@/services/column-service";
@@ -20,7 +20,7 @@ export function useWorkspaces() {
 
 export function useWorkspace(workspaceId: string) {
   return useQuery({
-    queryKey: ["workspaceById", workspaceId],
+    queryKey: ["workspaces", "workspaceById", workspaceId],
     queryFn: () => workspaceService.getById(workspaceId),
     enabled: !!workspaceId,
   });
@@ -28,16 +28,8 @@ export function useWorkspace(workspaceId: string) {
 
 export function useWorkspaceMembers(workspaceId: string) {
   return useQuery({
-    queryKey: ["workspace-members", workspaceId],
+    queryKey: ["workspaces", "workspace-members", workspaceId],
     queryFn: () => workspaceService.getMembers(workspaceId),
-    enabled: !!workspaceId,
-  });
-}
-
-export function useActivityLogs(workspaceId: string) {
-  return useQuery({
-    queryKey: ["activity-logs", workspaceId],
-    queryFn: () => activityLogService.getAll(workspaceId),
     enabled: !!workspaceId,
   });
 }
@@ -95,10 +87,19 @@ export function useAttachments(workspaceId: string, taskId: string) {
 }
 
 // --- NOTIFICATIONS ---
-export function useNotifications() {
+export function useNotifications(page: number = 1, pageSize: number = 10, unreadOnly: boolean = false) {
   return useQuery({
-    queryKey: ["notifications"],
-    queryFn: () => notificationService.getAll(),
+    queryKey: ["notifications", page, unreadOnly],
+    queryFn: () => notificationService.getAll(page, pageSize, unreadOnly),
+    placeholderData: keepPreviousData,
+  });
+}
+
+export function useUnreadNotificationCount() {
+  return useQuery({
+    queryKey: ["notifications-unread-count"],
+    queryFn: () => notificationService.getUnreadCount(),
+    refetchInterval: 60000, // Sync every minute just in case
   });
 }
 
@@ -128,5 +129,15 @@ export function usePresenceHeartbeat(isAuthenticated: boolean) {
     retry: false, 
     // Keep running even if window is in background (to maintain presence)
     refetchIntervalInBackground: true, 
+  });
+}
+
+// --- WORKSPACE AUDIT LOGS ---
+export function useActivityLogs(workspaceId: string, page: number, pageSize: number = 10) {
+  return useQuery({
+    queryKey: ["activity-logs", workspaceId, page, pageSize],
+    queryFn: () => activityLogService.getLogs(workspaceId, page, pageSize),
+    enabled: !!workspaceId,
+    placeholderData: keepPreviousData, // Keeps showing page 1 data while page 2 is loading
   });
 }

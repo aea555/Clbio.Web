@@ -1,41 +1,43 @@
 "use client";
 
 import { useWorkspaceStore } from "@/store/use-workspace-store";
-import { useBoards } from "@/hooks/use-queries";
+import { useBoards, useWorkspace } from "@/hooks/use-queries"; // Added useWorkspace
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import { CreateBoardModal } from "@/components/dashboard/create-board-modal";
 import { CreateWorkspaceModal } from "@/components/dashboard/create-workspace-modal";
+import { useWorkspacePermissions } from "@/hooks/use-workspace-permissions"; // Import Permissions
+import { ArchivedBanner } from "@/components/dashboard/archived-banner"; // Import Banner
 
 type SortOption = "Most Recent" | "Alphabetical" | "Last Updated";
 
 export default function DashboardPage() {
     const { activeWorkspaceId } = useWorkspaceStore();
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
-    const [isCreateWorkspaceModalOpen, setIsCreateWorkspaceModalOpen] = useState(false); // New State
+    const [isCreateWorkspaceModalOpen, setIsCreateWorkspaceModalOpen] = useState(false);
     const [sortBy, setSortBy] = useState<SortOption>("Most Recent");
-    // Fetch boards for the active workspace
+
+    // Fetch boards
     const { data: boards, isLoading } = useBoards(activeWorkspaceId || "");
+    
+    // Fetch workspace details (for name) & permissions
+    const { data: workspace } = useWorkspace(activeWorkspaceId || "");
+    const { isArchived, canEdit } = useWorkspacePermissions(activeWorkspaceId || "");
 
     const sortedBoards = useMemo(() => {
         if (!boards) return [];
 
-        // Create a copy to avoid mutating the original query cache
         const sorted = [...boards];
-
-        console.log("Sorting boards by:", sortBy);
-        console.log("Boards before sorting:", sorted);
 
         switch (sortBy) {
             case "Alphabetical":
                 return sorted.sort((a, b) => a.name.localeCompare(b.name));
 
             case "Last Updated":
-                // Fallback to createdAt if updatedAt is null
                 return sorted.sort((a, b) => {
                     const dateA = new Date(a.updatedAt || a.createdAt).getTime();
                     const dateB = new Date(b.updatedAt || b.createdAt).getTime();
-                    return dateB - dateA; // Descending
+                    return dateB - dateA;
                 });
 
             case "Most Recent":
@@ -43,10 +45,10 @@ export default function DashboardPage() {
                 return sorted.sort((a, b) => {
                     const dateA = new Date(a.createdAt).getTime();
                     const dateB = new Date(b.createdAt).getTime();
-                    return dateB - dateA; // Descending (Newest first)
+                    return dateB - dateA;
                 });
         }
-    }, [boards, sortBy]);
+    }, [boards, sortBy, workspace]);
 
     if (!activeWorkspaceId) {
         return (
@@ -64,7 +66,7 @@ export default function DashboardPage() {
         );
     } else {
         return (
-            <>
+            <div className="flex flex-col h-full">
                 <CreateBoardModal
                     isOpen={isCreateModalOpen}
                     onClose={() => setIsCreateModalOpen(false)}
@@ -73,8 +75,16 @@ export default function DashboardPage() {
                     isOpen={isCreateWorkspaceModalOpen}
                     onClose={() => setIsCreateWorkspaceModalOpen(false)}
                 />
+
+                {/* 1. Archived Banner */}
+                {isArchived && workspace && (
+                    <div className="mb-6 -mx-4 md:-mx-8 md:-mt-4">
+                        <ArchivedBanner workspaceId={workspace.id} workspaceName={workspace.name} />
+                    </div>
+                )}
+
                 {/* Page Heading & Filters */}
-                <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
+                <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 mb-6">
                     <div>
                         <h2 className="text-3xl font-bold text-[#0e141b] dark:text-[#e8edf3] mb-2 tracking-tight">Your Boards</h2>
                         <p className="text-[#507395] dark:text-[#94a3b8]">Manage your projects, track tasks, and collaborate.</p>
@@ -92,27 +102,33 @@ export default function DashboardPage() {
                             </select>
                             <span className="material-symbols-outlined absolute right-2 top-1/2 -translate-y-1/2 text-[#507395] pointer-events-none text-[20px]">expand_more</span>
                         </div>
-                        <button
-                            onClick={() => setIsCreateModalOpen(true)}
-                            className="flex items-center justify-center gap-2 rounded-lg h-10 px-5 bg-[#4c99e6] hover:bg-[#3b7ec4] hover:cursor-pointer text-white text-sm font-semibold shadow-sm hover:shadow-md transition-all active:scale-95">
-                            <span className="material-symbols-outlined text-[20px]">add</span>
-                            <span>Create Board</span>
-                        </button>
+                        
+                        {/* 2. Hide Create Button if Read Only */}
+                        {canEdit && (
+                            <button
+                                onClick={() => setIsCreateModalOpen(true)}
+                                className="flex items-center justify-center gap-2 rounded-lg h-10 px-5 bg-[#4c99e6] hover:bg-[#3b7ec4] hover:cursor-pointer text-white text-sm font-semibold shadow-sm hover:shadow-md transition-all active:scale-95">
+                                <span className="material-symbols-outlined text-[20px]">add</span>
+                                <span>Create Board</span>
+                            </button>
+                        )}
                     </div>
                 </div>
 
                 {/* Boards Grid */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
 
-                    {/* Create New Tile */}
-                    <button
-                        onClick={() => setIsCreateModalOpen(true)}
-                        className="group flex flex-col items-center justify-center min-h-[160px] rounded-xl border-2 border-dashed hover:cursor-pointer  border-[#e8edf3] dark:border-[#2d3a4a] hover:border-[#4c99e6] hover:bg-[#4c99e6]/5 dark:hover:bg-[#4c99e6]/10 transition-all duration-200 cursor-pointer">
-                        <div className="w-12 h-12 rounded-full bg-[#f8fafb] dark:bg-[#1a2430] flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
-                            <span className="material-symbols-outlined text-[#507395] group-hover:text-[#4c99e6] transition-colors text-[28px]">add</span>
-                        </div>
-                        <span className="text-sm font-medium text-[#507395] group-hover:text-[#4c99e6] transition-colors">Create new board</span>
-                    </button>
+                    {/* 3. Hide Create Tile if Read Only */}
+                    {canEdit && (
+                        <button
+                            onClick={() => setIsCreateModalOpen(true)}
+                            className="group flex flex-col items-center justify-center min-h-[160px] rounded-xl border-2 border-dashed hover:cursor-pointer  border-[#e8edf3] dark:border-[#2d3a4a] hover:border-[#4c99e6] hover:bg-[#4c99e6]/5 dark:hover:bg-[#4c99e6]/10 transition-all duration-200 cursor-pointer">
+                            <div className="w-12 h-12 rounded-full bg-[#f8fafb] dark:bg-[#1a2430] flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+                                <span className="material-symbols-outlined text-[#507395] group-hover:text-[#4c99e6] transition-colors text-[28px]">add</span>
+                            </div>
+                            <span className="text-sm font-medium text-[#507395] group-hover:text-[#4c99e6] transition-colors">Create new board</span>
+                        </button>
+                    )}
 
                     {/* Loading Skeletons */}
                     {isLoading && Array.from({ length: 3 }).map((_, i) => (
@@ -141,12 +157,14 @@ export default function DashboardPage() {
                                         <h3 className="font-bold text-lg text-[#0e141b] dark:text-[#e8edf3] group-hover:text-[#4c99e6] transition-colors truncate">
                                             {board.name}
                                         </h3>
-                                        <button
-                                            className="opacity-0 group-hover:opacity-100 transition-opacity p-1 hover:bg-[#f8fafb] dark:hover:bg-[#111921] rounded text-[#507395]"
-                                            onClick={(e) => { e.preventDefault(); /* Menu logic later */ }}
-                                        >
-                                            <span className="material-symbols-outlined text-[20px]">more_horiz</span>
-                                        </button>
+                                        {canEdit && (
+                                            <button
+                                                className="opacity-0 group-hover:opacity-100 transition-opacity p-1 hover:bg-[#f8fafb] dark:hover:bg-[#111921] rounded text-[#507395]"
+                                                onClick={(e) => { e.preventDefault(); /* Menu logic later */ }}
+                                            >
+                                                <span className="material-symbols-outlined text-[20px]">more_horiz</span>
+                                            </button>
+                                        )}
                                     </div>
                                     <p className="text-sm text-[#507395] dark:text-[#94a3b8] line-clamp-2">
                                         {board.description || "No description provided."}
@@ -157,7 +175,6 @@ export default function DashboardPage() {
                                     <div className="flex -space-x-2">
                                         <div className="bg-gray-300 rounded-full size-7 border-2 border-white dark:border-[#1a2430]"></div>
                                     </div>
-                                    {/* Optional: Show date on hover or always? */}
                                     <span className="text-xs text-[#507395] opacity-0 group-hover:opacity-100 transition-opacity">
                                         {new Date(board.updatedAt || board.createdAt).toLocaleDateString()}
                                     </span>
@@ -166,11 +183,9 @@ export default function DashboardPage() {
                         </Link>
                     ))}
                 </div>
-            </>
+            </div>
         );
     }
-
-
 }
 
 // Helper for consistency with design
@@ -182,7 +197,6 @@ function getRandomGradient(id: string) {
         "from-purple-400 to-violet-500",
         "from-orange-400 to-amber-500"
     ];
-    // Simple hash to get consistent color for same ID
     const index = id.charCodeAt(0) % gradients.length;
     return gradients[index];
 }

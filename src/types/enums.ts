@@ -16,3 +16,8 @@ export enum WorkspaceRole {
     PrivilegedMember = 1,
     Owner = 2,
 }
+
+export enum WorkspaceStatus {
+    Active = 0,
+    Archived = 1
+}
