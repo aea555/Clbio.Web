@@ -6,6 +6,7 @@ import { useActivityLogs } from "@/hooks/use-queries";
 import { SettingsTabs } from "@/components/dashboard/settings-tabs";
 import { useWorkspacePermissions } from "@/hooks/use-workspace-permissions";
 import { ArchivedBanner } from "@/components/dashboard/archived-banner";
+import { usePermissions } from "@/providers/permission-provider"; //
 
 export default function WorkspaceAuditLogsPage() {
   const params = useParams();
@@ -15,11 +16,19 @@ export default function WorkspaceAuditLogsPage() {
   const [page, setPage] = useState(1);
   const pageSize = 10;
 
+  // 1. RBAC & State Permissions
+  // We import this to ensure the component is subscribed to the permission context,
+  // consistent with other settings pages.
+  const { isOwner, isAdmin } = usePermissions();
+  const { isArchived } = useWorkspacePermissions(workspaceId);
+
   const { data: result, isLoading, isFetching } = useActivityLogs(workspaceId, page, pageSize);
-  const { isArchived, canInviteMember, canRemoveMember } = useWorkspacePermissions(workspaceId);
 
   const logs = result?.items || [];
-  const meta = result?.meta;
+  // Fix: Safe calculation for total pages using the API result
+  const totalPages = result ? Math.ceil(result.meta.totalCount / result.meta.pageSize) : 1;
+  console.log("Result: ", result);
+  console.log("Total Pages: ", totalPages)
 
   // Helper to color-code actions
   const getActionColor = (action: string) => {
@@ -44,15 +53,17 @@ export default function WorkspaceAuditLogsPage() {
 
       <SettingsTabs workspaceId={workspaceId} />
 
-      <div className="bg-white dark:bg-[#1a2430] rounded-xl border border-[#e8edf3] dark:border-[#2d3a4a] overflow-hidden shadow-sm flex flex-col min-h-[500px]">
+      <div className="bg-white dark:bg-[#1a2430] rounded-xl border border-[#e8edf3] dark:border-[#2d3a4a] overflow-hidden shadow-sm flex flex-col min-h-[500px] mt-6">
         {/* Table Header */}
         <div className="px-6 py-4 border-b border-[#e8edf3] dark:border-[#2d3a4a] flex justify-between items-center bg-[#f8fafb] dark:bg-[#111921]">
           <h3 className="font-bold text-[#0e141b] dark:text-[#e8edf3]">Activity Log</h3>
           <div className="flex items-center gap-2">
             {isFetching && <span className="text-xs text-[#4c99e6]">Refreshing...</span>}
-            <span className="text-xs text-[#507395] dark:text-[#94a3b8]">
-              Page {meta?.page || 1} of {meta?.totalPages || 1}
-            </span>
+            {result &&
+              <span className="text-xs text-[#507395] dark:text-[#94a3b8]">
+                Page {result.meta.page} of {totalPages}
+              </span>
+            }
           </div>
         </div>
 
@@ -124,10 +135,10 @@ export default function WorkspaceAuditLogsPage() {
         )}
 
         {/* Pagination Footer */}
-        {meta && meta.totalPages > 1 && (
+        {result && totalPages > 1 && (
           <div className="px-6 py-4 border-t border-[#e8edf3] dark:border-[#2d3a4a] bg-white dark:bg-[#1a2430] flex items-center justify-between">
             <p className="text-sm text-[#507395] dark:text-[#94a3b8]">
-              Showing <span className="font-medium">{(meta.page - 1) * meta.pageSize + 1}</span> to <span className="font-medium">{Math.min(meta.page * meta.pageSize, meta.totalCount)}</span> of <span className="font-medium">{meta.totalCount}</span> results
+              Showing <span className="font-medium">{(result.meta.page - 1) * result.meta.pageSize + 1}</span> to <span className="font-medium">{Math.min(result.meta.page * result.meta.pageSize, result.meta.totalCount)}</span> of <span className="font-medium">{result.meta.totalCount}</span> results
             </p>
             <div className="flex gap-2">
               <button
@@ -138,8 +149,8 @@ export default function WorkspaceAuditLogsPage() {
                 Previous
               </button>
               <button
-                onClick={() => setPage(p => Math.min(meta.totalPages, p + 1))}
-                disabled={page === meta.totalPages || isFetching}
+                onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+                disabled={page === totalPages || isFetching}
                 className="px-3 py-1.5 rounded-lg border border-[#e8edf3] dark:border-[#3e4d5d] text-sm font-medium hover:bg-gray-50 dark:hover:bg-[#111921] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
                 Next

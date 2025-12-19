@@ -9,6 +9,7 @@ import { notificationService } from "@/services/notification-service";
 import { activityLogService } from "@/services/activity-log-service";
 import { authService } from "@/services/auth-service";
 import { presenceService } from "@/services/presence-service";
+import { workspaceInvitationService } from "@/services/workspace-invitation-service";
 
 // --- WORKSPACES ---
 export function useWorkspaces() {
@@ -51,6 +52,15 @@ export function useBoard(workspaceId: string, boardId: string) {
   });
 }
 
+export function useBoardSearch(workspaceId: string, q?: string | null, limit?: 10){
+  return useQuery({
+    queryKey: ["boardSearchResults", workspaceId, q],
+    queryFn: () => boardService.search(workspaceId, q, limit),
+    enabled: !!workspaceId,
+    staleTime: 1000 * 5
+  })
+}
+
 // --- COLUMNS ---
 export function useColumns(workspaceId: string, boardId: string) {
   return useQuery({
@@ -89,7 +99,7 @@ export function useAttachments(workspaceId: string, taskId: string) {
 // --- NOTIFICATIONS ---
 export function useNotifications(page: number = 1, pageSize: number = 10, unreadOnly: boolean = false) {
   return useQuery({
-    queryKey: ["notifications", page, unreadOnly],
+    queryKey: ["notifications", page, pageSize, unreadOnly],
     queryFn: () => notificationService.getAll(page, pageSize, unreadOnly),
     placeholderData: keepPreviousData,
   });
@@ -140,4 +150,12 @@ export function useActivityLogs(workspaceId: string, page: number, pageSize: num
     enabled: !!workspaceId,
     placeholderData: keepPreviousData, // Keeps showing page 1 data while page 2 is loading
   });
+}
+
+export function useWorkspaceInvitations(){
+  return useQuery({
+    queryKey: ["workspaceInvitations"],
+    queryFn: () => workspaceInvitationService.getMyInvitations(),
+    placeholderData: keepPreviousData
+  })
 }

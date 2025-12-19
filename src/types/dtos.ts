@@ -1,6 +1,6 @@
 // Auto-generated frontend DTOs based on backend Read/Response DTOs
 
-import { TaskCompletionStatus, TaskProgressStatus, WorkspaceRole, WorkspaceStatus } from "./enums";
+import { InvitationStatus, TaskCompletionStatus, TaskProgressStatus, WorkspaceRole, WorkspaceStatus } from "./enums";
 
 export type Id = string;
 
@@ -140,33 +140,43 @@ export interface TokenResponseDto extends ResponseDtoBase {
 }
 
 export interface ActivityLogDto {
-  id: string;
-  workspaceId: string;
-  actorId: string;
-  actorDisplayName: string;
-  actionType: string;   // e.g. "Create", "Assign"
-  entityType: string;   // e.g. "Board", "Task"
-  entityId: string;
-  metadata: string;     // Description message
-  ipAddress?: string | null;
-  userAgent?: string | null;
-  createdAt: string;
+	id: string;
+	workspaceId: string;
+	actorId: string;
+	actorDisplayName: string;
+	actionType: string;   // e.g. "Create", "Assign"
+	entityType: string;   // e.g. "Board", "Task"
+	entityId: string;
+	metadata: string;     // Description message
+	ipAddress?: string | null;
+	userAgent?: string | null;
+	createdAt: string;
+}
+
+export interface ReadWorkspaceInvitationDto extends ResponseDtoBase
+{
+	id: string;
+	workspaceId: string;
+	workspaceName: string;
+	inviterName: string;
+	email: string;
+	role: WorkspaceRole;
+	invitationStatus: InvitationStatus
+	expiresAt: string;
 }
 
 export interface PaginationMeta {
-  totalCount: number;
-  page: number;
-  pageSize: number;
-  totalPages: number;
+	totalCount: number;
+	page: number;
+	pageSize: number;
+	totalPages: number;
+	unreadOnly?: boolean | null
 }
 
 export interface PaginatedResult<T> {
-  items: T[];
-  total: number; 
-  page: number;
-  pageSize: number;
-  totalPages?: number;
-  unreadOnly?: boolean;
+	items: T[];
+	meta: PaginationMeta;
 }
+
 export { WorkspaceStatus };
 

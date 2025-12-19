@@ -3,65 +3,53 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
-import { useWorkspaces } from "@/hooks/use-queries";
+import { useWorkspaces, useWorkspaceInvitations } from "@/hooks/use-queries"; // Added hook
 import { useWorkspaceStore } from "@/store/use-workspace-store";
 import { useAuthMutations } from "@/hooks/use-mutations";
 import { CreateWorkspaceModal } from "../dashboard/create-workspace-modal";
 import { ConfirmationModal } from "@/components/ui/confirmation-modal";
-import { useUIStore } from "@/store/use-ui-store"; // Import store
+import { useUIStore } from "@/store/use-ui-store";
 
 export function Sidebar() {
   const router = useRouter();
   const pathname = usePathname();
-
-  // Store & State
-  const { isSidebarOpen, setSidebarOpen, toggleSidebar } = useUIStore();
+  const { isSidebarOpen, setSidebarOpen } = useUIStore();
   const [isMobile, setIsMobile] = useState(false);
 
-  // Queries & Mutations
   const { data: workspaces, isLoading } = useWorkspaces();
+  // Fetch invitations to show badge count (page 1, small size)
+  const { data: invitations } = useWorkspaceInvitations(); 
+  const pendingCount = invitations?.items?.filter((i: any) => i.status === 0).length || 0; // Assuming 0 is Pending
+
   const { activeWorkspaceId, setActiveWorkspaceId } = useWorkspaceStore();
   const { logoutMutation } = useAuthMutations();
 
-  // Modals
   const [isCreateWorkspaceModalOpen, setIsCreateWorkspaceModalOpen] = useState(false);
   const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
 
-  // --- 1. Handle Responsive Defaults ---
+  // ... (Keep existing useEffects for Mobile/Resize/Defaults) ...
   useEffect(() => {
     const checkMobile = () => {
-      const mobile = window.innerWidth < 1024; // lg breakpoint
+      const mobile = window.innerWidth < 1024;
       setIsMobile(mobile);
-      // If mobile, close by default. If desktop, open by default.
-      // We only set this on initial load or resize to avoid overriding user preference too aggressively
-      if (mobile) {
-        setSidebarOpen(false);
-      } else {
-        setSidebarOpen(true);
-      }
+      if (mobile) setSidebarOpen(false);
+      else setSidebarOpen(true);
     };
-
-    // Check on mount
     checkMobile();
-
-    // Optional: Re-check on resize (debounced in prod, direct here for simplicity)
     window.addEventListener("resize", checkMobile);
     return () => window.removeEventListener("resize", checkMobile);
   }, [setSidebarOpen]);
 
-  // --- 2. Auto-close on Mobile Navigation ---
   useEffect(() => {
-    if (isMobile) {
-      setSidebarOpen(false);
-    }
+    if (isMobile) setSidebarOpen(false);
   }, [pathname, isMobile, setSidebarOpen]);
 
-  // Default to first workspace
   useEffect(() => {
     if (!activeWorkspaceId && workspaces && workspaces.length > 0) {
       setActiveWorkspaceId(workspaces[0].id);
     }
   }, [workspaces, activeWorkspaceId, setActiveWorkspaceId]);
+  // ... (End existing useEffects) ...
 
   const activeWorkspace = workspaces?.find(w => w.id === activeWorkspaceId);
 
@@ -81,22 +69,18 @@ export function Sidebar() {
 
   const isBoardsActive = pathname === "/dashboard" || pathname.startsWith("/w/");
   const isMembersActive = pathname.includes("/members");
-  const isSettingsActive = pathname.startsWith("/settings");
+  const isSettingsActive = pathname.includes("/settings") && !pathname.includes("/members");
+  // New Active State
+  const isInvitationsActive = pathname.includes("/workspace-invitations");
 
   const getLinkClasses = (isActive: boolean) =>
-    `flex items-center gap-3 px-3 py-2 rounded-lg transition-colors ${isActive
+    `flex items-center gap-3 px-3 py-2 rounded-lg transition-colors relative ${isActive
       ? "bg-white dark:bg-[#1a2430] shadow-sm text-[#4c99e6] font-medium"
       : "text-[#507395] dark:text-[#94a3b8] hover:bg-white dark:hover:bg-[#1a2430] hover:text-[#0e141b] dark:hover:text-[#e8edf3]"
     }`;
 
-  // --- RENDER ---
-
   return (
     <>
-      {/* MOBILE OVERLAY (BACKDROP) 
-        - Only visible on mobile when sidebar is open
-        - Blurs the background
-      */}
       {isMobile && isSidebarOpen && (
         <div 
           onClick={() => setSidebarOpen(false)}
@@ -104,10 +88,6 @@ export function Sidebar() {
         />
       )}
 
-      {/* SIDEBAR CONTAINER 
-        - Mobile: Fixed position, slides in/out
-        - Desktop: Relative/Sticky, expands/collapses width
-      */}
       <aside 
         className={`
           fixed inset-y-0 left-0 z-50 h-full flex flex-col 
@@ -133,10 +113,7 @@ export function Sidebar() {
           isLoading={logoutMutation.isPending}
         />
 
-        {/* Sidebar Header with Toggle (Desktop) / Close (Mobile) */}
-        {/* Sidebar Header */}
         <div className="p-4 border-b border-[#e8edf3] dark:border-[#2d3a4a] flex items-center justify-between gap-2">
-          {/* Workspace Selector (Full Width) */}
           <button className="flex-1 flex items-center gap-3 p-2 hover:bg-white dark:hover:bg-[#1a2430] rounded-lg transition-colors group min-w-0">
             <div className="bg-blue-500 rounded-lg size-8 shadow-sm flex-shrink-0 flex items-center justify-center text-white font-bold text-sm">
               {activeWorkspace?.name?.charAt(0) || "W"}
@@ -151,9 +128,6 @@ export function Sidebar() {
             </span>
           </button>
           
-          {/* COLLAPSE BUTTON (The "Close" Toaster inside)
-            - Visible only when sidebar is OPEN
-          */}
           <button 
             onClick={() => setSidebarOpen(false)}
             className="flex items-center justify-center p-2 text-[#507395] hover:text-[#4c99e6] hover:bg-gray-100 dark:hover:bg-[#1a2430] rounded-lg transition-colors flex-shrink-0"
@@ -165,7 +139,6 @@ export function Sidebar() {
           </button>
         </div>
 
-        {/* Navigation Links */}
         <nav className="flex-1 overflow-y-auto px-3 py-4 flex flex-col gap-1 whitespace-nowrap">
           <Link href="/dashboard" className={getLinkClasses(isBoardsActive)}>
             <span className={`material-symbols-outlined text-[24px] ${isBoardsActive ? "fill-1" : ""}`}>dashboard</span>
@@ -189,7 +162,20 @@ export function Sidebar() {
             <span className="text-sm">Settings</span>
           </Link>
 
-          {/* Workspace List Section */}
+          {/* New Link: Workspace Invitations */}
+          <Link
+            href="/dashboard/account/workspace-invitations"
+            className={getLinkClasses(isInvitationsActive)}
+          >
+            <span className={`material-symbols-outlined text-[24px] ${isInvitationsActive ? "fill-1" : ""}`}>mail</span>
+            <span className="text-sm">Invitations</span>
+            {pendingCount > 0 && (
+              <span className="absolute right-2 bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">
+                {pendingCount}
+              </span>
+            )}
+          </Link>
+
           <div className="mt-6 px-3">
             <p className="text-xs font-semibold text-[#507395] dark:text-[#94a3b8] uppercase tracking-wider mb-2">Workspaces</p>
             <div className="space-y-1">
@@ -210,7 +196,6 @@ export function Sidebar() {
           </div>
         </nav>
 
-        {/* Bottom Actions */}
         <div className="p-4 border-t border-[#e8edf3] dark:border-[#2d3a4a] flex flex-col gap-2 whitespace-nowrap">
           <button
             onClick={() => setIsCreateWorkspaceModalOpen(true)}
@@ -233,10 +218,6 @@ export function Sidebar() {
         </div>
       </aside>
 
-      {/* Desktop Spacer
-         Since the Sidebar is fixed/absolute in movement, we need this 
-         invisible div to push the main content over when the sidebar is open on desktop.
-      */}
       <div 
          className={`flex-shrink-0 transition-all duration-300 ease-in-out hidden lg:block ${isSidebarOpen ? "w-64" : "w-0"}`} 
       />

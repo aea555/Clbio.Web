@@ -171,7 +171,7 @@ export const forgotPasswordSchema = z.object({
 export type ForgotPasswordRequestDto = z.infer<typeof forgotPasswordSchema>;
 
 export const resetPasswordSchema = z.object({
-	email: z.string().email({ message: "Invalid email" }).max(150, { message: "Email too long" }),
+	email: z.string().email({ message: "Invalid email" }).max(320, { message: "Email too long" }),
 	code: z.string().max(6, { message: "Code too long" }),
 	newPassword: z.string().min(6, { message: "Password must be at least 6 characters" }).max(100, { message: "Password too long" }),
 });
@@ -198,3 +198,8 @@ export const googleLoginSchema = z.object({
 });
 export type GoogleLoginRequestDto = z.infer<typeof googleLoginSchema>;
 
+export const sendInvitationSchema =  z.object({
+	email: z.string().email({ message: "Invalid email" }).max(320, { message: "Email too long" }),
+	role: z.nativeEnum(WorkspaceRole),
+})
+export type CreateWorkspaceInvitationDto = z.infer<typeof sendInvitationSchema>;

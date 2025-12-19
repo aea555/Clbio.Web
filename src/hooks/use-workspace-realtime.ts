@@ -50,8 +50,26 @@ export function useWorkspaceRealtime(workspaceId: string) {
 
   useSocketEventListener("WorkspaceArchived", (data: { Id: string }) => {
     queryClient.invalidateQueries({ queryKey: ["workspaces"] });
+    queryClient.invalidateQueries({ queryKey: ["workspaceById", data.Id] });
     if (data.Id === workspaceId) {
        toast.warning("This workspace has been archived.");
+    }
+  });
+
+  useSocketEventListener("WorkspaceUnarchived", (data: { Id: string }) => {
+    queryClient.invalidateQueries({ queryKey: ["workspaces"] });
+    queryClient.invalidateQueries({ queryKey: ["workspaceById", data.Id] });
+    if (data.Id === workspaceId) {
+       toast.warning("This workspace has been archived.");
+    }
+  });
+
+  useSocketEventListener("UserLeftWorkspace", (data: { Id: string }) => {
+    queryClient.invalidateQueries({ queryKey: ["workspaces"] });
+    queryClient.invalidateQueries({ queryKey: ["workspace-members", workspaceId] });
+    queryClient.invalidateQueries({ queryKey: ["workspaceById", data.Id] });
+    if (data.Id === workspaceId) {
+       toast.warning("A user left the workspace.");
     }
   });
 
@@ -77,9 +95,14 @@ export function useWorkspaceRealtime(workspaceId: string) {
 
   useSocketEventListener("MemberUpdated", (member: ReadWorkspaceMemberDto) => {
      queryClient.invalidateQueries({ queryKey: ["workspace-members", workspaceId] });
+     queryClient.invalidateQueries({ queryKey: ["workspaces"] });
   });
 
   useSocketEventListener("MemberRemoved", (data: { userId: string }) => {
+     queryClient.invalidateQueries({ queryKey: ["workspace-members", workspaceId] });
+  });
+
+  useSocketEventListener("UserLeftWorkspace", (data: { userId: string }) => {
      queryClient.invalidateQueries({ queryKey: ["workspace-members", workspaceId] });
   });
 

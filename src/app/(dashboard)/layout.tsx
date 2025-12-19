@@ -1,7 +1,8 @@
 import { Sidebar } from "@/components/layout/sidebar";
 import { Header } from "@/components/layout/header";
-import SocketProvider from "@/providers/socket-provider"; 
+import SocketProvider from "@/providers/socket-provider";
 import { SessionManager } from "@/components/auth/session-manager";
+import { PermissionsProvider } from "@/providers/permission-provider";
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -13,9 +14,11 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           <Header />
           {/* Scrollable Canvas */}
           <div className="flex-1 overflow-y-auto p-8 bg-[#f8fafb]/50 dark:bg-[#111921]/50">
-            <div className="max-w-7xl mx-auto flex flex-col gap-8">
-              {children}
-            </div>
+            <PermissionsProvider>
+              <div className="max-w-7xl mx-auto flex flex-col gap-8">
+                {children}
+              </div>
+            </PermissionsProvider>
           </div>
         </main>
       </div>

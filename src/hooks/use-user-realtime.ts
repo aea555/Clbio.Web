@@ -4,75 +4,104 @@ import { useSocketEventListener } from "./use-socket-event-listener";
 import { useWorkspaceStore } from "@/store/use-workspace-store";
 import { toast } from "sonner";
 
+// 1. Added "InvitationAccepted" to the type
+type WorkspaceSignalType = "Invitation" | "Removal" | "Leave" | "RoleUpdate" | "InvitationAccepted";
+
 export function useUserRealtime() {
   const queryClient = useQueryClient();
   const router = useRouter();
   const { activeWorkspaceId, setActiveWorkspaceId } = useWorkspaceStore();
 
-  // 1. Generic Notification Handler (Updates badge & list)
   const handleNotificationEvent = (data: any) => {
-    // ⚡ Optimistic Update: Increment badge count immediately
     queryClient.setQueryData(["notifications-unread-count"], (old: number | undefined) => {
       return (old || 0) + 1;
     });
 
-    // Invalidate to fetch latest server state (eventual consistency)
     queryClient.invalidateQueries({ queryKey: ["notifications"] });
     queryClient.invalidateQueries({ queryKey: ["notifications-unread-count"] });
 
-    // Show toast (skip for specific types if handled elsewhere, but usually good to show)
     if (data && data.type !== "RemovedFromWorkspace") {
         const message = data.messageText || data.title || "New notification";
         toast.info(message);
     }
   };
 
-  // 2. Specific Handler for Invitations
-  const handleInvitation = (data: any) => {
-    // FIX: Update the sidebar workspace list so the new workspace appears immediately
-    queryClient.invalidateQueries({ queryKey: ["workspaces"] });
+  const handleWorkspaceSignal = (type: WorkspaceSignalType, data: any) => {
+    console.log(`Workspace signal received [${type}]:`, data);
+
+    // Case A: New Invitation Received
+    if (type === "Invitation") {
+      queryClient.invalidateQueries({ queryKey: ["workspaceInvitations"] });
+      handleNotificationEvent(data);
+      return;
+    }
+
+    // Case B: Invitation Accepted 
+    if (type === "InvitationAccepted") {
+      // 2. Refresh Invitations List (Remove the pending invite)
+      queryClient.invalidateQueries({ queryKey: ["workspaceInvitations"] });
+
+      // 3. Standard Notification behavior
+      handleNotificationEvent(data);
+      return;
+    }
+
+    // Case C: Context-Sensitive Events
+    const targetWorkspaceId = data.entityId || data.workspaceId || data.WorkspaceId;
+
+    let activeMsg = "";
+    let inactiveMsg = "";
+    let isError = false;
+
+    switch (type) {
+      case "Removal":
+        activeMsg = "You have been removed from the active workspace.";
+        inactiveMsg = `You have been removed from workspace: ${data.title || "Unknown"}`;
+        isError = true;
+        break;
+      case "Leave":
+        activeMsg = "You have left the active workspace.";
+        inactiveMsg = `You have left the workspace: ${data.title || "Unknown"}`;
+        break;
+      case "RoleUpdate":
+        activeMsg = "Your role in this workspace has been updated.";
+        inactiveMsg = `Your role changed in workspace: ${data.title || "Unknown"}`;
+        break;
+    }
+
+    if (activeWorkspaceId && activeWorkspaceId === targetWorkspaceId && type != "RoleUpdate") {
+      setActiveWorkspaceId(null as any); 
+      router.replace("/dashboard"); 
+      
+      queryClient.removeQueries({ queryKey: ["workspaces"] }); 
+      queryClient.removeQueries({ queryKey: ["workspaceById", targetWorkspaceId] });
+      queryClient.removeQueries({ queryKey: ["boards", targetWorkspaceId] });
+
+      if (isError) toast.error(activeMsg);
+      else toast.warning(activeMsg);
+    } else {
+      queryClient.invalidateQueries({ queryKey: ["workspaces"] });
+      toast.warning(inactiveMsg);
+    }
     
-    // Also trigger the standard notification behavior (badge + toast)
     handleNotificationEvent(data);
   };
 
-  // 3. Specific Handler for Workspace Removal
-  const handleRemovedFromWorkspace = (data: any) => {
-    console.log("Removed from workspace event:", data);
-    
-    // Extract ID (Robust handling for various casing/payload structures)
-    const removedWorkspaceId = data.entityId || data.workspaceId || data.WorkspaceId;
-
-    // Check if we are currently inside the deleted/removed workspace
-    if (activeWorkspaceId && activeWorkspaceId === removedWorkspaceId) {
-      // A. Clear Active Context
-      setActiveWorkspaceId(null as any); 
-      
-      // B. Force Navigation Safety
-      router.replace("/dashboard"); 
-      
-      // C. THE CULPRIT FIX: Hard remove the queries to prevent stale data persistence
-      queryClient.removeQueries({ queryKey: ["workspaces"] }); 
-      queryClient.removeQueries({ queryKey: ["workspaceById", removedWorkspaceId] });
-      queryClient.removeQueries({ queryKey: ["boards", removedWorkspaceId] });
-
-      toast.error("You have been removed from the active workspace.");
-    } else {
-      // If we are elsewhere, just refresh the list to remove the old workspace item
-      queryClient.invalidateQueries({ queryKey: ["workspaces"] });
-      toast.warning(`You have been removed from workspace: ${data.title || "Unknown"}`);
-    }
-    
-    // Also trigger notification update (badge/dropdown)
-    handleNotificationEvent(data); 
-  };
-
   // --- Event Listeners ---
-  useSocketEventListener("ReceiveNotification", handleNotificationEvent);
+  useSocketEventListener("NotificationReceived", handleNotificationEvent);
   
-  // FIX: Use specific handler for invitations
-  useSocketEventListener("WorkspaceInvitationReceived", handleInvitation);
+  // Logic for Declined is usually just notification + invitation list refresh 
+  useSocketEventListener("WorkspaceInvitationDeclined", (data) => {
+    queryClient.invalidateQueries({ queryKey: ["workspaceInvitations"] });
+    handleNotificationEvent(data);
+  });
+
+  // FIX: Route Accepted event to the Signal Handler
+  useSocketEventListener("WorkspaceInvitationAccepted", (data) => handleWorkspaceSignal("InvitationAccepted", data));
   
-  useSocketEventListener("RoleUpdated", handleNotificationEvent);
-  useSocketEventListener("RemovedFromWorkspace", handleRemovedFromWorkspace);
+  // Other Signals
+  useSocketEventListener("WorkspaceInvitationReceived", (data) => handleWorkspaceSignal("Invitation", data));
+  useSocketEventListener("RemovedFromWorkspace", (data) => handleWorkspaceSignal("Removal", data));
+  useSocketEventListener("LeftWorkspace", (data) => handleWorkspaceSignal("Leave", data));
+  useSocketEventListener("WorkspaceRoleUpdated", (data) => handleWorkspaceSignal("RoleUpdate", data));
 }

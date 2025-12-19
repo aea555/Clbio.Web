@@ -1,27 +1,33 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNotifications } from "@/hooks/use-queries";
 import { useNotificationMutations } from "@/hooks/use-mutations";
 import { formatDistanceToNow } from "date-fns";
-import { PaginationMeta } from "@/types/dtos";
 
 export default function NotificationsPage() {
    const [page, setPage] = useState(1);
    const [filter, setFilter] = useState<"all" | "unread">("all");
 
-   const pageSize = 20;
+   const pageSize = 10;
    const unreadOnly = filter === "unread";
 
    const { data: result, isLoading } = useNotifications(page, pageSize, unreadOnly);
    const { markAsReadMutation, markAllReadMutation, deleteNotificationMutation } = useNotificationMutations();
 
    const notifications = result?.items || [];
-   const totalPages = result?.total && result?.pageSize ? result?.total / result?.pageSize : 0;
+   const totalPages = result?.meta?.totalPages || 
+      (result?.meta?.totalCount ? Math.ceil(result.meta.totalCount / pageSize) : 0);
+
+   useEffect(() => {
+      setPage(1);
+   }, [filter]);
 
    const handlePageChange = (newPage: number) => {
-      setPage(newPage);
-      window.scrollTo({ top: 0, behavior: "smooth" });
+      if (newPage >= 1 && newPage <= totalPages) {
+         setPage(newPage);
+         window.scrollTo({ top: 0, behavior: "smooth" });
+      }
    };
 
    return (
@@ -33,19 +39,16 @@ export default function NotificationsPage() {
             </div>
 
             <div className="flex items-center gap-3">
-               {/* Filter Tabs */}
                <div className="bg-[#f8fafb] dark:bg-[#111921] p-1 rounded-lg border border-[#e8edf3] dark:border-[#2d3a4a] flex">
                   <button
                      onClick={() => setFilter("all")}
-                     className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${filter === "all" ? "bg-white dark:bg-[#1a2430] text-[#0e141b] dark:text-white shadow-sm" : "text-[#507395]"
-                        }`}
+                     className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${filter === "all" ? "bg-white dark:bg-[#1a2430] text-[#0e141b] dark:text-white shadow-sm" : "text-[#507395]"}`}
                   >
                      All
                   </button>
                   <button
                      onClick={() => setFilter("unread")}
-                     className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${filter === "unread" ? "bg-white dark:bg-[#1a2430] text-[#0e141b] dark:text-white shadow-sm" : "text-[#507395]"
-                        }`}
+                     className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${filter === "unread" ? "bg-white dark:bg-[#1a2430] text-[#0e141b] dark:text-white shadow-sm" : "text-[#507395]"}`}
                   >
                      Unread
                   </button>
@@ -75,7 +78,7 @@ export default function NotificationsPage() {
                   {notifications.map((notif: any) => (
                      <div key={notif.id} className={`p-4 flex gap-4 hover:bg-[#f8fafb] dark:hover:bg-[#111921]/50 transition-colors group ${!notif.isRead ? "bg-blue-50/30 dark:bg-blue-900/10" : ""}`}>
                         {/* Icon */}
-                        <div className="mt-1">
+                        <div className="mt-1 shrink-0">
                            <div className={`w-10 h-10 rounded-full flex items-center justify-center ${!notif.isRead ? "bg-[#4c99e6]/10 text-[#4c99e6]" : "bg-gray-100 dark:bg-gray-800 text-gray-500"}`}>
                               <span className="material-symbols-outlined text-[20px]">
                                  {notif.type === "Mention" ? "alternate_email" : "notifications"}
@@ -84,26 +87,26 @@ export default function NotificationsPage() {
                         </div>
 
                         {/* Content */}
-                        <div className="flex-1">
-                           <div className="flex justify-between items-start">
-                              <h4 className="text-sm font-semibold text-[#0e141b] dark:text-[#e8edf3]">
+                        <div className="flex-1 min-w-0"> {/* min-w-0 helps text truncate properly */}
+                           <div className="flex justify-between items-start gap-4">
+                              <h4 className="text-sm font-semibold text-[#0e141b] dark:text-[#e8edf3] truncate pr-2">
                                  {notif.title}
                               </h4>
-                              <span className="text-xs text-[#507395] dark:text-[#94a3b8]">
+                              {/* FIX: Use shrink-0 and whitespace-nowrap to prevent wrapping/shifting */}
+                              <span className="text-xs text-[#507395] dark:text-[#94a3b8] shrink-0 whitespace-nowrap">
                                  {formatDistanceToNow(new Date(notif.createdAt), { addSuffix: true })}
                               </span>
                            </div>
-                           <p className="text-sm text-[#507395] dark:text-[#94a3b8] mt-1">
+                           <p className="text-sm text-[#507395] dark:text-[#94a3b8] mt-1 break-words line-clamp-2">
                               {notif.messageText}
                            </p>
                         </div>
 
                         {/* Actions */}
-                        <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
                            {!notif.isRead && (
                               <button
                                  onClick={() => markAsReadMutation.mutate(notif.id)}
-                                 // FIX: Added 'flex items-center justify-center' and 'leading-none'
                                  className="w-8 h-8 flex items-center justify-center text-[#4c99e6] hover:bg-[#4c99e6]/10 rounded-full transition-colors"
                                  title="Mark as read"
                               >
@@ -112,7 +115,6 @@ export default function NotificationsPage() {
                            )}
                            <button
                               onClick={() => deleteNotificationMutation.mutate(notif.id)}
-                              // FIX: Added 'flex items-center justify-center' and 'leading-none'
                               className="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-full transition-colors"
                               title="Delete"
                            >
@@ -130,15 +132,15 @@ export default function NotificationsPage() {
                   <button
                      onClick={() => handlePageChange(page - 1)}
                      disabled={page === 1}
-                     className="px-3 py-1.5 text-sm font-medium border rounded-lg hover:bg-gray-50 disabled:opacity-50"
+                     className="px-3 py-1.5 text-sm font-medium border border-[#e8edf3] dark:border-[#3e4d5d] rounded-lg hover:bg-gray-50 dark:hover:bg-[#111921] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                   >
                      Previous
                   </button>
-                  <span className="text-sm text-[#507395]">Page {page} of {totalPages}</span>
+                  <span className="text-sm text-[#507395] dark:text-[#94a3b8]">Page {page} of {totalPages}</span>
                   <button
                      onClick={() => handlePageChange(page + 1)}
                      disabled={page === totalPages}
-                     className="px-3 py-1.5 text-sm font-medium border rounded-lg hover:bg-gray-50 disabled:opacity-50"
+                     className="px-3 py-1.5 text-sm font-medium border border-[#e8edf3] dark:border-[#3e4d5d] rounded-lg hover:bg-gray-50 dark:hover:bg-[#111921] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                   >
                      Next
                   </button>
