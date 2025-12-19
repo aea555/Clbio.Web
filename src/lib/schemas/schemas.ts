@@ -4,6 +4,7 @@ import {
 	TaskProgressStatus,
 	WorkspaceRole,
 } from "../../types/enums";
+import { MAX_FILE_SIZE_ATTACHMENT, MAX_FILE_SIZE_AVATAR, ACCEPTED_IMAGE_TYPES } from "@/constants/file-upload";
 
 // Mirror of CreateActivityLogDto.cs
 export const createActivityLogSchema = z.object({
@@ -26,13 +27,43 @@ export type CreateActivityLogDto = z.infer<typeof createActivityLogSchema>;
 
 // Attachment
 export const createAttachmentSchema = z.object({
-	fileName: z.string().min(1, { message: "File name is required" }).max(255, { message: "File name too long" }),
-	url: z.string().url({ message: "Invalid URL" }).max(2048, { message: "URL too long" }),
-	sizeBytes: z.number().int().min(1, { message: "Size must be at least 1" }),
-	taskId: z.string().guid({ message: "Invalid Task ID" }),
-	uploadedById: z.string().guid({ message: "Invalid UploadedBy ID" }),
+  files: z
+    .custom<FileList>((val) => typeof window !== 'undefined' && val instanceof FileList, "File selection is required.")
+    .transform((list) => Array.from(list))
+    .refine((files) => files.length > 0, "At least one file must be selected.")
+    .refine((files) => files.length <= 5, "At most 5 files at a time can be uploaded.")
+    
+    .refine(
+      (files) => files.every((file) => file.size <= MAX_FILE_SIZE_ATTACHMENT), 
+      "Individual attachment size can't be over 10MB!"
+    )
+    
+    .refine(
+        (files) => files.reduce((acc, file) => acc + file.size, 0) <= MAX_FILE_SIZE_ATTACHMENT*5,
+        "Total upload size can't be over 50MB!"
+    )
 });
+
 export type CreateAttachmentDto = z.infer<typeof createAttachmentSchema>;
+
+export const uploadUserAvatarSchema = z.object({
+  file: z
+    .custom<FileList>((val) => typeof window !== 'undefined' && val instanceof FileList, "Resim seçimi zorunludur.")
+    .transform((list) => Array.from(list))
+    .refine((files) => files.length > 0, "Bir resim seçmelisiniz.")
+    .refine((files) => files.length === 1, "Sadece tek bir resim yükleyebilirsiniz.")
+    
+    .refine(
+        (files) => files[0].size <= MAX_FILE_SIZE_AVATAR, 
+        `Profil fotoğrafı ${MAX_FILE_SIZE_AVATAR / 1024 / 1024}MB'dan büyük olamaz.`
+    )
+    .refine(
+        (files) => ACCEPTED_IMAGE_TYPES.includes(files[0].type as any), 
+        "Sadece desteklenen resim formatları (.jpg, .png, .webp) yüklenebilir."
+    )
+});
+
+export type UploadUserAvatarDto = z.infer<typeof uploadUserAvatarSchema>;
 
 // Comment
 export const createCommentSchema = z.object({

@@ -65,11 +65,16 @@ export interface ReadAttachmentDto extends ResponseDtoBase {
 	id: string;
 	fileName: string;
 	url: string;
+	contentType?: string | null;
 	sizeBytes: number;
 	taskId: string;
-	contentType?: string | null;
 	uploadedById?: string | null;
 	uploadedByDisplayName?: string | null;
+	uploadedByAvatarUrl?: string | null;
+}
+
+export interface UploadAvatarResponse extends ResponseDtoBase {
+	url: string;
 }
 
 export interface ReadCommentDto extends ResponseDtoBase {

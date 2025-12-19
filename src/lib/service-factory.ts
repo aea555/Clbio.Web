@@ -1,5 +1,6 @@
+import { AxiosResponse } from "axios";
 import { apiClient } from "./axios-client";
-import { ApiResponse } from "@/types/dtos";
+import { ApiResponse, ReadTaskItemDto } from "@/types/dtos";
 
 export async function get<T>(url: string) {
   const { data } = await apiClient.get<ApiResponse<T>>(url);
@@ -23,4 +24,9 @@ export async function patch<T>(url: string, payload: any) {
 
 export async function del(url: string) {
   await apiClient.delete(url);
+}
+
+export async function del_1<T>(url: string) {
+  const { data }: AxiosResponse<ApiResponse<T>> = await apiClient.delete(url);
+  return data.data;
 }

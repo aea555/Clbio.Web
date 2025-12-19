@@ -15,6 +15,33 @@ import { notificationService } from "@/services/notification-service";
 import { UpdateWorkspaceMemberDto } from "@/lib/schemas/schemas";
 import { workspaceInvitationService } from "@/services/workspace-invitation-service";
 import { WorkspaceRole } from "@/types/enums";
+import { userService } from "@/services/user-service";
+
+export function useUserMutations() {
+  const queryClient = useQueryClient();
+
+  const uploadAvatar = useMutation({
+    mutationFn: (file: File) => userService.uploadAvatar(file),
+
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ["users", "me"] });
+
+      toast.success("Profile Picture Uploaded!");
+    },
+    onError: (error) => toast.error(getErrorMessage(error)),
+  });
+
+  const deleteAvatar = useMutation({
+    mutationFn: () => userService.deleteAvatar(),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["users", "me"] });
+      toast.success("Profile photo removed!");
+    },
+    onError: (error) => toast.error(getErrorMessage(error)),
+  });
+
+  return {uploadAvatar, deleteAvatar};
+}
 
 export function useWorkspaceMutations(workspaceId: string) {
   const queryClient = useQueryClient();
@@ -58,7 +85,7 @@ export function useWorkspaceMutations(workspaceId: string) {
   // --- Members ---
   const inviteMember = useMutation({
     mutationFn: ({ email, role }: { email: string; role: WorkspaceRole }) =>
-      workspaceInvitationService.sendInvitation(workspaceId, {email, role}),
+      workspaceInvitationService.sendInvitation(workspaceId, { email, role }),
     onSuccess: (_, { }) => {
       toast.success("Member invited");
     },
@@ -86,12 +113,12 @@ export function useWorkspaceMutations(workspaceId: string) {
     onError: (error) => toast.error(getErrorMessage(error)),
   });
 
-  const leaveWorkspace= useMutation({
+  const leaveWorkspace = useMutation({
     mutationFn: () => workspaceService.leave(workspaceId!),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["workspaces"] });
       toast.success("You have left the workspace");
-      window.location.href = "/dashboard"; 
+      window.location.href = "/dashboard";
     },
     onError: (error) => toast.error(getErrorMessage(error)),
   });
@@ -331,19 +358,25 @@ export function useInteractionMutations(workspaceId: string) {
   });
 
   const uploadAttachment = useMutation({
-    mutationFn: ({ taskId, file }: { taskId: string; file: File }) =>
-      attachmentService.upload(workspaceId, taskId, file),
+    mutationFn: ({ taskId, files }: { taskId: string; files: File[] }) =>
+      attachmentService.upload(workspaceId, taskId, files),
+
     onSuccess: (_, { taskId }) => {
       queryClient.invalidateQueries({ queryKey: ["attachments", taskId] });
       queryClient.invalidateQueries({ queryKey: ["tasks", taskId] });
-      toast.success("File uploaded");
+
+      toast.success("Files uploaded succesfully");
     },
-    onError: (error: any) => toast.error(getErrorMessage(error)),
+    onError: (error) => toast.error(getErrorMessage(error)),
   });
 
   const deleteAttachment = useMutation({
     mutationFn: (attachmentId: string) => attachmentService.delete(workspaceId, attachmentId),
-    onSuccess: () => toast.success("Attachment deleted"),
+    onSuccess: (task) => {
+      queryClient.invalidateQueries({ queryKey: ["attachments", task?.id] });
+      queryClient.invalidateQueries({ queryKey: ["tasks", task?.id] });
+      toast.success("Attachment deleted")
+    },
     onError: (error: any) => toast.error(getErrorMessage(error)),
   });
 
@@ -440,8 +473,8 @@ export function useNotificationMutations() {
     onError: (error: any) => toast.error(getErrorMessage(error)),
   });
 
-  return { 
-    markAsReadMutation, 
+  return {
+    markAsReadMutation,
     markAllReadMutation,
     deleteNotificationMutation
   };
@@ -453,14 +486,14 @@ export function useInvitationMutations() {
   const respondToInvitation = useMutation({
     mutationFn: ({ invitationId, accept }: { invitationId: string; accept: boolean }) =>
       workspaceInvitationService.respondToInvitation(invitationId, accept),
-      
+
     onSuccess: (_, variables) => {
       // 1. Invalidate Invitations (to remove the pending card)
       queryClient.invalidateQueries({ queryKey: ["workspaceInvitations"] });
 
       if (variables.accept) {
         queryClient.invalidateQueries({ queryKey: ["workspaces"] });
-        
+
         toast.success("Invitation accepted! You have joined the workspace.");
       } else {
         toast.warning("Invitation declined.");

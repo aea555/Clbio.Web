@@ -84,6 +84,29 @@ export function useWorkspaceRealtime(workspaceId: string) {
   });
 
   // =========================================================
+  // ATTACHMENT EVENTS
+  // =========================================================
+  useSocketEventListener("WorkspaceAttachmentCreated", (data: { workspaceId: string, taskId: string }) => {
+    queryClient.invalidateQueries({ queryKey: ["workspaces"] });
+    queryClient.invalidateQueries({ queryKey: ["workspaceById", data.workspaceId] });
+    queryClient.invalidateQueries({queryKey: ["attachments", data.taskId]})
+
+    if (data.workspaceId === workspaceId) {
+       toast.warning("This workspace has been archived.");
+    }
+  });
+
+  useSocketEventListener("WorkspaceAttachmentDeleted", (data: { workspaceId: string, taskId: string }) => {
+    queryClient.invalidateQueries({ queryKey: ["workspaces"] });
+    queryClient.invalidateQueries({ queryKey: ["workspaceById", data.workspaceId] });
+    queryClient.invalidateQueries({queryKey: ["attachments", data.taskId]})
+
+    if (data.workspaceId === workspaceId) {
+       toast.warning("This workspace has been archived.");
+    }
+  });
+
+  // =========================================================
   // MEMBER EVENTS
   // =========================================================
 

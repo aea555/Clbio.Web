@@ -7,9 +7,10 @@ import { useUnreadNotificationCount, useWorkspaces, useBoardSearch } from "@/hoo
 import { useUIStore } from "@/store/use-ui-store";
 import { useState, useRef, useEffect } from "react";
 import { NotificationDropdown } from "./notification-dropdown";
-import { useDebounce } from "@/hooks/use-debounce"; // Ensure you created this hook
+import { useDebounce } from "@/hooks/use-debounce";
 import Link from "next/link";
-import { ReadBoardDto } from "@/types/dtos"; // Import Type
+import { ReadBoardDto } from "@/types/dtos";
+import { ProfileDropdown } from "../dashboard/profile-dropdown";
 
 export function Header() {
   const pathname = usePathname();
@@ -19,6 +20,7 @@ export function Header() {
   const { data: workspaces } = useWorkspaces();
   const { toggleSidebar, isSidebarOpen } = useUIStore();
   const [isNotifOpen, setIsNotifOpen] = useState(false);
+  const [isProfileOpen, setIsProfileOpen] = useState(false); //
   
   // --- Search State ---
   const [searchQuery, setSearchQuery] = useState("");
@@ -27,7 +29,6 @@ export function Header() {
   const searchRef = useRef<HTMLDivElement>(null);
 
   // --- Search Query ---
-  // FIX: Correct signature (id, query, limit)
   const { data: searchResults, isLoading: isSearching } = useBoardSearch(
     activeWorkspaceId || "", 
     debouncedSearch, 
@@ -115,7 +116,6 @@ export function Header() {
               ) : searchResults && searchResults.length > 0 ? (
                 <ul className="py-2">
                   <li className="px-4 py-1 text-xs font-semibold text-[#507395] uppercase tracking-wider">Boards</li>
-                  {/* Explicitly mapping as ReadBoardDto[] */}
                   {searchResults.map((board: ReadBoardDto) => (
                     <li key={board.id}>
                       <button 
@@ -168,10 +168,34 @@ export function Header() {
             />
           </div>
           
-          <div className="flex items-center gap-2">
-             <div className="bg-blue-600 rounded-full size-9 flex items-center justify-center text-white font-bold text-sm ring-2 ring-transparent hover:ring-[#4c99e6]/50 transition-all cursor-pointer">
-               {user?.displayName?.charAt(0) || "U"}
-             </div>
+          {/* Profile Avatar (With Dropdown) */}
+          <div className="relative">
+            <button 
+              onClick={() => { setIsProfileOpen(!isProfileOpen); setIsNotifOpen(false); }}
+              className="flex items-center gap-2 focus:outline-none"
+            >
+              {user?.avatarUrl ? (
+                <img 
+                  src={user.avatarUrl} 
+                  alt={user.displayName || "Profile"} 
+                  className={`size-9 rounded-full object-cover transition-all bg-gray-100 dark:bg-[#2d3a4a] ${
+                    isProfileOpen ? "ring-2 ring-[#4c99e6]" : "ring-2 ring-transparent hover:ring-[#4c99e6]/50"
+                  }`}
+                />
+              ) : (
+                <div className={`bg-blue-600 rounded-full size-9 flex items-center justify-center text-white font-bold text-sm transition-all ${
+                  isProfileOpen ? "ring-2 ring-[#4c99e6]" : "ring-2 ring-transparent hover:ring-[#4c99e6]/50"
+                }`}>
+                  {user?.displayName?.charAt(0) || "U"}
+                </div>
+              )}
+            </button>
+
+            {/* Profile Dropdown */}
+            <ProfileDropdown 
+              isOpen={isProfileOpen} 
+              onClose={() => setIsProfileOpen(false)} 
+            />
           </div>
         </div>
       </div>
