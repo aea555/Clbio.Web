@@ -20,4 +20,7 @@ export const boardService = {
 
   reorder: (workspaceId: string, boardIds: string[]) => 
     post<void>(`/api/proxy/workspaces/${workspaceId}/boards/reorder`, boardIds),
+
+  search: (workspaceId: string, q?: string | null, limit?: Number | null) =>
+    get<ReadBoardDto[]>(`/api/proxy/workspaces/${workspaceId}/boards/search?q=${encodeURIComponent(q || "")}&limit=${limit}`)
 };

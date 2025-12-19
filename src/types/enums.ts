@@ -16,3 +16,16 @@ export enum WorkspaceRole {
     PrivilegedMember = 1,
     Owner = 2,
 }
+
+export enum WorkspaceStatus {
+    Active = 0,
+    Archived = 1
+}
+
+export enum InvitationStatus {
+    Pending = 0,
+    Accepted = 1,
+    Declined = 2,
+    Expired = 3,
+    Cancelled = 4
+}

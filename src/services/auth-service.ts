@@ -4,7 +4,8 @@ import {
   RegisterRequestDto, 
   ForgotPasswordRequestDto, 
   ResetPasswordRequestDto,
-  VerifyEmailOtpRequestDto
+  VerifyEmailOtpRequestDto,
+  ResendVerificationOtpRequestDto
 } from "@/lib/schemas/schemas"; // <--- Updated import path
 import { ReadUserDto, TokenResponseDto, ApiResponse } from "@/types/dtos";
 
@@ -28,7 +29,7 @@ export const authService = {
    * Standard call. .NET returns { success: true, message: "..." }
    */
   register: async (data: RegisterRequestDto) => {
-    const response = await apiClient.post<ApiResponse<string>>("/api/proxy/auth/register", data);
+    const response = await apiClient.post<ApiResponse<ReadUserDto>>("/api/proxy/auth/register", data);
     return response.data;
   },
 
@@ -80,7 +81,7 @@ export const authService = {
     return apiClient.post("/api/proxy/auth/verify-email", data);
   },
 
-  resendVerification: async (userId: string) => {
-    return apiClient.post(`/api/proxy/auth/resend-verification-otp?userId=${userId}`);
+  resendVerification: async (data: ResendVerificationOtpRequestDto) => {
+    return apiClient.post(`/api/proxy/auth/resend-verification-otp`, data);
   }
 };

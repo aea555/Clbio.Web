@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const NEXT_SERVER_URL = ""; 
+const NEXT_SERVER_URL = "";
 
 export const apiClient = axios.create({
   baseURL: NEXT_SERVER_URL,
@@ -10,10 +10,17 @@ export const apiClient = axios.create({
 apiClient.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 401) {
-      // If the Proxy says 401, it means Refresh Token failed
-      window.location.href = "/login";
+    const originalRequest = error.config;
+
+    const isAuthRequest = originalRequest.url?.includes("/auth/") ||
+      originalRequest.url?.includes("/login") ||
+      originalRequest.url?.includes("/register") ||
+      originalRequest.url?.includes("/verify");
+
+    if (error.response?.status === 401 && !isAuthRequest) {
+      window.location.href = "/auth/login";
     }
+
     return Promise.reject(error);
   }
 );

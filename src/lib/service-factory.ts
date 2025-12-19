@@ -16,6 +16,11 @@ export async function put<T>(url: string, payload: any) {
   return data.data;
 }
 
+export async function patch<T>(url: string, payload: any) {
+  const { data } = await apiClient.patch<ApiResponse<T>>(url, payload);
+  return data.data;
+}
+
 export async function del(url: string) {
   await apiClient.delete(url);
 }

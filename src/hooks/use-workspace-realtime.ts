@@ -11,11 +11,11 @@ import {
 } from "@/types/dtos";
 import { toast } from "sonner"; 
 import { useEffect } from "react";
+import { useWorkspaceStore } from "@/store/use-workspace-store";
 
 export function useWorkspaceRealtime(workspaceId: string) {
   const { connection, isConnected } = useSocket();
   const queryClient = useQueryClient();
-  const router = useRouter();
 
   // 1. Connection Management
   useSocketEventListener("JoinWorkspace", () => {}); 
@@ -33,21 +33,43 @@ export function useWorkspaceRealtime(workspaceId: string) {
   }, [connection, isConnected, workspaceId]);
 
   // =========================================================
-  // WORKSPACE EVENTS (New!)
+  // WORKSPACE EVENTS 
   // =========================================================
   
+  useSocketEventListener("WorkspaceCreated", (data: ReadWorkspaceDto) => {
+    queryClient.invalidateQueries({ queryKey: ["workspaces"] });
+    queryClient.invalidateQueries({ queryKey: ["workspaceById", data.id] });
+    toast.success("New workspace created");
+  });
+
   useSocketEventListener("WorkspaceUpdated", (data: ReadWorkspaceDto) => {
-    // Update the specific workspace cache
-    queryClient.setQueryData(["workspaces", data.id], data);
-    // Update the sidebar list
+    queryClient.setQueryData(["workspaceById", data.id], data);
     queryClient.invalidateQueries({ queryKey: ["workspaces"] });
     toast.success("Workspace updated");
   });
 
   useSocketEventListener("WorkspaceArchived", (data: { Id: string }) => {
     queryClient.invalidateQueries({ queryKey: ["workspaces"] });
+    queryClient.invalidateQueries({ queryKey: ["workspaceById", data.Id] });
     if (data.Id === workspaceId) {
        toast.warning("This workspace has been archived.");
+    }
+  });
+
+  useSocketEventListener("WorkspaceUnarchived", (data: { Id: string }) => {
+    queryClient.invalidateQueries({ queryKey: ["workspaces"] });
+    queryClient.invalidateQueries({ queryKey: ["workspaceById", data.Id] });
+    if (data.Id === workspaceId) {
+       toast.warning("This workspace has been archived.");
+    }
+  });
+
+  useSocketEventListener("UserLeftWorkspace", (data: { Id: string }) => {
+    queryClient.invalidateQueries({ queryKey: ["workspaces"] });
+    queryClient.invalidateQueries({ queryKey: ["workspace-members", workspaceId] });
+    queryClient.invalidateQueries({ queryKey: ["workspaceById", data.Id] });
+    if (data.Id === workspaceId) {
+       toast.warning("A user left the workspace.");
     }
   });
 
@@ -57,7 +79,7 @@ export function useWorkspaceRealtime(workspaceId: string) {
     
     if (data.Id === workspaceId) {
        toast.error("This workspace has been deleted.");
-       router.push("/dashboard");
+       // Router push might be needed here if not handled by parent
     }
   });
 
@@ -67,14 +89,20 @@ export function useWorkspaceRealtime(workspaceId: string) {
 
   useSocketEventListener("MemberAdded", (member: ReadWorkspaceMemberDto) => {
      queryClient.invalidateQueries({ queryKey: ["workspace-members", workspaceId] });
+     queryClient.invalidateQueries({ queryKey: ["workspaces"] });
      toast.info(`${member.userDisplayName} joined the workspace.`);
   });
 
   useSocketEventListener("MemberUpdated", (member: ReadWorkspaceMemberDto) => {
      queryClient.invalidateQueries({ queryKey: ["workspace-members", workspaceId] });
+     queryClient.invalidateQueries({ queryKey: ["workspaces"] });
   });
 
   useSocketEventListener("MemberRemoved", (data: { userId: string }) => {
+     queryClient.invalidateQueries({ queryKey: ["workspace-members", workspaceId] });
+  });
+
+  useSocketEventListener("UserLeftWorkspace", (data: { userId: string }) => {
      queryClient.invalidateQueries({ queryKey: ["workspace-members", workspaceId] });
   });
 
@@ -95,10 +123,9 @@ export function useWorkspaceRealtime(workspaceId: string) {
   });
 
   useSocketEventListener("ColumnCreated", (col: ReadColumnDto) => {
-    queryClient.invalidateQueries({ queryKey: ["columns"] }); // BoardId is usually implicit in query key
+    queryClient.invalidateQueries({ queryKey: ["columns"] }); 
   });
 
-  // The NEW signal we added
   useSocketEventListener("ColumnUpdated", (col: ReadColumnDto) => {
     queryClient.invalidateQueries({ queryKey: ["columns"] }); 
   });
@@ -116,7 +143,7 @@ export function useWorkspaceRealtime(workspaceId: string) {
   // =========================================================
 
   useSocketEventListener("TaskCreated", (task: ReadTaskItemDto) => {
-    queryClient.invalidateQueries({ queryKey: ["columns"] }); // To update task counts/lists
+    queryClient.invalidateQueries({ queryKey: ["columns"] });
     queryClient.setQueryData(["tasks", task.id], task);
   });
 
@@ -139,16 +166,10 @@ export function useWorkspaceRealtime(workspaceId: string) {
     toast.info(`Task assigned to ${data.AssigneeName || "Unassigned"}`);
   });
 
-  // =========================================================
-  // COMMENT EVENTS
-  // =========================================================
-
   useSocketEventListener("CommentAdded", (comment: ReadCommentDto) => {
-    // 1. Add comment to the list
     queryClient.setQueryData(["comments", comment.taskId], (old: ReadCommentDto[] = []) => {
       return [...old, comment];
     });
-    // 2. Update task (comment count)
     queryClient.invalidateQueries({ queryKey: ["tasks", comment.taskId] });
   });
 }

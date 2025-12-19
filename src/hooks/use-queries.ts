@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, keepPreviousData } from "@tanstack/react-query";
 import { workspaceService } from "@/services/workspace-service";
 import { boardService } from "@/services/board-service";
 import { columnService } from "@/services/column-service";
@@ -8,6 +8,8 @@ import { attachmentService } from "@/services/attachment-service";
 import { notificationService } from "@/services/notification-service";
 import { activityLogService } from "@/services/activity-log-service";
 import { authService } from "@/services/auth-service";
+import { presenceService } from "@/services/presence-service";
+import { workspaceInvitationService } from "@/services/workspace-invitation-service";
 
 // --- WORKSPACES ---
 export function useWorkspaces() {
@@ -19,7 +21,7 @@ export function useWorkspaces() {
 
 export function useWorkspace(workspaceId: string) {
   return useQuery({
-    queryKey: ["workspaces", workspaceId],
+    queryKey: ["workspaces", "workspaceById", workspaceId],
     queryFn: () => workspaceService.getById(workspaceId),
     enabled: !!workspaceId,
   });
@@ -27,16 +29,8 @@ export function useWorkspace(workspaceId: string) {
 
 export function useWorkspaceMembers(workspaceId: string) {
   return useQuery({
-    queryKey: ["workspace-members", workspaceId],
+    queryKey: ["workspaces", "workspace-members", workspaceId],
     queryFn: () => workspaceService.getMembers(workspaceId),
-    enabled: !!workspaceId,
-  });
-}
-
-export function useActivityLogs(workspaceId: string) {
-  return useQuery({
-    queryKey: ["activity-logs", workspaceId],
-    queryFn: () => activityLogService.getAll(workspaceId),
     enabled: !!workspaceId,
   });
 }
@@ -56,6 +50,15 @@ export function useBoard(workspaceId: string, boardId: string) {
     queryFn: () => boardService.getById(workspaceId, boardId),
     enabled: !!workspaceId && !!boardId,
   });
+}
+
+export function useBoardSearch(workspaceId: string, q?: string | null, limit?: 10){
+  return useQuery({
+    queryKey: ["boardSearchResults", workspaceId, q],
+    queryFn: () => boardService.search(workspaceId, q, limit),
+    enabled: !!workspaceId,
+    staleTime: 1000 * 5
+  })
 }
 
 // --- COLUMNS ---
@@ -94,18 +97,65 @@ export function useAttachments(workspaceId: string, taskId: string) {
 }
 
 // --- NOTIFICATIONS ---
-export function useNotifications() {
+export function useNotifications(page: number = 1, pageSize: number = 10, unreadOnly: boolean = false) {
   return useQuery({
-    queryKey: ["notifications"],
-    queryFn: () => notificationService.getAll(),
+    queryKey: ["notifications", page, pageSize, unreadOnly],
+    queryFn: () => notificationService.getAll(page, pageSize, unreadOnly),
+    placeholderData: keepPreviousData,
+  });
+}
+
+export function useUnreadNotificationCount() {
+  return useQuery({
+    queryKey: ["notifications-unread-count"],
+    queryFn: () => notificationService.getUnreadCount(),
+    refetchInterval: 60000, // Sync every minute just in case
   });
 }
 
 // --- USERS ---
-export function useGetMe(query: string) {
+export function useGetMe() {
   return useQuery({
-    queryKey: ["users", "search", query],
+    queryKey: ["me"], 
     queryFn: () => authService.getMe(),
-    enabled: !!query, 
+    retry: 1, 
+    staleTime: 1000 * 60 * 5, 
   });
+}
+
+export function usePresenceHeartbeat(isAuthenticated: boolean) {
+  return useQuery({
+    queryKey: ["presence-heartbeat"],
+    queryFn: async () => {
+      // FIX: Wait for the call, then return 'true' so data is not undefined
+      await presenceService.heartbeat(); 
+      return true; 
+    },
+    // Only run if we are authenticated
+    enabled: isAuthenticated,
+    // Poll every 30 seconds
+    refetchInterval: 30 * 1000, 
+    // Do not retry on failure (if 401, the global error handler or session sync will catch it)
+    retry: false, 
+    // Keep running even if window is in background (to maintain presence)
+    refetchIntervalInBackground: true, 
+  });
+}
+
+// --- WORKSPACE AUDIT LOGS ---
+export function useActivityLogs(workspaceId: string, page: number, pageSize: number = 10) {
+  return useQuery({
+    queryKey: ["activity-logs", workspaceId, page, pageSize],
+    queryFn: () => activityLogService.getLogs(workspaceId, page, pageSize),
+    enabled: !!workspaceId,
+    placeholderData: keepPreviousData, // Keeps showing page 1 data while page 2 is loading
+  });
+}
+
+export function useWorkspaceInvitations(){
+  return useQuery({
+    queryKey: ["workspaceInvitations"],
+    queryFn: () => workspaceInvitationService.getMyInvitations(),
+    placeholderData: keepPreviousData
+  })
 }

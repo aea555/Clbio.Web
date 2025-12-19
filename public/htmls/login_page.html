@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Login - ProjectFlow</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#4c99e6",
+                        "background-light": "#f6f7f8",
+                        "background-dark": "#111921",
+                        "card-light": "#ffffff",
+                        "card-dark": "#1a242f",
+                        "text-main": "#0e141b",
+                        "text-secondary": "#507395",
+                        "border-color": "#e8edf3",
+                        "border-focus": "#4c99e6",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display min-h-screen flex flex-col">
+<!-- Top Navigation (Simplified for Login Page) -->
+<header class="flex items-center justify-between whitespace-nowrap border-b border-solid border-border-color dark:border-[#2d3a46] px-10 py-3 bg-card-light dark:bg-card-dark">
+<div class="flex items-center gap-4 text-text-main dark:text-white">
+<div class="size-8 text-primary">
+<svg fill="currentColor" viewbox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+<path clip-rule="evenodd" d="M39.475 21.6262C40.358 21.4363 40.6863 21.5589 40.7581 21.5934C40.7876 21.655 40.8547 21.857 40.8082 22.3336C40.7408 23.0255 40.4502 24.0046 39.8572 25.2301C38.6799 27.6631 36.5085 30.6631 33.5858 33.5858C30.6631 36.5085 27.6632 38.6799 25.2301 39.8572C24.0046 40.4502 23.0255 40.7407 22.3336 40.8082C21.8571 40.8547 21.6551 40.7875 21.5934 40.7581C21.5589 40.6863 21.4363 40.358 21.6262 39.475C21.8562 38.4054 22.4689 36.9657 23.5038 35.2817C24.7575 33.2417 26.5497 30.9744 28.7621 28.762C30.9744 26.5497 33.2417 24.7574 35.2817 23.5037C36.9657 22.4689 38.4054 21.8562 39.475 21.6262ZM4.41189 29.2403L18.7597 43.5881C19.8813 44.7097 21.4027 44.9179 22.7217 44.7893C24.0585 44.659 25.5148 44.1631 26.9723 43.4579C29.9052 42.0387 33.2618 39.5667 36.4142 36.4142C39.5667 33.2618 42.0387 29.9052 43.4579 26.9723C44.1631 25.5148 44.659 24.0585 44.7893 22.7217C44.9179 21.4027 44.7097 19.8813 43.5881 18.7597L29.2403 4.41187C27.8527 3.02428 25.8765 3.02573 24.2861 3.36776C22.6081 3.72863 20.7334 4.58419 18.8396 5.74801C16.4978 7.18716 13.9881 9.18353 11.5858 11.5858C9.18354 13.988 7.18717 16.4978 5.74802 18.8396C4.58421 20.7334 3.72865 22.6081 3.36778 24.2861C3.02574 25.8765 3.02429 27.8527 4.41189 29.2403Z" fill-rule="evenodd"></path>
+</svg>
+</div>
+<h2 class="text-text-main dark:text-white text-lg font-bold leading-tight tracking-[-0.015em]">ProjectFlow</h2>
+</div>
+<div class="flex items-center gap-4">
+<span class="text-sm font-medium text-text-secondary dark:text-gray-400 hidden sm:block">Don't have an account?</span>
+<a class="text-primary text-sm font-bold leading-normal tracking-[0.015em] hover:underline" href="#">Sign up</a>
+</div>
+</header>
+<!-- Main Content Area -->
+<main class="flex-grow flex items-center justify-center p-4">
+<div class="w-full max-w-[480px] bg-card-light dark:bg-card-dark rounded-xl shadow-lg border border-border-color dark:border-[#2d3a46] p-8 md:p-10">
+<!-- Header Section -->
+<div class="text-center mb-8">
+<h1 class="text-text-main dark:text-white tracking-tight text-[32px] font-bold leading-tight mb-2">Welcome back</h1>
+<p class="text-text-secondary dark:text-gray-400 text-base font-normal leading-normal">Please enter your details to sign in.</p>
+</div>
+<!-- Social Login -->
+<button class="w-full flex cursor-pointer items-center justify-center overflow-hidden rounded-lg h-12 px-5 bg-white dark:bg-[#2d3a46] border border-[#e8edf3] dark:border-[#3e4d5d] hover:bg-gray-50 dark:hover:bg-[#364452] transition-colors text-text-main dark:text-white gap-3 mb-6 font-bold text-base tracking-[0.015em]">
+<svg fill="none" height="24" viewbox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
+<path d="M23.52 12.2727C23.52 11.4242 23.4436 10.6061 23.3018 9.81818H12V14.4545H18.4582C18.18 15.9545 17.3291 17.2242 16.0636 18.0727V21.0818H19.9418C22.2109 18.9939 23.52 15.9212 23.52 12.2727Z" fill="#4285F4"></path>
+<path d="M12 24C15.24 24 17.9618 22.9273 19.9473 21.0873L16.0691 18.0782C14.9945 18.7964 13.62 19.2218 12 19.2218C8.87455 19.2218 6.22909 17.1109 5.28545 14.2745H1.27637V17.3836C3.25091 21.3055 7.31455 24 12 24Z" fill="#34A853"></path>
+<path d="M5.28545 14.2745C5.04545 13.5545 4.90909 12.7909 4.90909 12C4.90909 11.2091 5.04545 10.4455 5.28545 9.72545V6.61636H1.27637C0.463636 8.23636 0 10.0636 0 12C0 13.9364 0.463636 15.7636 1.27637 17.3836L5.28545 14.2745Z" fill="#FBBC05"></path>
+<path d="M12 4.77818C13.7618 4.77818 15.3382 5.38364 16.5818 6.57273L20.0236 3.13091C17.9564 1.20545 15.2345 0 12 0C7.31455 0 3.25091 2.69455 1.27637 6.61636L5.28545 9.72545C6.22909 6.88909 8.87455 4.77818 12 4.77818Z" fill="#EA4335"></path>
+</svg>
+<span>Sign in with Google</span>
+</button>
+<!-- Divider -->
+<div class="relative flex items-center py-2 mb-6">
+<div class="flex-grow border-t border-border-color dark:border-[#3e4d5d]"></div>
+<span class="flex-shrink-0 mx-4 text-text-secondary dark:text-gray-500 text-sm">or continue with email</span>
+<div class="flex-grow border-t border-border-color dark:border-[#3e4d5d]"></div>
+</div>
+<!-- Standard Form -->
+<form class="space-y-5">
+<!-- Email Input -->
+<div class="space-y-1.5">
+<label class="block text-sm font-medium text-text-main dark:text-white" for="email">Email Address</label>
+<div class="relative group">
+<div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-text-secondary dark:text-gray-500 group-focus-within:text-primary">
+<span class="material-symbols-outlined text-[20px]">mail</span>
+</div>
+<input class="block w-full rounded-lg border-border-color dark:border-[#3e4d5d] bg-white dark:bg-[#111921] pl-10 py-3 text-text-main dark:text-white placeholder-gray-400 focus:border-primary focus:ring-1 focus:ring-primary focus:outline-none sm:text-sm transition-colors shadow-sm" id="email" name="email" placeholder="name@company.com" required="" type="email"/>
+</div>
+</div>
+<!-- Password Input -->
+<div class="space-y-1.5">
+<div class="flex items-center justify-between">
+<label class="block text-sm font-medium text-text-main dark:text-white" for="password">Password</label>
+</div>
+<div class="relative group">
+<div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-text-secondary dark:text-gray-500 group-focus-within:text-primary">
+<span class="material-symbols-outlined text-[20px]">lock</span>
+</div>
+<input class="block w-full rounded-lg border-border-color dark:border-[#3e4d5d] bg-white dark:bg-[#111921] pl-10 pr-10 py-3 text-text-main dark:text-white placeholder-gray-400 focus:border-primary focus:ring-1 focus:ring-primary focus:outline-none sm:text-sm transition-colors shadow-sm" id="password" name="password" placeholder="••••••••" required="" type="password"/>
+<button class="absolute inset-y-0 right-0 pr-3 flex items-center text-text-secondary dark:text-gray-500 hover:text-text-main dark:hover:text-gray-300" type="button">
+<span class="material-symbols-outlined text-[20px]">visibility</span>
+</button>
+</div>
+<div class="flex justify-end pt-1">
+<a class="text-sm font-medium text-primary hover:text-primary/80 transition-colors" href="#">Forgot Password?</a>
+</div>
+</div>
+<!-- Submit Button -->
+<button class="w-full flex items-center justify-center rounded-lg bg-primary py-3 px-4 text-sm font-bold text-white shadow-sm hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 transition-colors mt-2" type="submit">
+                    Sign In
+                </button>
+</form>
+</div>
+</main>
+<!-- Footer -->
+<footer class="py-6 text-center text-sm text-text-secondary dark:text-gray-500">
+<p>© 2024 ProjectFlow Inc. All rights reserved.</p>
+<div class="mt-2 space-x-4">
+<a class="hover:underline" href="#">Privacy Policy</a>
+<a class="hover:underline" href="#">Terms of Service</a>
+</div>
+</footer>
+</body></html>

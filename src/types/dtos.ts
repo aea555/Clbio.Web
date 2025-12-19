@@ -1,6 +1,18 @@
 // Auto-generated frontend DTOs based on backend Read/Response DTOs
 
-import { TaskCompletionStatus, TaskProgressStatus, WorkspaceRole } from "./enums";
+import { InvitationStatus, TaskCompletionStatus, TaskProgressStatus, WorkspaceRole, WorkspaceStatus } from "./enums";
+
+export type Id = string;
+
+export interface ApiResponse<T = any> {
+	data?: T | null;
+	success: boolean;
+	error?: string | null;
+	code?: string | null;
+	timestamp: string; // ISO 8601
+}
+
+export type ApiResponseMessage = ApiResponse<string | null>;
 
 export interface ResponseDtoBase {
 	correlationId?: string | null;
@@ -76,12 +88,17 @@ export interface ReadNotificationDto extends ResponseDtoBase {
 	isRead: boolean;
 }
 
+export interface NotificationUnreadCount extends ResponseDtoBase {
+	count: number
+}
+
 export interface ReadWorkspaceDto extends ResponseDtoBase {
 	id: string;
 	name: string;
 	description?: string | null;
 	ownerId: string;
 	ownerDisplayName: string;
+	status: WorkspaceStatus;
 	memberCount?: number;
 	boardCount?: number;
 }
@@ -122,15 +139,44 @@ export interface TokenResponseDto extends ResponseDtoBase {
 	refreshExpiresUtc: string;
 }
 
-export type Id = string;
-
-export interface ApiResponse<T = any> {
-	data?: T | null;
-	success: boolean;
-	error?: string | null;
-	code?: string | null;
-	timestamp: string; // ISO 8601
+export interface ActivityLogDto {
+	id: string;
+	workspaceId: string;
+	actorId: string;
+	actorDisplayName: string;
+	actionType: string;   // e.g. "Create", "Assign"
+	entityType: string;   // e.g. "Board", "Task"
+	entityId: string;
+	metadata: string;     // Description message
+	ipAddress?: string | null;
+	userAgent?: string | null;
+	createdAt: string;
 }
 
-export type ApiResponseMessage = ApiResponse<string | null>;
+export interface ReadWorkspaceInvitationDto extends ResponseDtoBase
+{
+	id: string;
+	workspaceId: string;
+	workspaceName: string;
+	inviterName: string;
+	email: string;
+	role: WorkspaceRole;
+	invitationStatus: InvitationStatus
+	expiresAt: string;
+}
+
+export interface PaginationMeta {
+	totalCount: number;
+	page: number;
+	pageSize: number;
+	totalPages: number;
+	unreadOnly?: boolean | null
+}
+
+export interface PaginatedResult<T> {
+	items: T[];
+	meta: PaginationMeta;
+}
+
+export { WorkspaceStatus };
 
