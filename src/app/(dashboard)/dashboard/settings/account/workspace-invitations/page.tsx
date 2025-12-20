@@ -17,11 +17,9 @@ export default function WorkspaceInvitationsPage() {
   const [page, setPage] = useState(1);
   const pageSize = 10;
   
-  // Fetch paginated data
   const { data: result, isLoading } = useWorkspaceInvitations();
   const { respondToInvitation } = useInvitationMutations();
 
-  // Modal State
   const [actionInvitation, setActionInvitation] = useState<{ id: string, accept: boolean } | null>(null);
 
   const invitations = result?.items || [];
@@ -38,7 +36,6 @@ export default function WorkspaceInvitationsPage() {
     }
   };
 
-  // Helper for Status Badge
   const getStatusBadge = (status: number) => {
     switch(status) {
       case 0: return <span className="bg-yellow-100 text-yellow-800 text-xs px-2 py-0.5 rounded-full font-medium">Pending</span>;
@@ -51,7 +48,6 @@ export default function WorkspaceInvitationsPage() {
   return (
     <div className="max-w-5xl mx-auto w-full py-8">
       
-      {/* Confirmation Modal */}
       <ConfirmationModal
         isOpen={!!actionInvitation}
         onClose={() => setActionInvitation(null)}
@@ -79,14 +75,13 @@ export default function WorkspaceInvitationsPage() {
           <span className="text-xs text-[#507395]">Page {page} of {totalPages || 1}</span>
         </div>
 
-        {/* Loading State */}
         {isLoading && (
            <div className="flex-1 flex items-center justify-center">
-             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#4c99e6]"></div>
+             {/* FIX: Dynamic Spinner Color */}
+             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
            </div>
         )}
 
-        {/* Empty State */}
         {!isLoading && invitations.length === 0 && (
           <div className="flex-1 flex flex-col items-center justify-center text-[#507395] p-10">
             <span className="material-symbols-outlined text-[48px] mb-2 opacity-50">mail</span>
@@ -94,7 +89,6 @@ export default function WorkspaceInvitationsPage() {
           </div>
         )}
 
-        {/* List */}
         {!isLoading && invitations.length > 0 && (
           <div className="flex-1 overflow-x-auto">
             <table className="w-full text-left text-sm">
@@ -111,40 +105,36 @@ export default function WorkspaceInvitationsPage() {
               <tbody className="divide-y divide-[#e8edf3] dark:divide-[#2d3a4a]">
                 {invitations.map((invite: any) => (
                   <tr key={invite.id} className="group hover:bg-[#f8fafb] dark:hover:bg-[#111921]/50 transition-colors">
-                    {/* Workspace Name */}
                     <td className="px-6 py-4 font-medium text-[#0e141b] dark:text-[#e8edf3]">
                       {invite.workspaceName || "Unknown Workspace"}
                     </td>
 
-                    {/* Inviter */}
                     <td className="px-6 py-4 text-[#507395] dark:text-[#94a3b8]">
                       {invite.inviterName || "System"}
                     </td>
 
-                    {/* Role */}
                     <td className="px-6 py-4">
-                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300">
+                      {/* FIX: Dynamic Role Badge to match theme */}
+                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary-light text-primary dark:bg-primary/20 dark:text-primary-hover">
                          {ROLE_MAP[invite.role] || "Member"}
                       </span>
                     </td>
 
-                    {/* Date */}
                     <td className="px-6 py-4 text-[#507395] dark:text-[#94a3b8]">
                       {formatDistanceToNow(new Date(invite.createdAt), { addSuffix: true })}
                     </td>
 
-                    {/* Status */}
                     <td className="px-6 py-4">
                       {getStatusBadge(invite.status)}
                     </td>
 
-                    {/* Actions */}
                     <td className="px-6 py-4 text-right">
-                      {invite.status === 0 && ( // Only show actions for Pending
+                      {invite.status === 0 && ( 
                         <div className="flex justify-end gap-2">
                           <button
                             onClick={() => setActionInvitation({ id: invite.id, accept: true })}
-                            className="flex items-center gap-1 px-3 py-1.5 bg-[#4c99e6] hover:bg-[#3b82f6] text-white rounded-lg text-xs font-bold transition-colors shadow-sm"
+                            /* FIX: Dynamic Accept Button */
+                            className="flex items-center gap-1 px-3 py-1.5 bg-primary hover:bg-primary-hover text-white rounded-lg text-xs font-bold transition-colors shadow-sm"
                           >
                             <span className="material-symbols-outlined text-[16px]">check</span>
                             Accept
@@ -166,7 +156,6 @@ export default function WorkspaceInvitationsPage() {
           </div>
         )}
 
-        {/* Pagination Footer */}
         {totalPages > 1 && (
           <div className="px-6 py-4 border-t border-[#e8edf3] dark:border-[#2d3a4a] bg-white dark:bg-[#1a2430] flex items-center justify-between">
             <div className="flex gap-2">

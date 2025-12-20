@@ -1,17 +1,18 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useParams } from "next/navigation";
-import { useWorkspaceMembers } from "@/hooks/use-queries";
+import { useWorkspaceMembers, useOnlinePresence } from "@/hooks/use-queries"; // Added useOnlinePresence
 import { useWorkspaceMutations } from "@/hooks/use-mutations";
 import { useAuthStore } from "@/store/use-auth-store";
 import { AddMemberModal } from "@/components/dashboard/add-member-modal";
 import { SettingsTabs } from "@/components/dashboard/settings-tabs";
 import { ArchivedBanner } from "@/components/dashboard/archived-banner";
-import { useWorkspacePermissions } from "@/hooks/use-workspace-permissions"; // Keeping for isArchived state
-import { usePermissions } from "@/providers/permission-provider"; //
-import { Permission } from "@/lib/rbac/permissions"; //
+import { useWorkspacePermissions } from "@/hooks/use-workspace-permissions"; 
+import { usePermissions } from "@/providers/permission-provider"; 
+import { Permission } from "@/lib/rbac/permissions"; 
 import { ConfirmationModal } from "@/components/ui/confirmation-modal";
+import { UserAvatar } from "@/components/ui/user-avatar"; // Added Component
 import { WorkspaceRole } from "@/types/enums";
 import { toast } from "sonner";
 import { getErrorMessage } from "@/lib/error-utils";
@@ -27,11 +28,9 @@ export default function WorkspaceMembersPage() {
   const workspaceId = params.workspaceId as string;
   const { user: currentUser } = useAuthStore();
 
-  // 1. RBAC & State Permissions
   const { can, isOwner, isAdmin } = usePermissions();
   const { isArchived } = useWorkspacePermissions(workspaceId);
 
-  // State for modals
   const [isInviteOpen, setIsInviteOpen] = useState(false);
   const [memberToRemove, setMemberToRemove] = useState<string | null>(null);
   const [memberToUpdate, setMemberToUpdate] = useState<string | null>(null);
@@ -40,7 +39,14 @@ export default function WorkspaceMembersPage() {
   const { data: members, isLoading } = useWorkspaceMembers(workspaceId);
   const { removeMember, updateMemberRole } = useWorkspaceMutations(workspaceId);
 
-  // Modal Handlers
+  // 1. Extract Member IDs for Presence Check
+  const memberIds = useMemo(() => {
+    return members?.map((m) => m.userId) || [];
+  }, [members]);
+
+  // 2. Poll for Online Status
+  const { data: onlineUserIds } = useOnlinePresence(memberIds);
+
   const confirmRemove = (userId: string) => {
     setMemberToRemove(userId);
   };
@@ -76,49 +82,39 @@ export default function WorkspaceMembersPage() {
     }
   };
 
-  // 2. Hierarchy Logic (Owner > Admin > Member)
   const canManageMember = (targetMember: any) => {
     if (!targetMember) return false;
     
-    // State Check: Cannot manage if archived
     if (isArchived) return false;
-
-    // Self Check: Cannot manage self
     if (targetMember.userId === currentUser?.id) return false;
 
-    // Hierarchy Check
-    if (isOwner) return true; // Owners can manage everyone (except self)
+    if (isOwner) return true; 
     
     if (isAdmin) {
-      // Admins can only manage Regular Members
       return targetMember.role === WorkspaceRole.Member;
     }
 
     return false;
   };
 
-  // Permission to see the Invite Button
   const canInvite = can(Permission.AddMember) && !isArchived;
 
   if (isLoading) {
     return <div className="p-8">Loading members...</div>;
   }
 
-  // Find names for modals
   const memberName = members?.find((m: any) => m.userId === memberToRemove)?.userDisplayName || "this member";
   const memberUpdateName = members?.find((m: any) => m.userId === memberToUpdate)?.userDisplayName || "this member";
   const memberUpdateOldRole = members?.find((m: any) => m.userId === memberToUpdate)?.role || 0;
 
   return (
     <div className="flex flex-col min-h-full">
-      {/* Banner Logic */}
       {isArchived && (
         <div className="-mt-4 -mx-4 md:-mx-8 mb-6">
           <ArchivedBanner workspaceId={workspaceId} workspaceName="Current Workspace" />
         </div>
       )}
 
-      {/* Confirmation Modals */}
       <ConfirmationModal
         isOpen={!!memberToRemove}
         onClose={() => setMemberToRemove(null)}
@@ -148,7 +144,6 @@ export default function WorkspaceMembersPage() {
           onClose={() => setIsInviteOpen(false)}
         />
 
-        {/* Page Header */}
         <h2 className="text-2xl font-bold text-[#0e141b] dark:text-[#e8edf3] mb-2">Workspace Settings</h2>
         <p className="text-[#507395] dark:text-[#94a3b8] mb-6">Manage members and roles.</p>
 
@@ -158,11 +153,10 @@ export default function WorkspaceMembersPage() {
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
           <h3 className="font-bold text-lg text-[#0e141b] dark:text-[#e8edf3]">Member List</h3>
 
-          {/* 3. Permission Check: Invite Button */}
           {canInvite && (
             <button
               onClick={() => setIsInviteOpen(true)}
-              className="flex items-center justify-center gap-2 rounded-lg h-10 px-5 bg-[#4c99e6] hover:bg-[#3b7ec4] text-white text-sm font-semibold shadow-sm transition-all active:scale-95"
+              className="flex items-center justify-center gap-2 rounded-lg h-10 px-5 bg-primary hover:bg-primary-hover text-white text-sm font-semibold shadow-sm transition-all active:scale-95"
             >
               <span className="material-symbols-outlined text-[20px]">person_add</span>
               <span>Invite Member</span>
@@ -186,23 +180,27 @@ export default function WorkspaceMembersPage() {
               <tbody className="divide-y divide-[#e8edf3] dark:divide-[#2d3a4a]">
                 {members?.map((member) => {
                   const isManaged = canManageMember(member);
+                  // Check status
+                  const isOnline = onlineUserIds?.includes(member.userId);
                   
                   return (
                     <tr key={member.id} className="group hover:bg-[#f8fafb] dark:hover:bg-[#111921]/50 transition-colors">
-                      {/* User Info */}
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-3">
-                          <div className="w-9 h-9 rounded-full bg-gradient-to-br from-blue-400 to-indigo-500 flex items-center justify-center text-white font-bold text-sm">
-                            {member.userDisplayName?.charAt(0).toUpperCase() || "U"}
-                          </div>
+                          {/* Replaced manual div with UserAvatar */}
+                          <UserAvatar 
+                            src={member.userAvatarUrl} 
+                            name={member.userDisplayName} 
+                            isOnline={isOnline}
+                            size="md"
+                          />
                           <div>
                             <div className="font-medium text-[#0e141b] dark:text-[#e8edf3]">{member.userDisplayName}</div>
-                            {/* Optional: Show email or status if needed */}
+                            {/*<div className="text-xs text-[#507395]">{member.email}</div>*/}
                           </div>
                         </div>
                       </td>
 
-                      {/* Static Role Badge (Current Status) */}
                       <td className="px-6 py-4">
                         <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${member.role === WorkspaceRole.Owner
                             ? "bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300"
@@ -218,25 +216,22 @@ export default function WorkspaceMembersPage() {
                         {new Date(member.createdAt || Date.now()).toLocaleDateString()}
                       </td>
 
-                      {/* Update Role Actions */}
                       <td className="px-6 py-4">
                         {isManaged ? (
                           <select
                             value={member.role}
                             onChange={(e) => confirmRoleChange(member.userId, e.target.value)}
                             disabled={updateMemberRole.isPending}
-                            className="block w-full max-w-[120px] rounded-lg border-0 py-1.5 pl-3 pr-8 text-gray-900 dark:text-white ring-1 ring-inset ring-gray-300 dark:ring-gray-600 focus:ring-2 focus:ring-[#4c99e6] sm:text-xs sm:leading-6 bg-transparent cursor-pointer hover:bg-gray-50 dark:hover:bg-[#2d3a4a] transition-colors"
+                            className="block w-full max-w-[120px] rounded-lg border-0 py-1.5 pl-3 pr-8 text-gray-900 dark:text-white ring-1 ring-inset ring-gray-300 dark:ring-gray-600 focus:ring-2 focus:ring-primary sm:text-xs sm:leading-6 bg-transparent cursor-pointer hover:bg-gray-50 dark:hover:bg-[#2d3a4a] transition-colors"
                           >
                             <option value={WorkspaceRole.PrivilegedMember}>Admin</option>
                             <option value={WorkspaceRole.Member}>Member</option>
-                            {/* Typically you cannot grant Owner role via simple select, requires transfer */}
                           </select>
                         ) : (
                           <span className="text-xs text-gray-400 italic">No access</span>
                         )}
                       </td>
 
-                      {/* Remove Action */}
                       <td className="px-6 py-4 text-right">
                         {isManaged && can(Permission.RemoveMember) && (
                           <button

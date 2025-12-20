@@ -56,7 +56,8 @@ export default function NotificationsPage() {
 
                <button
                   onClick={() => markAllReadMutation.mutate()}
-                  className="px-4 py-2 rounded-lg bg-white dark:bg-[#1a2430] border border-[#e8edf3] dark:border-[#2d3a4a] text-sm font-bold text-[#507395] hover:text-[#4c99e6] hover:bg-gray-50 transition-colors shadow-sm"
+                  /* FIX: Dynamic Hover Color */
+                  className="px-4 py-2 rounded-lg bg-white dark:bg-[#1a2430] border border-[#e8edf3] dark:border-[#2d3a4a] text-sm font-bold text-[#507395] hover:text-primary hover:bg-gray-50 transition-colors shadow-sm"
                >
                   Mark all as read
                </button>
@@ -66,7 +67,8 @@ export default function NotificationsPage() {
          <div className="bg-white dark:bg-[#1a2430] rounded-xl border border-[#e8edf3] dark:border-[#2d3a4a] overflow-hidden shadow-sm">
             {isLoading ? (
                <div className="p-12 flex justify-center">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#4c99e6]"></div>
+                  {/* FIX: Dynamic Spinner Color */}
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
                </div>
             ) : notifications.length === 0 ? (
                <div className="p-12 text-center text-[#507395]">
@@ -76,10 +78,12 @@ export default function NotificationsPage() {
             ) : (
                <div className="divide-y divide-[#e8edf3] dark:divide-[#2d3a4a]">
                   {notifications.map((notif: any) => (
-                     <div key={notif.id} className={`p-4 flex gap-4 hover:bg-[#f8fafb] dark:hover:bg-[#111921]/50 transition-colors group ${!notif.isRead ? "bg-blue-50/30 dark:bg-blue-900/10" : ""}`}>
+                     /* FIX: Dynamic Unread Background Tint */
+                     <div key={notif.id} className={`p-4 flex gap-4 hover:bg-[#f8fafb] dark:hover:bg-[#111921]/50 transition-colors group ${!notif.isRead ? "bg-primary-light/30 dark:bg-primary/5" : ""}`}>
                         {/* Icon */}
                         <div className="mt-1 shrink-0">
-                           <div className={`w-10 h-10 rounded-full flex items-center justify-center ${!notif.isRead ? "bg-[#4c99e6]/10 text-[#4c99e6]" : "bg-gray-100 dark:bg-gray-800 text-gray-500"}`}>
+                           {/* FIX: Dynamic Unread Icon Colors */}
+                           <div className={`w-10 h-10 rounded-full flex items-center justify-center ${!notif.isRead ? "bg-primary-light text-primary" : "bg-gray-100 dark:bg-gray-800 text-gray-500"}`}>
                               <span className="material-symbols-outlined text-[20px]">
                                  {notif.type === "Mention" ? "alternate_email" : "notifications"}
                               </span>
@@ -87,12 +91,11 @@ export default function NotificationsPage() {
                         </div>
 
                         {/* Content */}
-                        <div className="flex-1 min-w-0"> {/* min-w-0 helps text truncate properly */}
+                        <div className="flex-1 min-w-0"> 
                            <div className="flex justify-between items-start gap-4">
                               <h4 className="text-sm font-semibold text-[#0e141b] dark:text-[#e8edf3] truncate pr-2">
                                  {notif.title}
                               </h4>
-                              {/* FIX: Use shrink-0 and whitespace-nowrap to prevent wrapping/shifting */}
                               <span className="text-xs text-[#507395] dark:text-[#94a3b8] shrink-0 whitespace-nowrap">
                                  {formatDistanceToNow(new Date(notif.createdAt), { addSuffix: true })}
                               </span>
@@ -107,7 +110,8 @@ export default function NotificationsPage() {
                            {!notif.isRead && (
                               <button
                                  onClick={() => markAsReadMutation.mutate(notif.id)}
-                                 className="w-8 h-8 flex items-center justify-center text-[#4c99e6] hover:bg-[#4c99e6]/10 rounded-full transition-colors"
+                                 /* FIX: Dynamic Mark Read Button */
+                                 className="w-8 h-8 flex items-center justify-center text-primary hover:bg-primary-light rounded-full transition-colors"
                                  title="Mark as read"
                               >
                                  <span className="material-symbols-outlined text-[20px] leading-none">check_circle</span>

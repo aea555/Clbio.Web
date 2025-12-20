@@ -7,9 +7,10 @@ import { useUnreadNotificationCount, useWorkspaces, useBoardSearch } from "@/hoo
 import { useUIStore } from "@/store/use-ui-store";
 import { useState, useRef, useEffect } from "react";
 import { NotificationDropdown } from "./notification-dropdown";
-import { useDebounce } from "@/hooks/use-debounce"; // Ensure you created this hook
+import { useDebounce } from "@/hooks/use-debounce";
 import Link from "next/link";
-import { ReadBoardDto } from "@/types/dtos"; // Import Type
+import { ReadBoardDto } from "@/types/dtos";
+import { ProfileDropdown } from "../dashboard/profile-dropdown";
 
 export function Header() {
   const pathname = usePathname();
@@ -19,6 +20,7 @@ export function Header() {
   const { data: workspaces } = useWorkspaces();
   const { toggleSidebar, isSidebarOpen } = useUIStore();
   const [isNotifOpen, setIsNotifOpen] = useState(false);
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
   
   // --- Search State ---
   const [searchQuery, setSearchQuery] = useState("");
@@ -27,7 +29,6 @@ export function Header() {
   const searchRef = useRef<HTMLDivElement>(null);
 
   // --- Search Query ---
-  // FIX: Correct signature (id, query, limit)
   const { data: searchResults, isLoading: isSearching } = useBoardSearch(
     activeWorkspaceId || "", 
     debouncedSearch, 
@@ -37,7 +38,6 @@ export function Header() {
   const { data: unreadCount } = useUnreadNotificationCount();
   const activeWorkspace = workspaces?.find(w => w.id === activeWorkspaceId);
 
-  // Close search when clicking outside
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
@@ -54,15 +54,39 @@ export function Header() {
     router.push(`/w/${activeWorkspaceId}/b/${boardId}`);
   };
 
-  const getSectionName = () => {
-    if (pathname.includes("/members")) return "Members";
-    if (pathname.includes("/audit-logs")) return "Settings / Audit Logs";
-    if (pathname.includes("/settings")) return "Settings";
-    if (pathname.includes("/b/")) return "Board View";
-    return "Boards";
+  // --- Dynamic Breadcrumb Logic ---
+  const getBreadcrumbs = () => {
+    // 1. Account & General Contexts (Non-Workspace)
+    if (pathname.includes("/workspace-invitations")) {
+        return { parent: "Account", parentHref: "/dashboard", current: "Invitations" };
+    }
+    
+    // App Settings Routes
+    if (pathname.startsWith("/dashboard/settings")) {
+        if (pathname.includes("/general")) return { parent: "Settings", parentHref: "/dashboard/settings", current: "Appearance" };
+        if (pathname.includes("/account")) return { parent: "Settings", parentHref: "/dashboard/settings", current: "Account" };
+        if (pathname.includes("/notifications")) return { parent: "Settings", parentHref: "/dashboard/settings", current: "Notifications" };
+        // Root Settings Page
+        return { parent: "Dashboard", parentHref: "/dashboard", current: "App Settings" };
+    }
+
+    // 2. Workspace Context (Default)
+    let current = "Boards";
+    
+    // Check specific workspace sub-pages
+    if (pathname.includes("/members")) current = "Members";
+    else if (pathname.includes("/audit-logs")) current = "Audit Logs";
+    else if (pathname.includes("/settings")) current = "Settings"; // Workspace Settings
+    else if (pathname.includes("/b/")) current = "Board View";
+
+    return { 
+        parent: activeWorkspace?.name || "Dashboard", 
+        parentHref: "/dashboard", 
+        current 
+    };
   };
 
-  const sectionName = getSectionName();
+  const breadcrumbs = getBreadcrumbs();
 
   return (
     <header className="h-16 border-b border-[#e8edf3] dark:border-[#2d3a4a] flex items-center justify-between px-4 md:px-6 bg-white dark:bg-[#1a2430] flex-shrink-0 z-10 font-sans transition-all duration-300">
@@ -80,12 +104,12 @@ export function Header() {
         )}
 
         <div className="flex items-center gap-2 text-sm text-[#507395] dark:text-[#94a3b8]">
-          <Link href="/dashboard" className="hover:text-[#4c99e6] cursor-pointer transition-colors sm:inline">
-            {activeWorkspace?.name || "Dashboard"}
+          <Link href={breadcrumbs.parentHref} className="hover:text-primary cursor-pointer transition-colors sm:inline">
+            {breadcrumbs.parent}
           </Link>
           <span className="material-symbols-outlined text-base hidden sm:inline">chevron_right</span>
           <span className="text-[#0e141b] dark:text-[#e8edf3] font-medium truncate max-w-[150px] sm:max-w-none">
-            {sectionName}
+            {breadcrumbs.current}
           </span>
         </div>
       </div>
@@ -95,14 +119,14 @@ export function Header() {
         
         {/* --- Search Bar --- */}
         <div className="relative group hidden md:block" ref={searchRef}>
-          <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[#507395] dark:text-[#94a3b8] group-focus-within:text-[#4c99e6] transition-colors text-[20px]">
+          <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[#507395] dark:text-[#94a3b8] group-focus-within:text-primary transition-colors text-[20px]">
             search
           </span>
           <input 
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             onFocus={() => setIsSearchFocused(true)}
-            className="pl-10 pr-4 py-2 bg-[#f8fafb] dark:bg-[#111921] border border-transparent focus:border-[#4c99e6]/30 focus:bg-white dark:focus:bg-[#1a2430] rounded-full text-sm w-48 lg:w-64 outline-none transition-all placeholder-[#507395]/70 text-[#0e141b] dark:text-[#e8edf3]" 
+            className="pl-10 pr-4 py-2 bg-[#f8fafb] dark:bg-[#111921] border border-transparent focus:border-primary/30 focus:bg-white dark:focus:bg-[#1a2430] rounded-full text-sm w-48 lg:w-64 outline-none transition-all placeholder-[#507395]/70 text-[#0e141b] dark:text-[#e8edf3]" 
             placeholder="Search boards..." 
             type="text"
           />
@@ -115,7 +139,6 @@ export function Header() {
               ) : searchResults && searchResults.length > 0 ? (
                 <ul className="py-2">
                   <li className="px-4 py-1 text-xs font-semibold text-[#507395] uppercase tracking-wider">Boards</li>
-                  {/* Explicitly mapping as ReadBoardDto[] */}
                   {searchResults.map((board: ReadBoardDto) => (
                     <li key={board.id}>
                       <button 
@@ -150,10 +173,10 @@ export function Header() {
           <div className="relative">
             <button 
               onClick={() => setIsNotifOpen(!isNotifOpen)}
-              className={`flex items-center justify-center p-2 rounded-full transition-colors ${
+              className={`flex items-center hover:cursor-pointer justify-center p-2 rounded-full transition-colors ${
                 isNotifOpen 
-                  ? "bg-[#4c99e6]/10 text-[#4c99e6]" 
-                  : "text-[#507395] hover:text-[#4c99e6] hover:bg-[#f8fafb] dark:hover:bg-[#111921]"
+                  ? "bg-primary-light text-primary" 
+                  : "text-[#507395] hover:text-primary hover:bg-[#f8fafb] dark:hover:bg-[#111921]"
               }`}
             >
               <span className="material-symbols-outlined text-[24px] leading-none">notifications</span>
@@ -168,10 +191,33 @@ export function Header() {
             />
           </div>
           
-          <div className="flex items-center gap-2">
-             <div className="bg-blue-600 rounded-full size-9 flex items-center justify-center text-white font-bold text-sm ring-2 ring-transparent hover:ring-[#4c99e6]/50 transition-all cursor-pointer">
-               {user?.displayName?.charAt(0) || "U"}
-             </div>
+          {/* Profile Avatar (With Dropdown) */}
+          <div className="relative">
+            <button 
+              onClick={() => { setIsProfileOpen(!isProfileOpen); setIsNotifOpen(false); }}
+              className="flex items-center gap-2 hover:cursor-pointer focus:outline-none"
+            >
+              {user?.avatarUrl ? (
+                <img 
+                  src={user.avatarUrl} 
+                  alt={user.displayName || "Profile"} 
+                  className={`size-9 rounded-full object-cover transition-all bg-gray-100 dark:bg-[#2d3a4a] ${
+                    isProfileOpen ? "ring-2 ring-primary" : "ring-2 ring-transparent hover:ring-primary/50"
+                  }`}
+                />
+              ) : (
+                <div className={`bg-primary rounded-full size-9 flex items-center justify-center text-white font-bold text-sm transition-all ${
+                  isProfileOpen ? "ring-2 ring-primary" : "ring-2 ring-transparent hover:ring-primary/50"
+                }`}>
+                  {user?.displayName?.charAt(0) || "U"}
+                </div>
+              )}
+            </button>
+
+            <ProfileDropdown 
+              isOpen={isProfileOpen} 
+              onClose={() => setIsProfileOpen(false)} 
+            />
           </div>
         </div>
       </div>

@@ -10,8 +10,9 @@ import { useWorkspaceStore } from "@/store/use-workspace-store";
 import { CreateWorkspaceDto, createWorkspaceSchema } from "@/lib/schemas/schemas";
 
 export function CreateWorkspaceModal({ isOpen, onClose}: { isOpen: boolean; onClose: () => void }) {
-  const { createWorkspace } = useWorkspaceMutations();
-  const setActiveWorkspaceId = useWorkspaceStore((state) => state.setActiveWorkspaceId);
+  const { activeWorkspaceId, setActiveWorkspaceId } = useWorkspaceStore();
+  
+  const { createWorkspace } = useWorkspaceMutations(activeWorkspaceId || "");
 
   const {
     register,
@@ -78,7 +79,8 @@ export function CreateWorkspaceModal({ isOpen, onClose}: { isOpen: boolean; onCl
               type="text"
               placeholder="e.g. Acme Corp"
               autoFocus
-              className="block w-full rounded-lg border border-[#e8edf3] dark:border-[#3e4d5d] bg-white dark:bg-[#111921] py-2.5 px-4 text-[#0e141b] dark:text-white placeholder-gray-400 focus:border-[#4c99e6] focus:ring-1 focus:ring-[#4c99e6] outline-none transition-colors text-sm"
+              /* FIX: Dynamic Focus Colors */
+              className="block w-full rounded-lg border border-[#e8edf3] dark:border-[#3e4d5d] bg-white dark:bg-[#111921] py-2.5 px-4 text-[#0e141b] dark:text-white placeholder-gray-400 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-colors text-sm"
             />
             {errors.name && <p className="text-red-500 text-xs">{errors.name.message}</p>}
           </div>
@@ -93,7 +95,8 @@ export function CreateWorkspaceModal({ isOpen, onClose}: { isOpen: boolean; onCl
               id="ws-desc"
               rows={3}
               placeholder="What is this team working on?"
-              className="block w-full rounded-lg border border-[#e8edf3] dark:border-[#3e4d5d] bg-white dark:bg-[#111921] py-2.5 px-4 text-[#0e141b] dark:text-white placeholder-gray-400 focus:border-[#4c99e6] focus:ring-1 focus:ring-[#4c99e6] outline-none transition-colors text-sm resize-none"
+              /* FIX: Dynamic Focus Colors */
+              className="block w-full rounded-lg border border-[#e8edf3] dark:border-[#3e4d5d] bg-white dark:bg-[#111921] py-2.5 px-4 text-[#0e141b] dark:text-white placeholder-gray-400 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-colors text-sm resize-none"
             />
             {errors.description && <p className="text-red-500 text-xs">{errors.description.message}</p>}
           </div>
@@ -110,7 +113,8 @@ export function CreateWorkspaceModal({ isOpen, onClose}: { isOpen: boolean; onCl
             <button
               type="submit"
               disabled={createWorkspace.isPending}
-              className="flex items-center gap-2 px-5 py-2 rounded-lg bg-[#4c99e6] text-white text-sm font-bold shadow-sm hover:bg-[#3b7ec4] transition-colors disabled:opacity-70 disabled:cursor-not-allowed"
+              /* FIX: Dynamic Background and Hover */
+              className="flex items-center gap-2 px-5 py-2 rounded-lg bg-primary text-white text-sm font-bold shadow-sm hover:bg-primary-hover transition-colors disabled:opacity-70 disabled:cursor-not-allowed"
             >
               {createWorkspace.isPending ? (
                 <>

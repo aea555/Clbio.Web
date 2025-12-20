@@ -14,13 +14,11 @@ interface NotificationDropdownProps {
 export function NotificationDropdown({ isOpen, onClose }: NotificationDropdownProps) {
   const dropdownRef = useRef<HTMLDivElement>(null);
   
-  // Fetch top 5 notifications for the dropdown
   const { data: result, isLoading } = useNotifications(1, 5);
   const { markAsReadMutation, markAllReadMutation } = useNotificationMutations();
   
   const notifications = result?.items || [];
 
-  // Close on click outside
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
@@ -43,7 +41,8 @@ export function NotificationDropdown({ isOpen, onClose }: NotificationDropdownPr
         {notifications.length > 0 && (
           <button 
             onClick={() => markAllReadMutation.mutate()}
-            className="text-xs text-[#4c99e6] hover:text-[#3b7ec4] font-medium"
+            /* FIX: Dynamic Primary Color */
+            className="text-xs text-primary hover:cursor-pointer hover:text-primary-hover font-medium"
           >
             Mark all read
           </button>
@@ -53,7 +52,8 @@ export function NotificationDropdown({ isOpen, onClose }: NotificationDropdownPr
       <div className="max-h-[300px] overflow-y-auto">
         {isLoading && (
           <div className="p-4 flex justify-center">
-            <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-[#4c99e6]"></div>
+            {/* FIX: Dynamic Spinner Color */}
+            <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-primary"></div>
           </div>
         )}
 
@@ -71,17 +71,19 @@ export function NotificationDropdown({ isOpen, onClose }: NotificationDropdownPr
             {/* Left Column: Icon + Mark Read Button */}
             <div className="flex flex-col items-center gap-2 mt-1">
                {/* Icon */}
-               <div className="w-8 h-8 flex-shrink-0 rounded-full bg-[#4c99e6]/10 text-[#4c99e6] flex items-center justify-center">
+               {/* FIX: Dynamic Background (primary-light) and Text (primary) */}
+               <div className="w-8 h-8 flex-shrink-0 rounded-full bg-primary-light text-primary flex items-center justify-center">
                  <span className="material-symbols-outlined text-[18px] leading-none">
                    {notif.type === "Mention" ? "alternate_email" : "notifications"}
                  </span>
                </div>
 
-               {/* Mark Read Button (Beneath Icon) */}
+               {/* Mark Read Button */}
                {!notif.isRead && (
                  <button 
                    onClick={(e) => { e.stopPropagation(); markAsReadMutation.mutate(notif.id); }}
-                   className="w-6 h-6 flex items-center justify-center rounded-full text-[#4c99e6] hover:bg-[#4c99e6] hover:text-white transition-all bg-white dark:bg-[#1a2430] border border-[#e8edf3] dark:border-[#3e4d5d] shadow-sm"
+                   /* FIX: Dynamic Hover State */
+                   className="w-6 h-6 flex items-center justify-center rounded-full text-primary hover:bg-primary hover:text-white transition-all bg-white dark:bg-[#1a2430] border border-[#e8edf3] dark:border-[#3e4d5d] shadow-sm"
                    title="Mark as read"
                  >
                    <span className="material-symbols-outlined text-[14px] leading-none">check</span>
@@ -91,13 +93,13 @@ export function NotificationDropdown({ isOpen, onClose }: NotificationDropdownPr
             
             {/* Right Column: Text Content */}
             <div className="flex-1 min-w-0">
-               {/* Title Line with Badge at Start */}
                <div className="flex items-center gap-2 mb-0.5">
                   <span className="text-sm font-semibold text-[#0e141b] dark:text-[#e8edf3]">
                     {notif.title}
                   </span>
                   {!notif.isRead && (
-                    <span className="w-2 h-2 rounded-full bg-[#4c99e6] flex-shrink-0"></span>
+                    /* FIX: Dynamic Unread Badge */
+                    <span className="w-2 h-2 rounded-full bg-primary flex-shrink-0"></span>
                   )}
                </div>
                
@@ -113,9 +115,10 @@ export function NotificationDropdown({ isOpen, onClose }: NotificationDropdownPr
       </div>
 
       <Link 
-        href="/dashboard/account/notifications"
+        href="/dashboard/settings/account/notifications"
         onClick={onClose}
-        className="block w-full py-3 text-center text-sm font-medium text-[#507395] hover:text-[#4c99e6] hover:bg-[#f8fafb] dark:hover:bg-[#111921] transition-colors border-t border-[#e8edf3] dark:border-[#2d3a4a]"
+        /* FIX: Dynamic Footer Link Hover */
+        className="block w-full py-3 text-center text-sm font-medium text-[#507395] hover:text-primary hover:bg-[#f8fafb] dark:hover:bg-[#111921] transition-colors border-t border-[#e8edf3] dark:border-[#2d3a4a]"
       >
         View all notifications
       </Link>

@@ -5,15 +5,15 @@ import { useParams, useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { useWorkspace, useWorkspaceMembers } from "@/hooks/use-queries";
+import { useWorkspace } from "@/hooks/use-queries";
 import { useWorkspaceMutations } from "@/hooks/use-mutations";
 import { useWorkspaceStore } from "@/store/use-workspace-store";
 import { SettingsTabs } from "@/components/dashboard/settings-tabs";
 import { ConfirmationModal } from "@/components/ui/confirmation-modal";
 import { ArchivedBanner } from "@/components/dashboard/archived-banner";
 import { useWorkspacePermissions } from "@/hooks/use-workspace-permissions"; 
-import { usePermissions } from "@/providers/permission-provider"; //
-import { Permission } from "@/lib/rbac/permissions"; //
+import { usePermissions } from "@/providers/permission-provider"; 
+import { Permission } from "@/lib/rbac/permissions"; 
 import { useAuthStore } from "@/store/use-auth-store";
 
 const updateWorkspaceSchema = z.object({
@@ -28,13 +28,8 @@ export default function WorkspaceGeneralSettingsPage() {
   const workspaceId = params.workspaceId as string;
   const { user: currentUser } = useAuthStore();
 
-  // 1. RBAC Permissions
   const { can, isOwner } = usePermissions();
-
-  // 2. State Permissions (Archived Status)
   const { isArchived } = useWorkspacePermissions(workspaceId);
-
-  // Combined Permission for Editing
   const canEditWorkspace = can(Permission.ManageWorkspace) && !isArchived;
 
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
@@ -43,7 +38,6 @@ export default function WorkspaceGeneralSettingsPage() {
   const [isLeaveModalOpen, setIsLeaveModalOpen] = useState(false);
 
   const { data: workspace, isLoading } = useWorkspace(workspaceId);
-  // We don't need to fetch members manually just for permissions anymore, the provider handles it.
   const { updateWorkspace, deleteWorkspace, archiveWorkspace, unarchiveWorkspace, leaveWorkspace } = useWorkspaceMutations(workspaceId);
   const { activeWorkspaceId, setActiveWorkspaceId } = useWorkspaceStore();
 
@@ -175,7 +169,8 @@ export default function WorkspaceGeneralSettingsPage() {
                     disabled={!canEditWorkspace}
                     id="name"
                     type="text"
-                    className="block w-full rounded-lg border border-[#e8edf3] dark:border-[#3e4d5d] bg-[#f8fafb] dark:bg-[#111921] py-2.5 px-4 text-[#0e141b] dark:text-white focus:border-[#4c99e6] focus:ring-1 focus:ring-[#4c99e6] outline-none transition-colors text-sm disabled:text-gray-500 disabled:cursor-text"
+                    /* FIX: Dynamic Focus Colors */
+                    className="block w-full rounded-lg border border-[#e8edf3] dark:border-[#3e4d5d] bg-[#f8fafb] dark:bg-[#111921] py-2.5 px-4 text-[#0e141b] dark:text-white focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-colors text-sm disabled:text-gray-500 disabled:cursor-text"
                   />
                   {errors.name && <p className="text-red-500 text-xs">{errors.name.message}</p>}
                 </div>
@@ -189,18 +184,19 @@ export default function WorkspaceGeneralSettingsPage() {
                     disabled={!canEditWorkspace}
                     id="description"
                     type="text"
-                    className="block w-full rounded-lg border border-[#e8edf3] dark:border-[#3e4d5d] bg-[#f8fafb] dark:bg-[#111921] py-2.5 px-4 text-[#0e141b] dark:text-white focus:border-[#4c99e6] focus:ring-1 focus:ring-[#4c99e6] outline-none transition-colors text-sm disabled:text-gray-500 disabled:cursor-text"
+                    /* FIX: Dynamic Focus Colors */
+                    className="block w-full rounded-lg border border-[#e8edf3] dark:border-[#3e4d5d] bg-[#f8fafb] dark:bg-[#111921] py-2.5 px-4 text-[#0e141b] dark:text-white focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-colors text-sm disabled:text-gray-500 disabled:cursor-text"
                   />
                 </div>
               </div>
 
-              {/* Hide Save button if user lacks edit permission */}
               {canEditWorkspace && (
                 <div className="flex justify-end border-t border-[#e8edf3] dark:border-[#2d3a4a] pt-4 mt-2">
                   <button
                     type="submit"
                     disabled={!isDirty || updateWorkspace.isPending}
-                    className="px-5 py-2 rounded-lg bg-[#4c99e6] text-white text-sm font-bold shadow-sm hover:bg-[#3b7ec4] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    /* FIX: Dynamic Background and Hover */
+                    className="px-5 py-2 rounded-lg bg-primary text-white text-sm font-bold shadow-sm hover:bg-primary-hover transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {updateWorkspace.isPending ? "Saving..." : "Save Changes"}
                   </button>
@@ -210,7 +206,6 @@ export default function WorkspaceGeneralSettingsPage() {
           </section>
 
           {/* Actions Zone */}
-          {/* We only render this section if the user has AT LEAST one capability here (Archive, Delete, or Leave) */}
           { (can(Permission.ArchiveWorkspace) || can(Permission.DeleteWorkspace) || !isOwner) && (
           <section className="bg-red-50 dark:bg-red-900/10 rounded-xl border border-red-100 dark:border-red-900/30 p-6">
             <h3 className="text-lg font-bold text-red-600 dark:text-red-400 mb-2">Workspace Actions</h3>
@@ -226,7 +221,8 @@ export default function WorkspaceGeneralSettingsPage() {
                   <button
                     type="button"
                     onClick={() => setIsUnarchiveModalOpen(true)}
-                    className="w-full sm:w-auto px-5 py-2 rounded-lg bg-white border border-[#4c99e6] text-[#4c99e6] text-sm font-bold shadow-sm hover:bg-blue-50 transition-colors dark:bg-transparent dark:border-[#4c99e6] dark:text-[#4c99e6] dark:hover:bg-blue-900/20"
+                    /* FIX: Dynamic Border and Text Colors for Restore Action */
+                    className="w-full hover:cursor-pointer sm:w-auto px-5 py-2 rounded-lg bg-white border border-primary text-primary text-sm font-bold shadow-sm hover:bg-blue-50 transition-colors dark:bg-transparent dark:border-primary dark:text-primary dark:hover:bg-blue-900/20"
                   >
                     Restore Workspace
                   </button>
@@ -234,7 +230,7 @@ export default function WorkspaceGeneralSettingsPage() {
                   <button
                     type="button"
                     onClick={() => setIsArchiveModalOpen(true)}
-                    className="w-full sm:w-auto px-5 py-2 rounded-lg bg-white border border-amber-200 text-amber-600 text-sm font-bold shadow-sm hover:bg-amber-50 transition-colors dark:bg-transparent dark:border-amber-800 dark:text-amber-400 dark:hover:bg-amber-900/20"
+                    className="w-full sm:w-auto px-5 py-2 hover:cursor-pointer rounded-lg bg-white border border-amber-200 text-amber-600 text-sm font-bold shadow-sm hover:bg-amber-50 transition-colors dark:bg-transparent dark:border-amber-800 dark:text-amber-400 dark:hover:bg-amber-900/20"
                   >
                     Archive Workspace
                   </button>
@@ -246,13 +242,13 @@ export default function WorkspaceGeneralSettingsPage() {
                 <button
                   type="button"
                   onClick={() => setIsDeleteModalOpen(true)}
-                  className="w-full sm:w-auto px-5 py-2 rounded-lg bg-white border border-red-200 text-red-600 text-sm font-bold shadow-sm hover:bg-red-50 transition-colors dark:bg-transparent dark:border-red-800 dark:text-red-400 dark:hover:bg-red-900/20"
+                  className="w-full hover:cursor-pointer sm:w-auto px-5 py-2 rounded-lg bg-white border border-red-200 text-red-600 text-sm font-bold shadow-sm hover:bg-red-50 transition-colors dark:bg-transparent dark:border-red-800 dark:text-red-400 dark:hover:bg-red-900/20"
                 >
                   Delete Workspace
                 </button>
               )}
 
-              {/* Leave Button (Everyone except owner) */}
+              {/* Leave Button */}
               {!isOwner && (
                 <button
                   onClick={() => setIsLeaveModalOpen(true)}

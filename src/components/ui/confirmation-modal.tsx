@@ -39,7 +39,8 @@ export function ConfirmationModal({
 
   // Variant Styles
   const confirmBtnStyles = {
-    primary: "bg-[#4c99e6] hover:bg-[#3b7ec4] text-white",
+    /* FIX: Replaced hardcoded hex values with dynamic primary classes */
+    primary: "bg-primary hover:bg-primary-hover text-white",
     danger: "bg-red-600 hover:bg-red-700 text-white",
     warning: "bg-amber-500 hover:bg-amber-600 text-white",
   };
@@ -55,7 +56,8 @@ export function ConfirmationModal({
           <div className={`mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full ${
             variant === 'danger' ? 'bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400' : 
             variant === 'warning' ? 'bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400' :
-            'bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400'
+            /* FIX: Replaced bg-blue-100/text-blue-600 with dynamic primary theme */
+            'bg-primary-light text-primary'
           }`}>
             <span className="material-symbols-outlined text-[28px]">
               {variant === 'danger' ? 'warning' : variant === 'warning' ? 'priority_high' : 'info'}

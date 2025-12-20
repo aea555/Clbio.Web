@@ -17,7 +17,6 @@ export const commentService = {
 
   /**
    * DELETE /api/workspaces/{workspaceId}/comments/{commentId}
-   * Note: Delete path is slightly different (not nested under tasks)
    */
   delete: (workspaceId: string, commentId: string) => 
     del(`/api/proxy/workspaces/${workspaceId}/comments/${commentId}`),

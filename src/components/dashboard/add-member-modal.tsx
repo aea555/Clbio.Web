@@ -24,7 +24,6 @@ export function AddMemberModal({ workspaceId, isOpen, onClose }: { workspaceId: 
     }
   });
 
-  // Reset form when modal opens
   useEffect(() => {
     if (isOpen) {
       reset({
@@ -36,8 +35,6 @@ export function AddMemberModal({ workspaceId, isOpen, onClose }: { workspaceId: 
   }, [isOpen, workspaceId, reset]);
 
   const onSubmit = (data: CreateWorkspaceMemberDto) => {
-    // FIX: Match the mutation signature defined in useWorkspaceMutations
-    // It expects { email: string; role: WorkspaceRole }
     inviteMember.mutate(
       { 
         email: data.email, 
@@ -46,9 +43,7 @@ export function AddMemberModal({ workspaceId, isOpen, onClose }: { workspaceId: 
       {
         onSuccess: () => {
           onClose();
-          // Success toast is handled in the mutation definition
         }
-        // Error toast is handled in the mutation definition
       }
     );
   };
@@ -68,7 +63,6 @@ export function AddMemberModal({ workspaceId, isOpen, onClose }: { workspaceId: 
         </div>
 
         <form onSubmit={handleSubmit(onSubmit)} className="p-6 space-y-5">
-          {/* Hidden Input for Workspace ID (needed for Zod schema validation) */}
           <input type="hidden" {...register("workspaceId")} />
 
           {/* Email Input */}
@@ -82,7 +76,8 @@ export function AddMemberModal({ workspaceId, isOpen, onClose }: { workspaceId: 
               type="email"
               placeholder="colleague@company.com"
               autoFocus
-              className="block w-full rounded-lg border border-[#e8edf3] dark:border-[#3e4d5d] bg-white dark:bg-[#111921] py-2.5 px-4 text-[#0e141b] dark:text-white placeholder-gray-400 focus:border-[#4c99e6] focus:ring-1 focus:ring-[#4c99e6] outline-none transition-colors text-sm"
+              /* FIX: Dynamic Focus Colors */
+              className="block w-full rounded-lg border border-[#e8edf3] dark:border-[#3e4d5d] bg-white dark:bg-[#111921] py-2.5 px-4 text-[#0e141b] dark:text-white placeholder-gray-400 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-colors text-sm"
             />
             {errors.email && <p className="text-red-500 text-xs">{errors.email.message}</p>}
           </div>
@@ -96,7 +91,8 @@ export function AddMemberModal({ workspaceId, isOpen, onClose }: { workspaceId: 
               <select
                 {...register("role", { valueAsNumber: true })}
                 id="role"
-                className="block w-full rounded-lg border border-[#e8edf3] dark:border-[#3e4d5d] bg-white dark:bg-[#111921] py-2.5 px-4 text-[#0e141b] dark:text-white appearance-none focus:border-[#4c99e6] focus:ring-1 focus:ring-[#4c99e6] outline-none transition-colors text-sm cursor-pointer"
+                /* FIX: Dynamic Focus Colors */
+                className="block w-full rounded-lg border border-[#e8edf3] dark:border-[#3e4d5d] bg-white dark:bg-[#111921] py-2.5 px-4 text-[#0e141b] dark:text-white appearance-none focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-colors text-sm cursor-pointer"
               >
                 <option value={WorkspaceRole.Member}>Member</option>
                 <option value={WorkspaceRole.PrivilegedMember}>Admin</option>
@@ -119,9 +115,9 @@ export function AddMemberModal({ workspaceId, isOpen, onClose }: { workspaceId: 
             <button
               type="submit"
               disabled={inviteMember.isPending}
-              className="flex items-center gap-2 px-5 py-2 rounded-lg bg-[#4c99e6] text-white text-sm font-bold shadow-sm hover:bg-[#3b7ec4] transition-colors disabled:opacity-70"
+              /* FIX: Dynamic Background and Hover */
+              className="flex items-center gap-2 px-5 py-2 rounded-lg bg-primary text-white text-sm font-bold shadow-sm hover:bg-primary-hover transition-colors disabled:opacity-70"
             >
-              {/* Updated text to reflect Invitation flow */}
               <span className="material-symbols-outlined text-[18px]">send</span>
               {inviteMember.isPending ? "Sending..." : "Send Invite"}
             </button>

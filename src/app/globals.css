@@ -1,31 +1,94 @@
 @import "tailwindcss";
 
+/* 1. Tailwind looks for the .dark class */
+@variant dark (&:where(.dark, .dark *));
+
+/* 2. Base Variables (Light Mode) */
 :root {
   --background: #ffffff;
   --foreground: #171717;
+  
+  /* Default Blue */
+  --accent-color: #4c99e6; 
+  --accent-color-hover: #3b7ec4;
+  --accent-color-light: #4c99e61a;
+}
+
+/* 3. Dark Mode Override */
+/* This matches <html class="dark"> */
+:root.dark {
+  --background: #0a0a0a;
+  --foreground: #ededed;
+}
+
+/* 4. Accent Color Overrides */
+/* Use :root[data-accent="..."] to ensure specificity */
+
+:root[data-accent="emerald"] {
+  --accent-color: #10b981;
+  --accent-color-hover: #059669;
+  --accent-color-light: #10b9811a;
+}
+
+:root[data-accent="violet"] {
+  --accent-color: #8b5cf6;
+  --accent-color-hover: #7c3aed;
+  --accent-color-light: #8b5cf61a;
+}
+
+:root[data-accent="amber"] {
+  --accent-color: #f59e0b;
+  --accent-color-hover: #d97706;
+  --accent-color-light: #f59e0b1a;
+}
+
+:root[data-accent="rose"] {
+  --accent-color: #f43f5e;
+  --accent-color-hover: #e11d48;
+  --accent-color-light: #f43f5e1a;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   
-  /* Update font-sans to prioritize Inter, falling back to Geist */
   --font-sans: var(--font-inter), var(--font-geist-sans), sans-serif; 
   --font-mono: var(--font-geist-mono);
 
-  /* Add Brand Colors from HTML */
-  --color-primary: #4cbfe6;
-  --color-primary-dark: #3db0d6;
+  /* Map standard Tailwind utilities to your variables */
+  --color-primary: var(--accent-color);
+  --color-primary-hover: var(--accent-color-hover);
+  --color-primary-light: var(--accent-color-light);
+
   --color-background-light: #f6f7f8;
   --color-background-dark: #111d21;
-  --color-card-dark: #1a2c32;
-  --color-input-dark: #23363d;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+@layer utilities {
+  /* Chrome, Edge, Safari */
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background-color: rgba(156, 163, 175, 0.5); /* gray-400 with opacity */
+    border-radius: 20px;
+    border: 3px solid transparent;
+    background-clip: content-box;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background-color: rgba(156, 163, 175, 0.8);
+  }
+
+  /* Dark mode specific overrides if needed, though transparent usually works for both */
+  .dark .custom-scrollbar::-webkit-scrollbar-thumb {
+    background-color: rgba(75, 85, 99, 0.5); /* gray-600 */
   }
 }
 
