@@ -222,7 +222,7 @@ export default function WorkspaceGeneralSettingsPage() {
                     type="button"
                     onClick={() => setIsUnarchiveModalOpen(true)}
                     /* FIX: Dynamic Border and Text Colors for Restore Action */
-                    className="w-full sm:w-auto px-5 py-2 rounded-lg bg-white border border-primary text-primary text-sm font-bold shadow-sm hover:bg-blue-50 transition-colors dark:bg-transparent dark:border-primary dark:text-primary dark:hover:bg-blue-900/20"
+                    className="w-full hover:cursor-pointer sm:w-auto px-5 py-2 rounded-lg bg-white border border-primary text-primary text-sm font-bold shadow-sm hover:bg-blue-50 transition-colors dark:bg-transparent dark:border-primary dark:text-primary dark:hover:bg-blue-900/20"
                   >
                     Restore Workspace
                   </button>
@@ -230,7 +230,7 @@ export default function WorkspaceGeneralSettingsPage() {
                   <button
                     type="button"
                     onClick={() => setIsArchiveModalOpen(true)}
-                    className="w-full sm:w-auto px-5 py-2 rounded-lg bg-white border border-amber-200 text-amber-600 text-sm font-bold shadow-sm hover:bg-amber-50 transition-colors dark:bg-transparent dark:border-amber-800 dark:text-amber-400 dark:hover:bg-amber-900/20"
+                    className="w-full sm:w-auto px-5 py-2 hover:cursor-pointer rounded-lg bg-white border border-amber-200 text-amber-600 text-sm font-bold shadow-sm hover:bg-amber-50 transition-colors dark:bg-transparent dark:border-amber-800 dark:text-amber-400 dark:hover:bg-amber-900/20"
                   >
                     Archive Workspace
                   </button>
@@ -242,7 +242,7 @@ export default function WorkspaceGeneralSettingsPage() {
                 <button
                   type="button"
                   onClick={() => setIsDeleteModalOpen(true)}
-                  className="w-full sm:w-auto px-5 py-2 rounded-lg bg-white border border-red-200 text-red-600 text-sm font-bold shadow-sm hover:bg-red-50 transition-colors dark:bg-transparent dark:border-red-800 dark:text-red-400 dark:hover:bg-red-900/20"
+                  className="w-full hover:cursor-pointer sm:w-auto px-5 py-2 rounded-lg bg-white border border-red-200 text-red-600 text-sm font-bold shadow-sm hover:bg-red-50 transition-colors dark:bg-transparent dark:border-red-800 dark:text-red-400 dark:hover:bg-red-900/20"
                 >
                   Delete Workspace
                 </button>

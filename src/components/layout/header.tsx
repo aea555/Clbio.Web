@@ -173,7 +173,7 @@ export function Header() {
           <div className="relative">
             <button 
               onClick={() => setIsNotifOpen(!isNotifOpen)}
-              className={`flex items-center justify-center p-2 rounded-full transition-colors ${
+              className={`flex items-center hover:cursor-pointer justify-center p-2 rounded-full transition-colors ${
                 isNotifOpen 
                   ? "bg-primary-light text-primary" 
                   : "text-[#507395] hover:text-primary hover:bg-[#f8fafb] dark:hover:bg-[#111921]"
@@ -195,7 +195,7 @@ export function Header() {
           <div className="relative">
             <button 
               onClick={() => { setIsProfileOpen(!isProfileOpen); setIsNotifOpen(false); }}
-              className="flex items-center gap-2 focus:outline-none"
+              className="flex items-center gap-2 hover:cursor-pointer focus:outline-none"
             >
               {user?.avatarUrl ? (
                 <img 

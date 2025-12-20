@@ -50,7 +50,7 @@ export function ArchivedBanner({ workspaceId, workspaceName }: ArchivedBannerPro
         
         <button
           onClick={() => setIsConfirmOpen(true)}
-          className="px-4 py-1.5 bg-white dark:bg-transparent border border-amber-300 dark:border-amber-700 text-amber-700 dark:text-amber-300 text-xs font-bold rounded-lg hover:bg-amber-100 dark:hover:bg-amber-900/40 transition-colors shadow-sm"
+          className="px-4 hover:cursor-pointer py-1.5 bg-white dark:bg-transparent border border-amber-300 dark:border-amber-700 text-amber-700 dark:text-amber-300 text-xs font-bold rounded-lg hover:bg-amber-100 dark:hover:bg-amber-900/40 transition-colors shadow-sm"
         >
           Restore Workspace
         </button>

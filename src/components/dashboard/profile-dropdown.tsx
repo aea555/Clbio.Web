@@ -114,7 +114,7 @@ export function ProfileDropdown({ isOpen, onClose }: ProfileDropdownProps) {
         <div className="p-2 border-t border-[#e8edf3] dark:border-[#2d3a4a]">
             <button
                 onClick={() => setShowLogoutConfirm(true)}
-                className="w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-bold text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
+                className="w-full hover:cursor-pointer flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-bold text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
             >
                 <div className="w-8 h-8 rounded-full bg-red-50 dark:bg-red-900/10 flex items-center justify-center">
                   <span className="material-symbols-outlined text-[18px]">logout</span>

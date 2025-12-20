@@ -39,9 +39,9 @@ export interface ReadBoardDto extends ResponseDtoBase {
 export interface ReadColumnDto extends ResponseDtoBase {
 	id: string;
 	name: string;
-	position: number;
 	boardId: string;
 	taskCount?: number;
+	position: number;
 }
 
 export interface ReadTaskItemDto extends ResponseDtoBase {

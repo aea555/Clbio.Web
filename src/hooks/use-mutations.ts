@@ -16,7 +16,7 @@ import { UpdateWorkspaceMemberDto } from "@/lib/schemas/schemas";
 import { workspaceInvitationService } from "@/services/workspace-invitation-service";
 import { WorkspaceRole } from "@/types/enums";
 import { userService } from "@/services/user-service";
-import { ReadUserDto } from "@/types/dtos";
+import { ReadCommentDto, ReadTaskItemDto, ReadUserDto, ReadWorkspaceMemberDto } from "@/types/dtos";
 
 export function useUserMutations() {
   const queryClient = useQueryClient();
@@ -254,8 +254,13 @@ export function useBoardMutations(workspaceId: string) {
   const updateBoard = useMutation({
     mutationFn: ({ id, data }: { id: string; data: any }) =>
       boardService.update(workspaceId, id, data),
-    onSuccess: () => {
+    onSuccess: (_, variables) => {
+      // 1. Invalidate the list (for Dashboard)
       queryClient.invalidateQueries({ queryKey: ["boards", workspaceId] });
+      // 2. Invalidate the specific board detail (for Board Page header)
+      // FIX: Added this line
+      queryClient.invalidateQueries({ queryKey: ["boards", "detail", variables.id] });
+
       toast.success("Board updated");
     },
     onError: (error: any) => toast.error(getErrorMessage(error)),
@@ -263,14 +268,14 @@ export function useBoardMutations(workspaceId: string) {
 
   const deleteBoard = useMutation({
     mutationFn: (id: string) => boardService.delete(workspaceId, id),
-    onSuccess: () => {
+    onSuccess: (_, boardId) => {
       queryClient.invalidateQueries({ queryKey: ["boards", workspaceId] });
+      queryClient.removeQueries({ queryKey: ["boards", "detail", boardId] });
       toast.success("Board deleted");
     },
     onError: (error: any) => toast.error(getErrorMessage(error)),
   });
 
-  // ⚡ Optimistic Reorder
   const reorderBoards = useMutation({
     mutationFn: (boardIds: string[]) => boardService.reorder(workspaceId, boardIds),
     onMutate: async (newOrder) => {
@@ -293,7 +298,6 @@ export function useBoardMutations(workspaceId: string) {
 
   return { createBoard, updateBoard, deleteBoard, reorderBoards };
 }
-
 // ============================================================================
 // COLUMN MUTATIONS
 // ============================================================================
@@ -352,125 +356,251 @@ export function useColumnMutations(workspaceId: string, boardId: string) {
 // ============================================================================
 // TASK MUTATIONS
 // ============================================================================
-export function useTaskMutations(workspaceId: string) {
+export function useTaskMutations(workspaceId: string, boardId?: string) {
   const queryClient = useQueryClient();
 
   const createTask = useMutation({
     mutationFn: ({ columnId, data }: { columnId: string; data: any }) =>
       taskService.create(workspaceId, columnId, data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["columns"] });
+      // FIX: Invalidate the specific board's task list
+      if (boardId) {
+        queryClient.invalidateQueries({ queryKey: ["tasks", "board", boardId] });
+      } else {
+        // Fallback or invalidate all tasks if widely used (less efficient)
+        queryClient.invalidateQueries({ queryKey: ["tasks"] });
+      }
       toast.success("Task created");
     },
     onError: (error: any) => toast.error(getErrorMessage(error)),
   });
 
   const updateTask = useMutation({
+    // We expect 'data' to contain the FULL UpdateTaskItemDto structure 
+    // or at least the required fields + changes.
     mutationFn: ({ id, data }: { id: string; data: any }) =>
       taskService.update(workspaceId, id, data),
-    onSuccess: (data) => {
-      queryClient.setQueryData(["tasks", data?.id], data);
-      queryClient.invalidateQueries({ queryKey: ["columns"] });
+
+    onMutate: async ({ id, data }) => {
+      // 1. Cancel Refetches
+      await queryClient.cancelQueries({ queryKey: ["tasks", "detail", id] });
+      if (boardId) await queryClient.cancelQueries({ queryKey: ["tasks", "board", boardId] });
+
+      // 2. Snapshot Previous Data
+      const previousTask = queryClient.getQueryData<ReadTaskItemDto>(["tasks", "detail", id]);
+
+      // 3. Optimistic Update (Detail View)
+      if (previousTask) {
+        queryClient.setQueryData<ReadTaskItemDto>(["tasks", "detail", id], {
+          ...previousTask,
+          ...data
+        });
+      }
+
+      // 4. Optimistic Update (Board List View)
+      if (boardId) {
+        queryClient.setQueryData<ReadTaskItemDto[]>(["tasks", "board", boardId], (old) => {
+          if (!old) return [];
+          return old.map(t => t.id === id ? { ...t, ...data } : t);
+        });
+      }
+
+      return { previousTask };
     },
-    onError: (error: any) => toast.error(getErrorMessage(error)),
+    onError: (err, variables, context) => {
+      if (context?.previousTask) {
+        queryClient.setQueryData(["tasks", "detail", variables.id], context.previousTask);
+      }
+      toast.error(getErrorMessage(err));
+    },
+    onSettled: (data, err, variables) => {
+      // Always invalidate to ensure consistency with backend
+      queryClient.invalidateQueries({ queryKey: ["tasks", "detail", variables.id] });
+      if (boardId) queryClient.invalidateQueries({ queryKey: ["tasks", "board", boardId] });
+    }
   });
 
   const deleteTask = useMutation({
     mutationFn: (id: string) => taskService.delete(workspaceId, id),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["columns"] });
+    onSuccess: (_, taskId) => {
+      if (boardId) {
+        queryClient.invalidateQueries({ queryKey: ["tasks", "board", boardId] });
+      }
+      queryClient.removeQueries({ queryKey: ["tasks", "detail", taskId] });
       toast.success("Task deleted");
     },
     onError: (error: any) => toast.error(getErrorMessage(error)),
   });
 
-  // Optimistic Move
   const moveTask = useMutation({
     mutationFn: ({ taskId, data }: { taskId: string; data: any }) =>
       taskService.move(workspaceId, taskId, data),
 
     onMutate: async ({ taskId, data }) => {
-      await queryClient.cancelQueries({ queryKey: ["columns"] });
-      const previousColumns = queryClient.getQueryData(["columns"]);
+      if (!boardId) return;
 
-      queryClient.setQueriesData({ queryKey: ["columns"] }, (old: any[] | undefined) => {
-        if (!old) return [];
-        const newCols = JSON.parse(JSON.stringify(old));
+      const queryKey = ["tasks", "board", boardId];
+      await queryClient.cancelQueries({ queryKey });
+      const previousTasks = queryClient.getQueryData<ReadTaskItemDto[]>(queryKey);
 
-        const sourceCol = newCols.find((c: any) => c.items.some((t: any) => t.id === taskId));
-        const targetCol = newCols.find((c: any) => c.id === data.targetColumnId);
+      if (previousTasks) {
+        queryClient.setQueryData<ReadTaskItemDto[]>(queryKey, (old) => {
+          if (!old) return [];
+          const newTasks = [...old];
+          const taskIndex = newTasks.findIndex(t => t.id === taskId);
 
-        if (!sourceCol || !targetCol) return old;
+          if (taskIndex === -1) return old;
 
-        const taskIdx = sourceCol.items.findIndex((t: any) => t.id === taskId);
-        const [task] = sourceCol.items.splice(taskIdx, 1);
+          const updatedTask = {
+            ...newTasks[taskIndex],
+            columnId: data.targetColumnId,
+            position: data.newPosition
+          };
 
-        task.position = data.newPosition;
-        targetCol.items.splice(data.newPosition, 0, task);
+          newTasks[taskIndex] = updatedTask;
+          return newTasks;
+        });
+      }
 
-        return newCols;
-      });
-
-      return { previousColumns };
+      return { previousTasks };
     },
-    onError: (error, __, ctx) => {
-      if (ctx?.previousColumns) queryClient.setQueryData(["columns"], ctx.previousColumns);
+
+    onError: (error, __, context) => {
+      if (boardId && context?.previousTasks) {
+        queryClient.setQueryData(["tasks", "board", boardId], context.previousTasks);
+      }
       toast.error(getErrorMessage(error));
     },
-    onSettled: () => queryClient.invalidateQueries({ queryKey: ["columns"] }),
+
+    onSettled: () => {
+      if (boardId) {
+        queryClient.invalidateQueries({ queryKey: ["tasks", "board", boardId] });
+      }
+    },
   });
 
-  return { createTask, updateTask, deleteTask, moveTask };
+  const assignTask = useMutation({
+    mutationFn: ({ taskId, userId }: { taskId: string; userId: string | null }) =>
+      taskService.assign(workspaceId, taskId, userId),
+
+    onMutate: async ({ taskId, userId }) => {
+      // 1. Cancel Refetches
+      await queryClient.cancelQueries({ queryKey: ["tasks", "detail", taskId] });
+      if (boardId) await queryClient.cancelQueries({ queryKey: ["tasks", "board", boardId] });
+
+      const previousTask = queryClient.getQueryData<ReadTaskItemDto>(["tasks", "detail", taskId]);
+
+      // 2. Find Member Info for Optimistic UI (Avatar/Name)
+      const members = queryClient.getQueryData<ReadWorkspaceMemberDto[]>(["workspaces", "members", workspaceId]);
+      const targetMember = members?.find(m => m.userId === userId);
+
+      const optimisticUpdate = {
+        assigneeId: userId,
+        assigneeDisplayName: targetMember?.userDisplayName || (userId ? "Loading..." : null),
+        assigneeAvatarUrl: targetMember?.userAvatarUrl
+      };
+
+      // 3. Update Detail View
+      if (previousTask) {
+        queryClient.setQueryData(["tasks", "detail", taskId], { ...previousTask, ...optimisticUpdate });
+      }
+
+      // 4. Update Board List View
+      if (boardId) {
+        queryClient.setQueryData<ReadTaskItemDto[]>(["tasks", "board", boardId], (old) => {
+          if (!old) return [];
+          return old.map(t => t.id === taskId ? { ...t, ...optimisticUpdate } : t);
+        });
+      }
+
+      return { previousTask };
+    },
+    onError: (err, variables, context) => {
+      if (context?.previousTask) queryClient.setQueryData(["tasks", "detail", variables.taskId], context.previousTask);
+      toast.error(getErrorMessage(err));
+    },
+    onSettled: (data, err, variables) => {
+      queryClient.invalidateQueries({ queryKey: ["tasks", "detail", variables.taskId] });
+      if (boardId) queryClient.invalidateQueries({ queryKey: ["tasks", "board", boardId] });
+    }
+  });
+
+  return { createTask, updateTask, deleteTask, moveTask, assignTask };
 }
 
 // ============================================================================
-// INTERACTION MUTATIONS
+// COMMENT MUTATIONS
 // ============================================================================
-export function useInteractionMutations(workspaceId: string) {
+export function useCommentMutations(workspaceId: string, taskId: string) {
   const queryClient = useQueryClient();
 
   const createComment = useMutation({
-    mutationFn: ({ taskId, data }: { taskId: string; data: any }) =>
-      commentService.create(workspaceId, taskId, data),
-    onSuccess: (_, { taskId }) => {
-      queryClient.invalidateQueries({ queryKey: ["comments", taskId] });
-      queryClient.invalidateQueries({ queryKey: ["tasks", taskId] });
+    mutationFn: (data: any) => commentService.create(workspaceId, taskId, data),
+    onSuccess: (newComment) => {
+      // FIX: Check for duplicates before adding
+      queryClient.setQueryData(["comments", taskId], (old: ReadCommentDto[] = []) => {
+        if (old.some(c => c.id === newComment?.id)) return old; // Already added by socket? Skip.
+        return [...old, newComment];
+      });
+      queryClient.invalidateQueries({ queryKey: ["tasks", "detail", taskId] });
     },
     onError: (error: any) => toast.error(getErrorMessage(error)),
   });
 
   const deleteComment = useMutation({
     mutationFn: (commentId: string) => commentService.delete(workspaceId, commentId),
-    onSuccess: (_, commentId) => {
-      // Invalidation strategy handled elsewhere or via SignalR
+    onMutate: async (commentId) => {
+      await queryClient.cancelQueries({ queryKey: ["comments", taskId] });
+      const previous = queryClient.getQueryData(["comments", taskId]);
+
+      // Optimistically remove
+      queryClient.setQueryData(["comments", taskId], (old: ReadCommentDto[] | undefined) => {
+        if (!old) return [];
+        return old.filter(c => c.id !== commentId);
+      });
+
+      return { previous };
     },
-    onError: (error: any) => toast.error(getErrorMessage(error)),
+    onError: (err, _, ctx) => {
+      if (ctx?.previous) queryClient.setQueryData(["comments", taskId], ctx.previous);
+      toast.error(getErrorMessage(err));
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ["comments", taskId] });
+      queryClient.invalidateQueries({ queryKey: ["tasks", "detail", taskId] });
+    }
   });
 
+  return { createComment, deleteComment };
+}
+
+// ============================================================================
+// ATTACHMENT MUTATIONS
+// ============================================================================
+export function useAttachmentMutations(workspaceId: string, taskId: string) {
+  const queryClient = useQueryClient();
+
   const uploadAttachment = useMutation({
-    mutationFn: ({ taskId, files }: { taskId: string; files: File[] }) =>
-      attachmentService.upload(workspaceId, taskId, files),
-
-    onSuccess: (_, { taskId }) => {
+    mutationFn: (files: File[]) => attachmentService.upload(workspaceId, taskId, files),
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["attachments", taskId] });
-      queryClient.invalidateQueries({ queryKey: ["tasks", taskId] });
-
-      toast.success("Files uploaded succesfully");
+      queryClient.invalidateQueries({ queryKey: ["tasks", "detail", taskId] });
+      toast.success("File uploaded");
     },
-    onError: (error) => toast.error(getErrorMessage(error)),
+    onError: (error: any) => toast.error(getErrorMessage(error)),
   });
 
   const deleteAttachment = useMutation({
     mutationFn: (attachmentId: string) => attachmentService.delete(workspaceId, attachmentId),
-    onSuccess: (task) => {
-      queryClient.invalidateQueries({ queryKey: ["attachments", task?.id] });
-      queryClient.invalidateQueries({ queryKey: ["tasks", task?.id] });
-      toast.success("Attachment deleted")
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["attachments", taskId] });
+      queryClient.invalidateQueries({ queryKey: ["tasks", "detail", taskId] });
+      toast.success("File deleted");
     },
     onError: (error: any) => toast.error(getErrorMessage(error)),
   });
 
-  return { createComment, deleteComment, uploadAttachment, deleteAttachment };
+  return { uploadAttachment, deleteAttachment };
 }
 
 export function useAuthMutations() {

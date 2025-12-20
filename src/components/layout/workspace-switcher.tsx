@@ -35,18 +35,7 @@ export function WorkspaceSwitcher({ onCreateClick }: WorkspaceSwitcherProps) {
     setActiveWorkspaceId(workspaceId);
     setIsOpen(false);
 
-    // Logic to redirect if currently on a specific board/workspace page
-    if (pathname.includes("/workspaces/")) {
-      const pathParts = pathname.split("/");
-      const workspaceIndex = pathParts.indexOf("workspaces");
-      if (workspaceIndex !== -1 && pathParts[workspaceIndex + 1]) {
-        pathParts[workspaceIndex + 1] = workspaceId;
-        router.push(pathParts.join("/"));
-      }
-    } else if (pathname !== "/dashboard") {
-      // If in settings or other generic pages, go to dashboard of new workspace
-      router.push("/dashboard");
-    }
+    router.push("/dashboard")
   };
 
   return (
@@ -74,7 +63,7 @@ export function WorkspaceSwitcher({ onCreateClick }: WorkspaceSwitcherProps) {
         </div>
 
         {/* Chevron */}
-        <span className={`material-symbols-outlined ml-auto text-[#507395] dark:text-[#94a3b8] transition-transform duration-200 text-[20px] ${
+        <span className={`material-symbols-outlined ml-auto text-[#507395] hover:cursor-pointer dark:text-[#94a3b8] transition-transform duration-200 text-[20px] ${
             isOpen ? "rotate-180 text-primary" : "group-hover:text-primary"
         }`}>
           expand_more
@@ -100,7 +89,7 @@ export function WorkspaceSwitcher({ onCreateClick }: WorkspaceSwitcherProps) {
                     <button
                        key={ws.id}
                        onClick={() => handleSwitch(ws.id)}
-                       className="w-full text-left px-3 py-2 flex items-center gap-3 hover:bg-[#f8fafb] dark:hover:bg-[#2d3a4a] transition-colors"
+                       className="w-full text-left px-3 py-2 flex hover:cursor-pointer items-center gap-3 hover:bg-[#f8fafb] dark:hover:bg-[#2d3a4a] transition-colors"
                     >
                        <div className={`w-6 h-6 rounded flex items-center justify-center text-[10px] font-bold text-white shrink-0 ${
                           isActive ? "bg-primary" : "bg-gray-400 dark:bg-gray-600"
@@ -124,7 +113,7 @@ export function WorkspaceSwitcher({ onCreateClick }: WorkspaceSwitcherProps) {
            <div className="p-2 border-t border-[#e8edf3] dark:border-[#2d3a4a]">
               <button
                  onClick={() => { setIsOpen(false); onCreateClick(); }}
-                 className="flex w-full items-center justify-center gap-2 rounded-lg py-2 px-3 bg-primary-light text-primary hover:bg-primary-light/80 transition-colors text-xs font-bold"
+                 className="flex w-full hover:cursor-pointer items-center justify-center gap-2 rounded-lg py-2 px-3 bg-primary-light text-primary hover:bg-primary-light/80 transition-colors text-xs font-bold"
               >
                  <span className="material-symbols-outlined text-[16px]">add</span>
                  Create New Workspace

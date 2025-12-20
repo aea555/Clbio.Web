@@ -42,7 +42,7 @@ export function NotificationDropdown({ isOpen, onClose }: NotificationDropdownPr
           <button 
             onClick={() => markAllReadMutation.mutate()}
             /* FIX: Dynamic Primary Color */
-            className="text-xs text-primary hover:text-primary-hover font-medium"
+            className="text-xs text-primary hover:cursor-pointer hover:text-primary-hover font-medium"
           >
             Mark all read
           </button>

@@ -11,7 +11,9 @@ import { authService } from "@/services/auth-service";
 import { presenceService } from "@/services/presence-service";
 import { workspaceInvitationService } from "@/services/workspace-invitation-service";
 
-// --- WORKSPACES ---
+// ============================================================================
+// WORKSPACES
+// ============================================================================
 export function useWorkspaces() {
   return useQuery({
     queryKey: ["workspaces"],
@@ -21,7 +23,7 @@ export function useWorkspaces() {
 
 export function useWorkspace(workspaceId: string) {
   return useQuery({
-    queryKey: ["workspaces", "workspaceById", workspaceId],
+    queryKey: ["workspaces", "detail", workspaceId],
     queryFn: () => workspaceService.getById(workspaceId),
     enabled: !!workspaceId,
   });
@@ -29,13 +31,23 @@ export function useWorkspace(workspaceId: string) {
 
 export function useWorkspaceMembers(workspaceId: string) {
   return useQuery({
-    queryKey: ["workspaces", "workspace-members", workspaceId],
+    queryKey: ["workspaces", "members", workspaceId],
     queryFn: () => workspaceService.getMembers(workspaceId),
     enabled: !!workspaceId,
   });
 }
 
-// --- BOARDS ---
+export function useWorkspaceInvitations(){
+  return useQuery({
+    queryKey: ["workspace-invitations"],
+    queryFn: () => workspaceInvitationService.getMyInvitations(),
+    placeholderData: keepPreviousData
+  });
+}
+
+// ============================================================================
+// BOARDS
+// ============================================================================
 export function useBoards(workspaceId: string) {
   return useQuery({
     queryKey: ["boards", workspaceId],
@@ -46,7 +58,7 @@ export function useBoards(workspaceId: string) {
 
 export function useBoard(workspaceId: string, boardId: string) {
   return useQuery({
-    queryKey: ["boards", workspaceId, boardId],
+    queryKey: ["boards", "detail", boardId],
     queryFn: () => boardService.getById(workspaceId, boardId),
     enabled: !!workspaceId && !!boardId,
   });
@@ -54,32 +66,49 @@ export function useBoard(workspaceId: string, boardId: string) {
 
 export function useBoardSearch(workspaceId: string, q?: string | null, limit?: 10){
   return useQuery({
-    queryKey: ["boardSearchResults", workspaceId, q],
+    queryKey: ["boards", "search", workspaceId, q],
     queryFn: () => boardService.search(workspaceId, q, limit),
     enabled: !!workspaceId,
-    staleTime: 1000 * 5
-  })
+    staleTime: 1000 * 5 // Keep search results fresh for 5 seconds
+  });
 }
 
-// --- COLUMNS ---
+// ============================================================================
+// COLUMNS
+// ============================================================================
 export function useColumns(workspaceId: string, boardId: string) {
   return useQuery({
-    queryKey: ["columns", boardId], // BoardId is unique enough
+    queryKey: ["columns", boardId], 
     queryFn: () => columnService.getAll(workspaceId, boardId),
     enabled: !!workspaceId && !!boardId,
   });
 }
 
-// --- TASKS ---
+// ============================================================================
+// TASKS
+// ============================================================================
+
+// Fetch a single task details (for modals/pages)
 export function useTask(workspaceId: string, taskId: string) {
   return useQuery({
-    queryKey: ["tasks", taskId],
+    queryKey: ["tasks", "detail", taskId],
     queryFn: () => taskService.getById(workspaceId, taskId),
     enabled: !!workspaceId && !!taskId,
   });
 }
 
-// --- INTERACTIONS (Comments / Attachments) ---
+// Fetch all tasks for a specific board (for the Kanban view)
+export function useBoardTasks(workspaceId: string, boardId: string) {
+  return useQuery({
+    queryKey: ["tasks", "board", boardId],
+    queryFn: () => taskService.getByBoard(workspaceId, boardId),
+    enabled: !!workspaceId && !!boardId
+  });
+}
+
+// ============================================================================
+// INTERACTIONS (Comments / Attachments)
+// ============================================================================
 export function useComments(workspaceId: string, taskId: string) {
   return useQuery({
     queryKey: ["comments", taskId],
@@ -96,7 +125,9 @@ export function useAttachments(workspaceId: string, taskId: string) {
   });
 }
 
-// --- NOTIFICATIONS ---
+// ============================================================================
+// NOTIFICATIONS & LOGS
+// ============================================================================
 export function useNotifications(page: number = 1, pageSize: number = 10, unreadOnly: boolean = false) {
   return useQuery({
     queryKey: ["notifications", page, pageSize, unreadOnly],
@@ -107,13 +138,24 @@ export function useNotifications(page: number = 1, pageSize: number = 10, unread
 
 export function useUnreadNotificationCount() {
   return useQuery({
-    queryKey: ["notifications-unread-count"],
+    queryKey: ["notifications", "unread-count"],
     queryFn: () => notificationService.getUnreadCount(),
-    refetchInterval: 60000, // Sync every minute just in case
+    refetchInterval: 60000, 
   });
 }
 
-// --- USERS ---
+export function useActivityLogs(workspaceId: string, page: number, pageSize: number = 10) {
+  return useQuery({
+    queryKey: ["activity-logs", workspaceId, page, pageSize],
+    queryFn: () => activityLogService.getLogs(workspaceId, page, pageSize),
+    enabled: !!workspaceId,
+    placeholderData: keepPreviousData, 
+  });
+}
+
+// ============================================================================
+// USER & SYSTEM
+// ============================================================================
 export function useGetMe() {
   return useQuery({
     queryKey: ["me"], 
@@ -127,35 +169,32 @@ export function usePresenceHeartbeat(isAuthenticated: boolean) {
   return useQuery({
     queryKey: ["presence-heartbeat"],
     queryFn: async () => {
-      // FIX: Wait for the call, then return 'true' so data is not undefined
       await presenceService.heartbeat(); 
       return true; 
     },
-    // Only run if we are authenticated
     enabled: isAuthenticated,
-    // Poll every 30 seconds
     refetchInterval: 30 * 1000, 
-    // Do not retry on failure (if 401, the global error handler or session sync will catch it)
     retry: false, 
-    // Keep running even if window is in background (to maintain presence)
     refetchIntervalInBackground: true, 
   });
 }
 
-// --- WORKSPACE AUDIT LOGS ---
-export function useActivityLogs(workspaceId: string, page: number, pageSize: number = 10) {
-  return useQuery({
-    queryKey: ["activity-logs", workspaceId, page, pageSize],
-    queryFn: () => activityLogService.getLogs(workspaceId, page, pageSize),
-    enabled: !!workspaceId,
-    placeholderData: keepPreviousData, // Keeps showing page 1 data while page 2 is loading
-  });
-}
+export function useOnlinePresence(userIds: string[]) {
+  // Create a stable key so React Query doesn't refetch just because the array reference changed
+  // We sort them so the order doesn't affect the cache key
+  const stableKey = [...userIds].sort().join(",");
 
-export function useWorkspaceInvitations(){
   return useQuery({
-    queryKey: ["workspaceInvitations"],
-    queryFn: () => workspaceInvitationService.getMyInvitations(),
-    placeholderData: keepPreviousData
-  })
+    queryKey: ["presence", stableKey], 
+    queryFn: () => presenceService.check(userIds),
+    
+    // Polling Interval: 10 seconds
+    refetchInterval: 10000, 
+    
+    // Only run if we have users to check
+    enabled: userIds.length > 0, 
+    
+    // Keep data fresh-ish but allow background updates
+    staleTime: 5000, 
+  });
 }

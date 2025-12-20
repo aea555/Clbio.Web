@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useParams } from "next/navigation";
-import { useWorkspaceMembers } from "@/hooks/use-queries";
+import { useWorkspaceMembers, useOnlinePresence } from "@/hooks/use-queries"; // Added useOnlinePresence
 import { useWorkspaceMutations } from "@/hooks/use-mutations";
 import { useAuthStore } from "@/store/use-auth-store";
 import { AddMemberModal } from "@/components/dashboard/add-member-modal";
@@ -12,6 +12,7 @@ import { useWorkspacePermissions } from "@/hooks/use-workspace-permissions";
 import { usePermissions } from "@/providers/permission-provider"; 
 import { Permission } from "@/lib/rbac/permissions"; 
 import { ConfirmationModal } from "@/components/ui/confirmation-modal";
+import { UserAvatar } from "@/components/ui/user-avatar"; // Added Component
 import { WorkspaceRole } from "@/types/enums";
 import { toast } from "sonner";
 import { getErrorMessage } from "@/lib/error-utils";
@@ -37,6 +38,14 @@ export default function WorkspaceMembersPage() {
 
   const { data: members, isLoading } = useWorkspaceMembers(workspaceId);
   const { removeMember, updateMemberRole } = useWorkspaceMutations(workspaceId);
+
+  // 1. Extract Member IDs for Presence Check
+  const memberIds = useMemo(() => {
+    return members?.map((m) => m.userId) || [];
+  }, [members]);
+
+  // 2. Poll for Online Status
+  const { data: onlineUserIds } = useOnlinePresence(memberIds);
 
   const confirmRemove = (userId: string) => {
     setMemberToRemove(userId);
@@ -147,7 +156,6 @@ export default function WorkspaceMembersPage() {
           {canInvite && (
             <button
               onClick={() => setIsInviteOpen(true)}
-              /* FIX: Dynamic Background and Hover */
               className="flex items-center justify-center gap-2 rounded-lg h-10 px-5 bg-primary hover:bg-primary-hover text-white text-sm font-semibold shadow-sm transition-all active:scale-95"
             >
               <span className="material-symbols-outlined text-[20px]">person_add</span>
@@ -172,16 +180,23 @@ export default function WorkspaceMembersPage() {
               <tbody className="divide-y divide-[#e8edf3] dark:divide-[#2d3a4a]">
                 {members?.map((member) => {
                   const isManaged = canManageMember(member);
+                  // Check status
+                  const isOnline = onlineUserIds?.includes(member.userId);
                   
                   return (
                     <tr key={member.id} className="group hover:bg-[#f8fafb] dark:hover:bg-[#111921]/50 transition-colors">
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-3">
-                          <div className="w-9 h-9 rounded-full bg-gradient-to-br from-blue-400 to-indigo-500 flex items-center justify-center text-white font-bold text-sm">
-                            {member.userDisplayName?.charAt(0).toUpperCase() || "U"}
-                          </div>
+                          {/* Replaced manual div with UserAvatar */}
+                          <UserAvatar 
+                            src={member.userAvatarUrl} 
+                            name={member.userDisplayName} 
+                            isOnline={isOnline}
+                            size="md"
+                          />
                           <div>
                             <div className="font-medium text-[#0e141b] dark:text-[#e8edf3]">{member.userDisplayName}</div>
+                            {/*<div className="text-xs text-[#507395]">{member.email}</div>*/}
                           </div>
                         </div>
                       </td>
@@ -207,7 +222,6 @@ export default function WorkspaceMembersPage() {
                             value={member.role}
                             onChange={(e) => confirmRoleChange(member.userId, e.target.value)}
                             disabled={updateMemberRole.isPending}
-                            /* FIX: Dynamic Focus Ring */
                             className="block w-full max-w-[120px] rounded-lg border-0 py-1.5 pl-3 pr-8 text-gray-900 dark:text-white ring-1 ring-inset ring-gray-300 dark:ring-gray-600 focus:ring-2 focus:ring-primary sm:text-xs sm:leading-6 bg-transparent cursor-pointer hover:bg-gray-50 dark:hover:bg-[#2d3a4a] transition-colors"
                           >
                             <option value={WorkspaceRole.PrivilegedMember}>Admin</option>

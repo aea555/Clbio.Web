@@ -19,10 +19,14 @@ export const attachmentService = {
       formData.append("Files", file);
     });
 
-    // Backend artık tek obje değil, liste dönüyor (ReadAttachmentDto[])
     const { data } = await apiClient.post<ApiResponse<ReadAttachmentDto[]>>(
       `/api/proxy/workspaces/${workspaceId}/tasks/${taskId}/attachments`,
-      formData
+      formData,
+      {
+        headers: {
+          "Content-Type": undefined, 
+        } as any,
+      }
     );
 
     return data.data!;

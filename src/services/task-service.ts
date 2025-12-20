@@ -9,12 +9,16 @@ export const taskService = {
   getById: (workspaceId: string, taskId: string) => 
     get<ReadTaskItemDto>(`/api/proxy/workspaces/${workspaceId}/tasks/${taskId}`),
 
+  // GET BY BOARD
+  getByBoard: (workspaceId: string, boardId: string) => 
+    get<ReadTaskItemDto[]>(`/api/proxy/workspaces/${workspaceId}/tasks?boardId=${boardId}`),
+
   /**
    * POST /api/workspaces/{workspaceId}/columns/{columnId}/tasks
    * Note: Creation is scoped to a Column
    */
   create: (workspaceId: string, columnId: string, data: CreateTaskItemDto) => 
-    post<ReadTaskItemDto>(`/api/proxy/workspaces/${workspaceId}/columns/${columnId}/tasks`, data),
+    post<ReadTaskItemDto>(`/api/proxy/workspaces/${workspaceId}/tasks`, data),
 
   /**
    * PUT /api/workspaces/{workspaceId}/tasks/{taskId}
@@ -29,8 +33,11 @@ export const taskService = {
     del(`/api/proxy/workspaces/${workspaceId}/tasks/${taskId}`),
 
   /**
-   * POST /api/workspaces/{workspaceId}/tasks/{taskId}/move
+   * PUT /api/workspaces/{workspaceId}/tasks/{taskId}/move
    */
   move: (workspaceId: string, taskId: string, data: MoveTaskItemDto) => 
-    post<void>(`/api/proxy/workspaces/${workspaceId}/tasks/${taskId}/move`, data),
+    put<void>(`/api/proxy/workspaces/${workspaceId}/tasks/${taskId}/move`, data),
+
+  assign: (workspaceId: string, taskId: string, userId: string | null) => 
+    put<void>(`/api/proxy/workspaces/${workspaceId}/tasks/${taskId}/assign`, JSON.stringify(userId))
 };
