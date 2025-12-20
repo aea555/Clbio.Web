@@ -33,7 +33,8 @@ export function SettingsTabs({ workspaceId }: SettingsTabsProps) {
               className={`
                 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors
                 ${isActive 
-                  ? "border-[#4c99e6] text-[#4c99e6]" 
+                  /* FIX: Dynamic Primary Border and Text */
+                  ? "border-primary text-primary" 
                   : "border-transparent text-[#507395] dark:text-[#94a3b8] hover:text-[#0e141b] dark:hover:text-[#e8edf3] hover:border-gray-300"}
               `}
             >

@@ -3,6 +3,7 @@
 import { useWorkspaceMutations } from "@/hooks/use-mutations";
 import { useState } from "react";
 import { ConfirmationModal } from "@/components/ui/confirmation-modal";
+import { useWorkspaceStore } from "@/store/use-workspace-store";
 
 interface ArchivedBannerProps {
   workspaceId: string;
@@ -11,7 +12,9 @@ interface ArchivedBannerProps {
 
 export function ArchivedBanner({ workspaceId, workspaceName }: ArchivedBannerProps) {
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
-  const { unarchiveWorkspace } = useWorkspaceMutations();
+  const { activeWorkspaceId } = useWorkspaceStore();
+  
+  const { unarchiveWorkspace } = useWorkspaceMutations(activeWorkspaceId || "");
 
   const handleUnarchive = () => {
     unarchiveWorkspace.mutate(workspaceId, {

@@ -3,6 +3,8 @@ import { Geist, Geist_Mono, Inter } from "next/font/google";
 import "./globals.css";
 import QueryProvider from "@/providers/query-provider";
 import { Toaster } from "sonner";
+import { ThemeInitializer } from "@/providers/theme-initializer";
+import { ThemeProvider } from "@/providers/theme-provider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -34,16 +36,24 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
-        <link 
-          rel="stylesheet" 
-          href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" 
+        <link
+          rel="stylesheet"
+          href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
         />
       </head>
       <body className={`${inter.variable} antialiased font-sans`}>
-        <QueryProvider>
-          {children}
-          <Toaster position="bottom-right" richColors closeButton />
-        </QueryProvider>
+        <ThemeInitializer />
+        <ThemeProvider
+          attribute="class" 
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
+          <QueryProvider>
+            {children}
+            <Toaster position="bottom-right" richColors closeButton />
+          </QueryProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

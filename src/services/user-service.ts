@@ -17,7 +17,12 @@ export const userService = {
 
     const { data } = await apiClient.post<ApiResponse<UploadAvatarResponse>>(
       "/api/proxy/users/me/avatar", 
-      formData
+      formData,
+      {
+        headers: {
+          "Content-Type": undefined, 
+        } as any,
+      }
     );
 
     return data.data!; 

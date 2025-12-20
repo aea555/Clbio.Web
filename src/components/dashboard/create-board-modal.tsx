@@ -2,7 +2,6 @@
 
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
 import { useWorkspaceStore } from "@/store/use-workspace-store";
 import { useBoardMutations } from "@/hooks/use-mutations";
 import { toast } from "sonner";
@@ -27,7 +26,6 @@ export function CreateBoardModal({ isOpen, onClose }: { isOpen: boolean; onClose
     }
   });
   
-  // Reset form when modal opens/closes
   useEffect(() => {
     if (isOpen && activeWorkspaceId) {
       reset({
@@ -39,7 +37,6 @@ export function CreateBoardModal({ isOpen, onClose }: { isOpen: boolean; onClose
   }, [isOpen, reset, activeWorkspaceId]);
 
   const onSubmit = (data: CreateBoardDto) => {
-    console.log("Creating board with data:", data);
     if (!activeWorkspaceId) {
       toast.error("No active workspace selected");
       return;
@@ -56,9 +53,6 @@ export function CreateBoardModal({ isOpen, onClose }: { isOpen: boolean; onClose
           toast.success("Board created successfully!");
           onClose();
         },
-        onError: () => {
-          // Error is handled globally by mutation hook, but we can keep modal open
-        },
       }
     );
   };
@@ -71,7 +65,7 @@ export function CreateBoardModal({ isOpen, onClose }: { isOpen: boolean; onClose
         className="bg-white dark:bg-[#1a2430] rounded-xl shadow-2xl w-full max-w-md border border-[#e8edf3] dark:border-[#2d3a4a] overflow-hidden animate-in zoom-in-95 duration-200"
         onClick={(e) => e.stopPropagation()} 
       >
-        {/* Header  */}
+        {/* Header */}
         <div className="px-6 py-4 border-b border-[#e8edf3] dark:border-[#2d3a4a] flex justify-between items-center bg-[#f8fafb] dark:bg-[#111921]">
           <h3 className="text-lg font-bold text-[#0e141b] dark:text-[#e8edf3]">Create New Board</h3>
           <button 
@@ -95,7 +89,11 @@ export function CreateBoardModal({ isOpen, onClose }: { isOpen: boolean; onClose
               type="text"
               placeholder="e.g. Q4 Marketing Plan"
               autoFocus
-              className="block w-full rounded-lg border border-[#e8edf3] dark:border-[#3e4d5d] bg-white dark:bg-[#111921] py-2.5 px-4 text-[#0e141b] dark:text-white placeholder-gray-400 focus:border-[#4c99e6] focus:ring-1 focus:ring-[#4c99e6] outline-none transition-colors text-sm"
+              /* FIX: Removed hardcoded focus colors.
+                 Changed focus:border-[#4c99e6] -> focus:border-primary
+                 Changed focus:ring-[#4c99e6]   -> focus:ring-primary
+              */
+              className="block w-full rounded-lg border border-[#e8edf3] dark:border-[#3e4d5d] bg-white dark:bg-[#111921] py-2.5 px-4 text-[#0e141b] dark:text-white placeholder-gray-400 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-colors text-sm"
             />
             {errors.name && <p className="text-red-500 text-xs">{errors.name.message}</p>}
           </div>
@@ -110,7 +108,9 @@ export function CreateBoardModal({ isOpen, onClose }: { isOpen: boolean; onClose
               id="description"
               rows={3}
               placeholder="What is this board for?"
-              className="block w-full rounded-lg border border-[#e8edf3] dark:border-[#3e4d5d] bg-white dark:bg-[#111921] py-2.5 px-4 text-[#0e141b] dark:text-white placeholder-gray-400 focus:border-[#4c99e6] focus:ring-1 focus:ring-[#4c99e6] outline-none transition-colors text-sm resize-none"
+              /* FIX: Updated textarea focus colors as well 
+              */
+              className="block w-full rounded-lg border border-[#e8edf3] dark:border-[#3e4d5d] bg-white dark:bg-[#111921] py-2.5 px-4 text-[#0e141b] dark:text-white placeholder-gray-400 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-colors text-sm resize-none"
             />
             {errors.description && <p className="text-red-500 text-xs">{errors.description.message}</p>}
           </div>
@@ -127,7 +127,7 @@ export function CreateBoardModal({ isOpen, onClose }: { isOpen: boolean; onClose
             <button
               type="submit"
               disabled={createBoard.isPending}
-              className="flex items-center gap-2 px-5 py-2 rounded-lg bg-[#4c99e6] text-white text-sm font-bold shadow-sm hover:bg-[#3b7ec4] transition-colors disabled:opacity-70 disabled:cursor-not-allowed"
+              className="flex items-center gap-2 px-5 py-2 rounded-lg bg-primary text-white text-sm font-bold shadow-sm hover:bg-primary-hover transition-colors disabled:opacity-70 disabled:cursor-not-allowed"
             >
               {createBoard.isPending ? (
                 <>

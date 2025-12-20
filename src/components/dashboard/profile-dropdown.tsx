@@ -56,7 +56,7 @@ export function ProfileDropdown({ isOpen, onClose }: ProfileDropdownProps) {
         {/* 1. Avatar & User Info */}
         <div className="p-6 flex flex-col items-center border-b border-[#e8edf3] dark:border-[#2d3a4a] bg-[#f8fafb] dark:bg-[#111921]">
             <Link
-                href="/dashboard/account/profile"
+                href="/dashboard/settings/account"
                 onClick={onClose}
                 className="relative group mb-3 cursor-pointer"
             >
@@ -89,7 +89,7 @@ export function ProfileDropdown({ isOpen, onClose }: ProfileDropdownProps) {
         {/* 2. Navigation Links */}
         <div className="p-2 space-y-1">
             <Link
-                href="/dashboard/account/profile"
+                href="/dashboard/settings/account"
                 onClick={onClose}
                 className="flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium text-[#0e141b] dark:text-[#e8edf3] hover:bg-[#f8fafb] dark:hover:bg-[#2d3a4a] transition-colors"
             >

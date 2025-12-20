@@ -16,31 +16,121 @@ import { UpdateWorkspaceMemberDto } from "@/lib/schemas/schemas";
 import { workspaceInvitationService } from "@/services/workspace-invitation-service";
 import { WorkspaceRole } from "@/types/enums";
 import { userService } from "@/services/user-service";
+import { ReadUserDto } from "@/types/dtos";
 
 export function useUserMutations() {
   const queryClient = useQueryClient();
 
+  const setUser = useAuthStore((s) => s.setUser);
+  const setAvatarUpdating = useAuthStore((s) => s.setAvatarUpdating);
+
+  /**
+   * =========================
+   * UPLOAD AVATAR
+   * =========================
+   */
   const uploadAvatar = useMutation({
     mutationFn: (file: File) => userService.uploadAvatar(file),
 
-    onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: ["users", "me"] });
+    // 🔒 Lock sync + cancel in-flight /me refetches
+    onMutate: async () => {
+      setAvatarUpdating(true);
 
-      toast.success("Profile Picture Uploaded!");
+      await queryClient.cancelQueries({
+        queryKey: ["users", "me"],
+      });
     },
-    onError: (error) => toast.error(getErrorMessage(error)),
+
+    onSuccess: (data) => {
+      console.log("🟢 Upload Success. Backend URL:", data.url);
+
+      const newAvatarUrl = data.url;
+
+      const currentUser =
+        useAuthStore.getState().user ??
+        queryClient.getQueryData<ReadUserDto>(["users", "me"]);
+
+      if (!currentUser) {
+        console.error("🔴 No user found to update avatar");
+        return;
+      }
+
+      const updatedUser: ReadUserDto = {
+        ...currentUser,
+        avatarUrl: newAvatarUrl,
+        updatedAt: new Date().toISOString(), // 🔥 ensures timestamp dominance
+      };
+
+      // Update React Query cache (prevents immediate rollback)
+      queryClient.setQueryData(["users", "me"], updatedUser);
+
+      // Update Zustand store (authoritative for UI)
+      setUser(updatedUser);
+
+      toast.success("Profile picture uploaded!");
+    },
+
+    onError: (error) => {
+      toast.error(getErrorMessage(error));
+    },
+
+    // Unlock sync after everything settles
+    onSettled: () => {
+      setAvatarUpdating(false);
+    },
   });
 
+  /**
+   * =========================
+   * DELETE AVATAR
+   * =========================
+   */
   const deleteAvatar = useMutation({
     mutationFn: () => userService.deleteAvatar(),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["users", "me"] });
-      toast.success("Profile photo removed!");
+
+    onMutate: async () => {
+      setAvatarUpdating(true);
+
+      await queryClient.cancelQueries({
+        queryKey: ["users", "me"],
+      });
     },
-    onError: (error) => toast.error(getErrorMessage(error)),
+
+    onSuccess: () => {
+      const currentUser =
+        useAuthStore.getState().user ??
+        queryClient.getQueryData<ReadUserDto>(["users", "me"]);
+
+      if (!currentUser) {
+        console.error("🔴 No user found to delete avatar");
+        return;
+      }
+
+      const updatedUser: ReadUserDto = {
+        ...currentUser,
+        avatarUrl: null,
+        updatedAt: new Date().toISOString(), // timestamp wins over server
+      };
+
+      queryClient.setQueryData(["users", "me"], updatedUser);
+      setUser(updatedUser);
+
+      toast.success("Profile picture removed!");
+    },
+
+    onError: (error) => {
+      toast.error(getErrorMessage(error));
+    },
+
+    onSettled: () => {
+      setAvatarUpdating(false);
+    },
   });
 
-  return {uploadAvatar, deleteAvatar};
+  return {
+    uploadAvatar,
+    deleteAvatar,
+  };
 }
 
 export function useWorkspaceMutations(workspaceId: string) {

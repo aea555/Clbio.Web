@@ -8,7 +8,7 @@ import { CreateBoardModal } from "@/components/dashboard/create-board-modal";
 import { CreateWorkspaceModal } from "@/components/dashboard/create-workspace-modal";
 import { ArchivedBanner } from "@/components/dashboard/archived-banner";
 import { usePermissions } from "@/providers/permission-provider";
-import { useWorkspacePermissions } from "@/hooks/use-workspace-permissions"; //
+import { useWorkspacePermissions } from "@/hooks/use-workspace-permissions"; 
 import { Permission } from "@/lib/rbac/permissions";
 
 type SortOption = "Most Recent" | "Alphabetical" | "Last Updated";
@@ -19,17 +19,12 @@ export default function DashboardPage() {
     const [isCreateWorkspaceModalOpen, setIsCreateWorkspaceModalOpen] = useState(false);
     const [sortBy, setSortBy] = useState<SortOption>("Most Recent");
 
-    // 1. RBAC Check (User Role)
     const { can } = usePermissions();
-
-    // 2. State Check (Workspace Status)
-    // We use the hook you provided to ensure "isArchived" is the source of truth
     const { isArchived } = useWorkspacePermissions(activeWorkspaceId || "");
 
     const { data: boards, isLoading } = useBoards(activeWorkspaceId || "");
     const { data: workspace } = useWorkspace(activeWorkspaceId || "");
 
-    // Logic: User needs PERMISSION + Workspace must NOT be archived
     const canCreateBoard = can(Permission.CreateBoard) && !isArchived;
 
     const sortedBoards = useMemo(() => {
@@ -100,7 +95,8 @@ export default function DashboardPage() {
                         <select
                             value={sortBy}
                             onChange={(e) => setSortBy(e.target.value as SortOption)}
-                            className="appearance-none bg-white dark:bg-[#1a2430] border border-[#e8edf3] dark:border-[#2d3a4a] text-[#0e141b] dark:text-[#e8edf3] text-sm rounded-lg pl-3 pr-8 py-2.5 focus:outline-none focus:ring-2 focus:ring-[#4c99e6]/20 cursor-pointer hover:border-[#4c99e6]/50 transition-colors"
+                            /* FIX: Dynamic Focus Ring and Hover Border */
+                            className="appearance-none bg-white dark:bg-[#1a2430] border border-[#e8edf3] dark:border-[#2d3a4a] text-[#0e141b] dark:text-[#e8edf3] text-sm rounded-lg pl-3 pr-8 py-2.5 focus:outline-none focus:ring-2 focus:ring-primary/20 cursor-pointer hover:border-primary/50 transition-colors"
                         >
                             <option value="Most Recent">Most Recent</option>
                             <option value="Alphabetical">Alphabetical</option>
@@ -109,11 +105,12 @@ export default function DashboardPage() {
                         <span className="material-symbols-outlined absolute right-2 top-1/2 -translate-y-1/2 text-[#507395] pointer-events-none text-[20px]">expand_more</span>
                     </div>
                     
-                    {/* Header Button: Hidden if Archived or No Permission */}
+                    {/* Header Button */}
                     {canCreateBoard && (
                         <button
                             onClick={() => setIsCreateModalOpen(true)}
-                            className="flex items-center justify-center gap-2 rounded-lg h-10 px-5 bg-[#4c99e6] hover:bg-[#3b7ec4] hover:cursor-pointer text-white text-sm font-semibold shadow-sm hover:shadow-md transition-all active:scale-95"
+                            /* FIX: Dynamic Background and Hover */
+                            className="flex items-center justify-center gap-2 rounded-lg h-10 px-5 bg-primary hover:bg-primary-hover hover:cursor-pointer text-white text-sm font-semibold shadow-sm hover:shadow-md transition-all active:scale-95"
                         >
                             <span className="material-symbols-outlined text-[20px]">add</span>
                             <span>Create Board</span>
@@ -125,16 +122,19 @@ export default function DashboardPage() {
             {/* Boards Grid */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
 
-                {/* Grid Tile Button: Hidden if Archived or No Permission */}
+                {/* Grid Tile Button */}
                 {canCreateBoard && (
                     <button
                         onClick={() => setIsCreateModalOpen(true)}
-                        className="group flex flex-col items-center justify-center min-h-[160px] rounded-xl border-2 border-dashed hover:cursor-pointer  border-[#e8edf3] dark:border-[#2d3a4a] hover:border-[#4c99e6] hover:bg-[#4c99e6]/5 dark:hover:bg-[#4c99e6]/10 transition-all duration-200 cursor-pointer"
+                        /* FIX: Dynamic Border, Background, and Hover States */
+                        className="group flex flex-col items-center justify-center min-h-[160px] rounded-xl border-2 border-dashed hover:cursor-pointer border-[#e8edf3] dark:border-[#2d3a4a] hover:border-primary hover:bg-primary/5 dark:hover:bg-primary/10 transition-all duration-200 cursor-pointer"
                     >
                         <div className="w-12 h-12 rounded-full bg-[#f8fafb] dark:bg-[#1a2430] flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
-                            <span className="material-symbols-outlined text-[#507395] group-hover:text-[#4c99e6] transition-colors text-[28px]">add</span>
+                            {/* FIX: Dynamic Icon Color */}
+                            <span className="material-symbols-outlined text-[#507395] group-hover:text-primary transition-colors text-[28px]">add</span>
                         </div>
-                        <span className="text-sm font-medium text-[#507395] group-hover:text-[#4c99e6] transition-colors">Create new board</span>
+                        {/* FIX: Dynamic Text Color */}
+                        <span className="text-sm font-medium text-[#507395] group-hover:text-primary transition-colors">Create new board</span>
                     </button>
                 )}
 
@@ -156,17 +156,17 @@ export default function DashboardPage() {
                         href={`/w/${activeWorkspaceId}/b/${board.id}`}
                         className="group relative flex flex-col bg-white dark:bg-[#1a2430] rounded-xl border border-[#e8edf3] dark:border-[#2d3a4a] hover:shadow-lg hover:-translate-y-1 transition-all duration-300 overflow-hidden cursor-pointer"
                     >
-                        {/* Random Color Header */}
+                        {/* Random Color Header (Kept for content differentiation) */}
                         <div className={`h-3 w-full bg-gradient-to-r ${getRandomGradient(board.id)}`}></div>
 
                         <div className="p-5 flex flex-col h-full justify-between gap-4">
                             <div>
                                 <div className="flex justify-between items-start mb-2">
-                                    <h3 className="font-bold text-lg text-[#0e141b] dark:text-[#e8edf3] group-hover:text-[#4c99e6] transition-colors truncate">
+                                    {/* FIX: Dynamic Title Hover Color */}
+                                    <h3 className="font-bold text-lg text-[#0e141b] dark:text-[#e8edf3] group-hover:text-primary transition-colors truncate">
                                         {board.name}
                                     </h3>
                                     
-                                    {/* Context Menu: Hidden if Read Only (or you can show "View" only options) */}
                                     {can(Permission.UpdateBoard) && !isArchived && (
                                         <button
                                             className="opacity-0 group-hover:opacity-100 transition-opacity p-1 hover:bg-[#f8fafb] dark:hover:bg-[#111921] rounded text-[#507395]"
