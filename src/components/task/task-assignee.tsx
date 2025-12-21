@@ -152,7 +152,7 @@ export function TaskAssignee({ task, workspaceId, boardId, isArchived = false }:
         {/* Trigger */}
         <button 
            onClick={() => setIsOpen(!isOpen)}
-           className="flex items-center gap-2 w-full hover:bg-gray-50 dark:hover:bg-[#2d3a4a] p-1.5 -ml-1.5 rounded-lg transition-colors text-left"
+           className="hover:cursor-pointer flex items-center gap-2 w-full hover:bg-gray-50 dark:hover:bg-[#2d3a4a] p-1.5 -ml-1.5 rounded-lg transition-colors text-left"
         >
             {task.assigneeId ? (
                 <>
@@ -172,7 +172,7 @@ export function TaskAssignee({ task, workspaceId, boardId, isArchived = false }:
                     <div className="w-6 h-6 rounded-full border-gray-400 flex items-center justify-center text-[#507395] flex-shrink-0">
                         <span className="material-symbols-outlined text-[14px]">person_add</span>
                     </div>
-                    <span className="text-sm text-[#507395] font-medium flex-1">Unassigned</span>
+                    <span className="hover:cursor-pointer text-sm text-[#507395] font-medium flex-1">Unassigned</span>
                     <span className="material-symbols-outlined text-[18px] text-[#507395]">expand_more</span>
                 </>
             )}
@@ -197,7 +197,7 @@ export function TaskAssignee({ task, workspaceId, boardId, isArchived = false }:
                         {task.assigneeId && (
                             <button 
                                 onClick={() => handleAssign(null)}
-                                className="w-full text-left flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 text-red-600 text-sm mb-1"
+                                className="hover:cursor-pointer w-full text-left flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 text-red-600 text-sm mb-1"
                             >
                                 <span className="material-symbols-outlined text-[18px]">close</span>
                                 Remove Assignment
@@ -208,7 +208,7 @@ export function TaskAssignee({ task, workspaceId, boardId, isArchived = false }:
                             <button
                                 key={member.id}
                                 onClick={() => handleAssign(member.userId)}
-                                className={`w-full text-left flex items-center gap-2 px-2 py-1.5 rounded-lg text-sm transition-colors ${
+                                className={`hover:cursor-pointer w-full text-left flex items-center gap-2 px-2 py-1.5 rounded-lg text-sm transition-colors ${
                                     task.assigneeId === member.userId 
                                         ? "bg-primary/10 text-primary font-bold" 
                                         : "text-[#0e141b] dark:text-[#e8edf3] hover:bg-gray-100 dark:hover:bg-[#2d3a4a]"

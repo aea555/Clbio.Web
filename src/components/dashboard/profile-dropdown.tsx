@@ -17,11 +17,9 @@ export function ProfileDropdown({ isOpen, onClose }: ProfileDropdownProps) {
   const { logoutMutation } = useAuthMutations();
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
 
-  // Close when clicking outside
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-        // Prevent closing if the confirmation modal is active
         if (!showLogoutConfirm) {
           onClose();
         }
@@ -37,7 +35,6 @@ export function ProfileDropdown({ isOpen, onClose }: ProfileDropdownProps) {
 
   return (
     <>
-      {/* Logout Confirmation (Portalled) */}
       <ConfirmationModal
         isOpen={showLogoutConfirm}
         onClose={() => setShowLogoutConfirm(false)}
@@ -51,10 +48,11 @@ export function ProfileDropdown({ isOpen, onClose }: ProfileDropdownProps) {
 
       <div
         ref={dropdownRef}
-        className="absolute top-full right-0 mt-3 w-72 bg-white dark:bg-[#1a2430] rounded-xl shadow-xl border border-[#e8edf3] dark:border-[#2d3a4a] overflow-hidden z-50 animate-in fade-in zoom-in-95 duration-100 origin-top-right"
+        // FIX: Using bg-card and border-border-base for theme syncing
+        className="absolute top-full right-0 mt-3 w-72 bg-card rounded-xl shadow-xl border border-border-base overflow-hidden z-[100] animate-in fade-in zoom-in-95 duration-100 origin-top-right"
       >
-        {/* 1. Avatar & User Info */}
-        <div className="p-6 flex flex-col items-center border-b border-[#e8edf3] dark:border-[#2d3a4a] bg-[#f8fafb] dark:bg-[#111921]">
+        {/* 1. Avatar & User Info - Using bg-background for subtle contrast */}
+        <div className="p-6 flex flex-col items-center border-b border-border-base bg-background">
             <Link
                 href="/dashboard/settings/account"
                 onClick={onClose}
@@ -64,24 +62,24 @@ export function ProfileDropdown({ isOpen, onClose }: ProfileDropdownProps) {
                     <img
                         src={user.avatarUrl}
                         alt="Profile"
-                        className="size-20 rounded-full object-cover shadow-sm ring-4 ring-white dark:ring-[#2d3a4a] group-hover:brightness-75 transition-all"
+                        // FIX: ring color now matches the background theme
+                        className="size-20 rounded-full object-cover shadow-sm ring-4 ring-background group-hover:brightness-75 transition-all"
                     />
                 ) : (
-                    <div className="size-20 rounded-full bg-blue-600 flex items-center justify-center text-white font-bold text-3xl shadow-sm ring-4 ring-white dark:ring-[#2d3a4a] group-hover:bg-blue-700 transition-colors">
+                    <div className="size-20 rounded-full bg-primary flex items-center justify-center text-white font-bold text-3xl shadow-sm ring-4 ring-background group-hover:opacity-90 transition-opacity">
                         {user?.displayName?.charAt(0) || "U"}
                     </div>
                 )}
 
-                {/* Edit Overlay */}
                 <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                     <span className="material-symbols-outlined text-white drop-shadow-md text-[28px]">edit</span>
                 </div>
             </Link>
 
-            <h3 className="font-bold text-[#0e141b] dark:text-[#e8edf3] text-lg text-center truncate w-full px-2">
+            <h3 className="font-bold text-foreground text-lg text-center truncate w-full px-2 leading-tight">
                 {user?.displayName || "User"}
             </h3>
-            <p className="text-sm text-[#507395] dark:text-[#94a3b8] truncate w-full text-center px-2">
+            <p className="text-sm text-muted-foreground truncate w-full text-center px-2 mt-1">
                 {user?.email}
             </p>
         </div>
@@ -91,32 +89,34 @@ export function ProfileDropdown({ isOpen, onClose }: ProfileDropdownProps) {
             <Link
                 href="/dashboard/settings/account"
                 onClick={onClose}
-                className="flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium text-[#0e141b] dark:text-[#e8edf3] hover:bg-[#f8fafb] dark:hover:bg-[#2d3a4a] transition-colors"
+                // FIX: Hover matches the background variable
+                className="flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium text-foreground hover:bg-background transition-colors"
             >
-                <div className="w-8 h-8 rounded-full bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center text-[#4c99e6]">
+                <div className="w-8 h-8 rounded-full bg-primary-light flex items-center justify-center text-primary">
                   <span className="material-symbols-outlined text-[18px]">person</span>
                 </div>
                 My Profile
             </Link>
              <Link
-                href="/dashboard/settings"
+                href="/dashboard/settings/general"
                 onClick={onClose}
-                className="flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium text-[#0e141b] dark:text-[#e8edf3] hover:bg-[#f8fafb] dark:hover:bg-[#2d3a4a] transition-colors"
+                className="flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium text-foreground hover:bg-background transition-colors"
             >
-                <div className="w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-[#507395]">
+                {/* FIX: Using muted-foreground logic for secondary icons */}
+                <div className="w-8 h-8 rounded-full bg-border-base/50 flex items-center justify-center text-muted-foreground">
                   <span className="material-symbols-outlined text-[18px]">settings</span>
                 </div>
-                Settings
+                Appearance
             </Link>
         </div>
 
         {/* 3. Logout Button */}
-        <div className="p-2 border-t border-[#e8edf3] dark:border-[#2d3a4a]">
+        <div className="p-2 border-t border-border-base">
             <button
                 onClick={() => setShowLogoutConfirm(true)}
-                className="w-full hover:cursor-pointer flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-bold text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
+                className="w-full hover:cursor-pointer flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-bold text-red-600 dark:text-red-400 hover:bg-red-500/10 transition-colors"
             >
-                <div className="w-8 h-8 rounded-full bg-red-50 dark:bg-red-900/10 flex items-center justify-center">
+                <div className="w-8 h-8 rounded-full bg-red-500/10 flex items-center justify-center">
                   <span className="material-symbols-outlined text-[18px]">logout</span>
                 </div>
                 Sign Out

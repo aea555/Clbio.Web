@@ -3,6 +3,8 @@ import { useRouter } from "next/navigation";
 import { useSocketEventListener } from "./use-socket-event-listener";
 import { useWorkspaceStore } from "@/store/use-workspace-store";
 import { toast } from "sonner";
+import { useEffect, useRef } from "react";
+import { useThemeStore } from "@/store/use-theme-store";
 
 // 1. Added "InvitationAccepted" to the type
 type WorkspaceSignalType = "Invitation" | "Removal" | "Leave" | "RoleUpdate" | "InvitationAccepted";
@@ -10,9 +12,34 @@ type WorkspaceSignalType = "Invitation" | "Removal" | "Leave" | "RoleUpdate" | "
 export function useUserRealtime() {
   const queryClient = useQueryClient();
   const router = useRouter();
+  const { notificationSound, notificationVolume, notificationSoundFile } = useThemeStore();
   const { activeWorkspaceId, setActiveWorkspaceId } = useWorkspaceStore();
 
+  // --- Audio Logic ---
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  useEffect(() => {
+    // Initialize the audio object only on the client side
+    audioRef.current = new Audio();
+  }, []);
+
+  const playNotificationSound = () => {
+    if (!audioRef.current || !notificationSound) return;
+
+    audioRef.current.src = `/sounds/${notificationSoundFile}`;
+    audioRef.current.volume = notificationVolume;
+    
+    audioRef.current.currentTime = 0;
+    
+    audioRef.current.play().catch((err) => {
+      console.warn("Notification sound playback failed:", err);
+    });
+  };
+
   const handleNotificationEvent = (data: any) => {
+    // 1. Play the sound effect
+    playNotificationSound();
+
     queryClient.setQueryData(["notifications-unread-count"], (old: number | undefined) => {
       return (old || 0) + 1;
     });
@@ -31,7 +58,7 @@ export function useUserRealtime() {
 
     // Case A: New Invitation Received
     if (type === "Invitation") {
-      queryClient.invalidateQueries({ queryKey: ["workspaceInvitations"] });
+      queryClient.invalidateQueries({ queryKey: ["workspace-invitations"] });
       handleNotificationEvent(data);
       return;
     }
@@ -39,7 +66,7 @@ export function useUserRealtime() {
     // Case B: Invitation Accepted 
     if (type === "InvitationAccepted") {
       // 2. Refresh Invitations List (Remove the pending invite)
-      queryClient.invalidateQueries({ queryKey: ["workspaceInvitations"] });
+      queryClient.invalidateQueries({ queryKey: ["workspace-invitations"] });
 
       // 3. Standard Notification behavior
       handleNotificationEvent(data);

@@ -57,7 +57,7 @@ export function AddMemberModal({ workspaceId, isOpen, onClose }: { workspaceId: 
         {/* Header */}
         <div className="px-6 py-4 border-b border-[#e8edf3] dark:border-[#2d3a4a] flex justify-between items-center bg-[#f8fafb] dark:bg-[#111921]">
           <h3 className="text-lg font-bold text-[#0e141b] dark:text-[#e8edf3]">Invite Member</h3>
-          <button onClick={onClose} className="text-[#507395] hover:text-[#0e141b] dark:hover:text-white transition-colors">
+          <button onClick={onClose} className="hover:cursor-pointer text-[#507395] hover:text-[#0e141b] dark:hover:text-white transition-colors">
             <span className="material-symbols-outlined text-[20px]">close</span>
           </button>
         </div>
@@ -108,7 +108,7 @@ export function AddMemberModal({ workspaceId, isOpen, onClose }: { workspaceId: 
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 rounded-lg text-sm font-medium text-[#507395] hover:bg-gray-100 dark:hover:bg-[#2d3a4a] transition-colors"
+              className="hover:cursor-pointer px-4 py-2 rounded-lg text-sm font-medium text-[#507395] hover:bg-gray-100 dark:hover:bg-[#2d3a4a] transition-colors"
             >
               Cancel
             </button>
@@ -116,7 +116,7 @@ export function AddMemberModal({ workspaceId, isOpen, onClose }: { workspaceId: 
               type="submit"
               disabled={inviteMember.isPending}
               /* FIX: Dynamic Background and Hover */
-              className="flex items-center gap-2 px-5 py-2 rounded-lg bg-primary text-white text-sm font-bold shadow-sm hover:bg-primary-hover transition-colors disabled:opacity-70"
+              className="flex hover:cursor-pointer items-center gap-2 px-5 py-2 rounded-lg bg-primary text-white text-sm font-bold shadow-sm hover:bg-primary-hover transition-colors disabled:opacity-70"
             >
               <span className="material-symbols-outlined text-[18px]">send</span>
               {inviteMember.isPending ? "Sending..." : "Send Invite"}

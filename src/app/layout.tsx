@@ -40,11 +40,11 @@ export default function RootLayout({
           rel="stylesheet"
           href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
         />
+        <ThemeInitializer />
       </head>
       <body className={`${inter.variable} antialiased font-sans`}>
-        <ThemeInitializer />
         <ThemeProvider
-          attribute="class" 
+          attribute="class"
           defaultTheme="system"
           enableSystem
           disableTransitionOnChange

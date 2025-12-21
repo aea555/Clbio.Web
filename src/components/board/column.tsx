@@ -161,7 +161,7 @@ export function Column({ column, tasks, workspaceId, boardId, isArchived = false
       {can(Permission.CreateTask) && !isArchived && (
          <button 
             onClick={() => setIsCreateTaskOpen(true)}
-            className="mt-3 flex items-center gap-2 p-2 rounded-lg text-[#507395] hover:text-primary hover:bg-white dark:hover:bg-[#1a2430] transition-colors text-sm font-bold w-full"
+            className="hover:cursor-pointer mt-3 flex items-center gap-2 p-2 rounded-lg text-[#507395] hover:text-primary hover:bg-white dark:hover:bg-[#1a2430] transition-colors text-sm font-bold w-full"
          >
             <span className="material-symbols-outlined text-[18px]">add</span>
             Add Task

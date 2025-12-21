@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { notFound, useParams, useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -11,9 +11,9 @@ import { useWorkspaceStore } from "@/store/use-workspace-store";
 import { SettingsTabs } from "@/components/dashboard/settings-tabs";
 import { ConfirmationModal } from "@/components/ui/confirmation-modal";
 import { ArchivedBanner } from "@/components/dashboard/archived-banner";
-import { useWorkspacePermissions } from "@/hooks/use-workspace-permissions"; 
-import { usePermissions } from "@/providers/permission-provider"; 
-import { Permission } from "@/lib/rbac/permissions"; 
+import { useWorkspacePermissions } from "@/hooks/use-workspace-permissions";
+import { usePermissions } from "@/providers/permission-provider";
+import { Permission } from "@/lib/rbac/permissions";
 import { useAuthStore } from "@/store/use-auth-store";
 
 const updateWorkspaceSchema = z.object({
@@ -91,6 +91,11 @@ export default function WorkspaceGeneralSettingsPage() {
   }
 
   if (isLoading) return <div className="p-8">Loading settings...</div>;
+
+  if (!workspace) {
+    notFound();
+    return null;
+  }
 
   return (
     <div className="flex flex-col min-h-full">
@@ -196,7 +201,7 @@ export default function WorkspaceGeneralSettingsPage() {
                     type="submit"
                     disabled={!isDirty || updateWorkspace.isPending}
                     /* FIX: Dynamic Background and Hover */
-                    className="px-5 py-2 rounded-lg bg-primary text-white text-sm font-bold shadow-sm hover:bg-primary-hover transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="hover:cursor-pointer px-5 py-2 rounded-lg bg-primary text-white text-sm font-bold shadow-sm hover:bg-primary-hover transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {updateWorkspace.isPending ? "Saving..." : "Save Changes"}
                   </button>
@@ -206,60 +211,60 @@ export default function WorkspaceGeneralSettingsPage() {
           </section>
 
           {/* Actions Zone */}
-          { (can(Permission.ArchiveWorkspace) || can(Permission.DeleteWorkspace) || !isOwner) && (
-          <section className="bg-red-50 dark:bg-red-900/10 rounded-xl border border-red-100 dark:border-red-900/30 p-6">
-            <h3 className="text-lg font-bold text-red-600 dark:text-red-400 mb-2">Workspace Actions</h3>
-            <p className="text-sm text-red-600/80 dark:text-red-400/80 mb-6">
-              Manage the visibility and existence of this workspace.
-            </p>
+          {(can(Permission.ArchiveWorkspace) || can(Permission.DeleteWorkspace) || !isOwner) && (
+            <section className="bg-red-50 dark:bg-red-900/10 rounded-xl border border-red-100 dark:border-red-900/30 p-6">
+              <h3 className="text-lg font-bold text-red-600 dark:text-red-400 mb-2">Workspace Actions</h3>
+              <p className="text-sm text-red-600/80 dark:text-red-400/80 mb-6">
+                Manage the visibility and existence of this workspace.
+              </p>
 
-            <div className="flex flex-col sm:flex-row items-center justify-end gap-4">
-              
-              {/* Archive / Restore Button */}
-              {can(Permission.ArchiveWorkspace) && (
-                isArchived ? (
+              <div className="flex flex-col sm:flex-row items-center justify-end gap-4">
+
+                {/* Archive / Restore Button */}
+                {can(Permission.ArchiveWorkspace) && (
+                  isArchived ? (
+                    <button
+                      type="button"
+                      onClick={() => setIsUnarchiveModalOpen(true)}
+                      /* FIX: Dynamic Border and Text Colors for Restore Action */
+                      className="w-full hover:cursor-pointer sm:w-auto px-5 py-2 rounded-lg bg-white border border-primary text-primary text-sm font-bold shadow-sm hover:bg-blue-50 transition-colors dark:bg-transparent dark:border-primary dark:text-primary dark:hover:bg-blue-900/20"
+                    >
+                      Restore Workspace
+                    </button>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => setIsArchiveModalOpen(true)}
+                      className="w-full sm:w-auto px-5 py-2 hover:cursor-pointer rounded-lg bg-white border border-amber-200 text-amber-600 text-sm font-bold shadow-sm hover:bg-amber-50 transition-colors dark:bg-transparent dark:border-amber-800 dark:text-amber-400 dark:hover:bg-amber-900/20"
+                    >
+                      Archive Workspace
+                    </button>
+                  )
+                )}
+
+                {/* Delete Button */}
+                {can(Permission.DeleteWorkspace) && (
                   <button
                     type="button"
-                    onClick={() => setIsUnarchiveModalOpen(true)}
-                    /* FIX: Dynamic Border and Text Colors for Restore Action */
-                    className="w-full hover:cursor-pointer sm:w-auto px-5 py-2 rounded-lg bg-white border border-primary text-primary text-sm font-bold shadow-sm hover:bg-blue-50 transition-colors dark:bg-transparent dark:border-primary dark:text-primary dark:hover:bg-blue-900/20"
+                    onClick={() => setIsDeleteModalOpen(true)}
+                    className="w-full hover:cursor-pointer sm:w-auto px-5 py-2 rounded-lg bg-white border border-red-200 text-red-600 text-sm font-bold shadow-sm hover:bg-red-50 transition-colors dark:bg-transparent dark:border-red-800 dark:text-red-400 dark:hover:bg-red-900/20"
                   >
-                    Restore Workspace
+                    Delete Workspace
                   </button>
-                ) : (
+                )}
+
+                {/* Leave Button */}
+                {!isOwner && (
                   <button
-                    type="button"
-                    onClick={() => setIsArchiveModalOpen(true)}
-                    className="w-full sm:w-auto px-5 py-2 hover:cursor-pointer rounded-lg bg-white border border-amber-200 text-amber-600 text-sm font-bold shadow-sm hover:bg-amber-50 transition-colors dark:bg-transparent dark:border-amber-800 dark:text-amber-400 dark:hover:bg-amber-900/20"
+                    onClick={() => setIsLeaveModalOpen(true)}
+                    className="w-full sm:w-auto px-4 py-2 bg-white dark:bg-transparent border border-red-300 dark:border-red-800 text-red-600 dark:text-red-400 font-bold text-sm rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
                   >
-                    Archive Workspace
+                    Leave Workspace
                   </button>
-                )
-              )}
+                )}
 
-              {/* Delete Button */}
-              {can(Permission.DeleteWorkspace) && (
-                <button
-                  type="button"
-                  onClick={() => setIsDeleteModalOpen(true)}
-                  className="w-full hover:cursor-pointer sm:w-auto px-5 py-2 rounded-lg bg-white border border-red-200 text-red-600 text-sm font-bold shadow-sm hover:bg-red-50 transition-colors dark:bg-transparent dark:border-red-800 dark:text-red-400 dark:hover:bg-red-900/20"
-                >
-                  Delete Workspace
-                </button>
-              )}
-
-              {/* Leave Button */}
-              {!isOwner && (
-                <button
-                  onClick={() => setIsLeaveModalOpen(true)}
-                  className="w-full sm:w-auto px-4 py-2 bg-white dark:bg-transparent border border-red-300 dark:border-red-800 text-red-600 dark:text-red-400 font-bold text-sm rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
-                >
-                  Leave Workspace
-                </button>
-              )}
-
-            </div>
-          </section>
+              </div>
+            </section>
           )}
         </div>
       </div>

@@ -1,8 +1,6 @@
 "use client";
 
 export function ThemeInitializer() {
-  // This script runs instantly on the client, before React hydrates.
-  // It reads the Zustand persist store from localStorage and applies the attribute.
   const script = `
     (function() {
       try {
@@ -10,15 +8,21 @@ export function ThemeInitializer() {
         const persisted = localStorage.getItem(storageKey);
         if (persisted) {
           const parsed = JSON.parse(persisted);
-          // Zustand persist structure is { state: { ... }, version: 0 }
-          const color = parsed.state && parsed.state.accentColor;
-          if (color) {
-            document.documentElement.setAttribute('data-accent', color);
+          const state = parsed.state;
+          if (state) {
+            // 1. Apply Accent Color
+            if (state.accentColor) {
+              document.documentElement.setAttribute('data-accent', state.accentColor);
+            }
+            // 2. Apply Background Theme (Crucial for Dark Mode variants)
+            if (state.backgroundTheme) {
+              document.documentElement.setAttribute('data-bg', state.backgroundTheme);
+            }
+            // 3. Apply High Contrast
+            document.documentElement.setAttribute('data-contrast', state.highContrast ? 'high' : 'normal');
           }
         }
-      } catch (e) {
-        // If JSON parse fails or storage is blocked, fail silently (defaults to blue CSS)
-      }
+      } catch (e) {}
     })();
   `;
 

@@ -65,7 +65,7 @@ export function TaskActivity({ taskId, workspaceId, isArchived = false }: { task
                      <button
                         type="submit"
                         disabled={createComment.isPending}
-                        className="px-4 py-1.5 bg-primary hover:bg-primary-hover text-white text-xs font-bold rounded-md transition-colors"
+                        className="hover:cursor-pointer px-4 py-1.5 bg-primary hover:bg-primary-hover text-white text-xs font-bold rounded-md transition-colors"
                      >
                         Save
                      </button>
@@ -107,7 +107,7 @@ export function TaskActivity({ taskId, workspaceId, isArchived = false }: { task
                         {!isArchived && user?.id === comment.authorId && (
                            <button
                               onClick={() => deleteComment.mutate(comment.id)}
-                              className="text-xs text-[#507395] hover:text-red-500 underline opacity-0 group-hover:opacity-100 transition-opacity"
+                              className="hover:cursor-pointer text-xs text-[#507395] hover:text-red-500 underline opacity-0 group-hover:opacity-100 transition-opacity"
                            >
                               Delete
                            </button>

@@ -34,31 +34,31 @@ export function NotificationDropdown({ isOpen, onClose }: NotificationDropdownPr
   return (
     <div 
       ref={dropdownRef}
-      className="absolute right-0 top-12 mt-2 w-80 bg-white dark:bg-[#1a2430] rounded-xl shadow-2xl border border-[#e8edf3] dark:border-[#2d3a4a] z-50 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200"
+      // FIX: Increased z-index to 50 and ensured bg-card is used
+      className="absolute right-0 top-12 mt-2 w-80 bg-card rounded-xl shadow-2xl border border-border-base z-[100] overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200"
     >
-      <div className="flex items-center justify-between px-4 py-3 border-b border-[#e8edf3] dark:border-[#2d3a4a] bg-[#f8fafb] dark:bg-[#111921]">
-        <h3 className="text-sm font-bold text-[#0e141b] dark:text-[#e8edf3]">Notifications</h3>
+      {/* Header Area: Using bg-background for a subtle inset feel */}
+      <div className="flex items-center justify-between px-4 py-3 border-b border-border-base bg-background">
+        <h3 className="text-sm font-bold text-foreground">Notifications</h3>
         {notifications.length > 0 && (
           <button 
             onClick={() => markAllReadMutation.mutate()}
-            /* FIX: Dynamic Primary Color */
-            className="text-xs text-primary hover:cursor-pointer hover:text-primary-hover font-medium"
+            className="text-xs text-primary hover:cursor-pointer hover:text-primary-hover font-bold transition-colors"
           >
             Mark all read
           </button>
         )}
       </div>
 
-      <div className="max-h-[300px] overflow-y-auto">
+      <div className="max-h-[400px] overflow-y-auto custom-scrollbar">
         {isLoading && (
-          <div className="p-4 flex justify-center">
-            {/* FIX: Dynamic Spinner Color */}
-            <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-primary"></div>
+          <div className="p-8 flex justify-center">
+            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
           </div>
         )}
 
         {!isLoading && notifications.length === 0 && (
-          <div className="p-6 text-center text-[#507395] dark:text-[#94a3b8] text-sm">
+          <div className="p-8 text-center text-muted-foreground text-sm">
             No notifications yet.
           </div>
         )}
@@ -66,24 +66,23 @@ export function NotificationDropdown({ isOpen, onClose }: NotificationDropdownPr
         {!isLoading && notifications.map((notif: any) => (
           <div 
             key={notif.id}
-            className={`px-4 py-3 border-b border-[#e8edf3] dark:border-[#2d3a4a] hover:bg-[#f8fafb] dark:hover:bg-[#111921] transition-colors flex gap-3 group ${!notif.isRead ? "bg-blue-50/50 dark:bg-blue-900/10" : ""}`}
+            // FIX: Using bg-primary-light for unread and theme variables for hover
+            className={`px-4 py-4 border-b border-border-base hover:bg-background transition-colors flex gap-3 group ${
+              !notif.isRead ? "bg-primary-light/30" : ""
+            }`}
           >
             {/* Left Column: Icon + Mark Read Button */}
-            <div className="flex flex-col items-center gap-2 mt-1">
-               {/* Icon */}
-               {/* FIX: Dynamic Background (primary-light) and Text (primary) */}
-               <div className="w-8 h-8 flex-shrink-0 rounded-full bg-primary-light text-primary flex items-center justify-center">
-                 <span className="material-symbols-outlined text-[18px] leading-none">
+            <div className="flex flex-col items-center gap-3 mt-0.5">
+               <div className="w-9 h-9 flex-shrink-0 rounded-full bg-primary-light text-primary flex items-center justify-center border border-primary/10">
+                 <span className="material-symbols-outlined text-[20px] leading-none">
                    {notif.type === "Mention" ? "alternate_email" : "notifications"}
                  </span>
                </div>
 
-               {/* Mark Read Button */}
                {!notif.isRead && (
                  <button 
                    onClick={(e) => { e.stopPropagation(); markAsReadMutation.mutate(notif.id); }}
-                   /* FIX: Dynamic Hover State */
-                   className="w-6 h-6 flex items-center justify-center rounded-full text-primary hover:bg-primary hover:text-white transition-all bg-white dark:bg-[#1a2430] border border-[#e8edf3] dark:border-[#3e4d5d] shadow-sm"
+                   className="w-6 h-6 flex items-center justify-center rounded-full text-primary hover:bg-primary hover:text-white transition-all bg-card border border-border-base shadow-sm"
                    title="Mark as read"
                  >
                    <span className="material-symbols-outlined text-[14px] leading-none">check</span>
@@ -93,20 +92,19 @@ export function NotificationDropdown({ isOpen, onClose }: NotificationDropdownPr
             
             {/* Right Column: Text Content */}
             <div className="flex-1 min-w-0">
-               <div className="flex items-center gap-2 mb-0.5">
-                  <span className="text-sm font-semibold text-[#0e141b] dark:text-[#e8edf3]">
+               <div className="flex items-start justify-between gap-2 mb-1">
+                  <span className="text-sm font-bold text-foreground leading-tight">
                     {notif.title}
                   </span>
                   {!notif.isRead && (
-                    /* FIX: Dynamic Unread Badge */
-                    <span className="w-2 h-2 rounded-full bg-primary flex-shrink-0"></span>
+                    <span className="w-2.5 h-2.5 rounded-full bg-primary flex-shrink-0 mt-1 shadow-[0_0_8px_var(--accent-color)]"></span>
                   )}
                </div>
                
-               <p className="text-sm text-[#0e141b] dark:text-[#e8edf3] leading-snug opacity-90">
+               <p className="text-sm text-foreground/80 leading-snug">
                  {notif.messageText}
                </p>
-               <p className="text-xs text-[#507395] dark:text-[#94a3b8] mt-1.5">
+               <p className="text-[11px] font-medium text-muted-foreground mt-2 uppercase tracking-wider">
                  {formatDistanceToNow(new Date(notif.createdAt), { addSuffix: true })}
                </p>
             </div>
@@ -117,8 +115,7 @@ export function NotificationDropdown({ isOpen, onClose }: NotificationDropdownPr
       <Link 
         href="/dashboard/settings/account/notifications"
         onClick={onClose}
-        /* FIX: Dynamic Footer Link Hover */
-        className="block w-full py-3 text-center text-sm font-medium text-[#507395] hover:text-primary hover:bg-[#f8fafb] dark:hover:bg-[#111921] transition-colors border-t border-[#e8edf3] dark:border-[#2d3a4a]"
+        className="block w-full py-3.5 text-center text-sm font-bold text-muted-foreground hover:text-primary hover:bg-background transition-colors border-t border-border-base bg-card"
       >
         View all notifications
       </Link>
