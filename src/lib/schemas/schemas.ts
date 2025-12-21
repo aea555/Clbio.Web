@@ -5,6 +5,7 @@ import {
 	WorkspaceRole,
 } from "../../types/enums";
 import { MAX_FILE_SIZE_ATTACHMENT, MAX_FILE_SIZE_AVATAR, ACCEPTED_IMAGE_TYPES } from "@/constants/file-upload";
+import { passwordRegex } from "@/constants/passwordregex";
 
 // Mirror of CreateActivityLogDto.cs
 export const createActivityLogSchema = z.object({
@@ -27,40 +28,40 @@ export type CreateActivityLogDto = z.infer<typeof createActivityLogSchema>;
 
 // Attachment
 export const createAttachmentSchema = z.object({
-  files: z
-    .custom<FileList>((val) => typeof window !== 'undefined' && val instanceof FileList, "File selection is required.")
-    .transform((list) => Array.from(list))
-    .refine((files) => files.length > 0, "At least one file must be selected.")
-    .refine((files) => files.length <= 5, "At most 5 files at a time can be uploaded.")
-    
-    .refine(
-      (files) => files.every((file) => file.size <= MAX_FILE_SIZE_ATTACHMENT), 
-      "Individual attachment size can't be over 10MB!"
-    )
-    
-    .refine(
-        (files) => files.reduce((acc, file) => acc + file.size, 0) <= MAX_FILE_SIZE_ATTACHMENT*5,
-        "Total upload size can't be over 50MB!"
-    )
+	files: z
+		.custom<FileList>((val) => typeof window !== 'undefined' && val instanceof FileList, "File selection is required.")
+		.transform((list) => Array.from(list))
+		.refine((files) => files.length > 0, "At least one file must be selected.")
+		.refine((files) => files.length <= 5, "At most 5 files at a time can be uploaded.")
+
+		.refine(
+			(files) => files.every((file) => file.size <= MAX_FILE_SIZE_ATTACHMENT),
+			"Individual attachment size can't be over 10MB!"
+		)
+
+		.refine(
+			(files) => files.reduce((acc, file) => acc + file.size, 0) <= MAX_FILE_SIZE_ATTACHMENT * 5,
+			"Total upload size can't be over 50MB!"
+		)
 });
 
 export type CreateAttachmentDto = z.infer<typeof createAttachmentSchema>;
 
 export const uploadUserAvatarSchema = z.object({
-  file: z
-    .custom<FileList>((val) => typeof window !== 'undefined' && val instanceof FileList, "Resim seçimi zorunludur.")
-    .transform((list) => Array.from(list))
-    .refine((files) => files.length > 0, "Bir resim seçmelisiniz.")
-    .refine((files) => files.length === 1, "Sadece tek bir resim yükleyebilirsiniz.")
-    
-    .refine(
-        (files) => files[0].size <= MAX_FILE_SIZE_AVATAR, 
-        `Profil fotoğrafı ${MAX_FILE_SIZE_AVATAR / 1024 / 1024}MB'dan büyük olamaz.`
-    )
-    .refine(
-        (files) => ACCEPTED_IMAGE_TYPES.includes(files[0].type as any), 
-        "Sadece desteklenen resim formatları (.jpg, .png, .webp) yüklenebilir."
-    )
+	file: z
+		.custom<FileList>((val) => typeof window !== 'undefined' && val instanceof FileList, "Resim seçimi zorunludur.")
+		.transform((list) => Array.from(list))
+		.refine((files) => files.length > 0, "Bir resim seçmelisiniz.")
+		.refine((files) => files.length === 1, "Sadece tek bir resim yükleyebilirsiniz.")
+
+		.refine(
+			(files) => files[0].size <= MAX_FILE_SIZE_AVATAR,
+			`Profil fotoğrafı ${MAX_FILE_SIZE_AVATAR / 1024 / 1024}MB'dan büyük olamaz.`
+		)
+		.refine(
+			(files) => ACCEPTED_IMAGE_TYPES.includes(files[0].type as any),
+			"Sadece desteklenen resim formatları (.jpg, .png, .webp) yüklenebilir."
+		)
 });
 
 export type UploadUserAvatarDto = z.infer<typeof uploadUserAvatarSchema>;
@@ -133,8 +134,8 @@ export const updateTaskItemSchema = z.object({
 export type UpdateTaskItemDto = z.infer<typeof updateTaskItemSchema>;
 
 export const moveTaskItemSchema = z.object({
-    targetColumnId: z.string().guid({ message: "Invalid Target Column ID" }),
-    targetPosition: z.number().int(),
+	targetColumnId: z.string().guid({ message: "Invalid Target Column ID" }),
+	targetPosition: z.number().int(),
 });
 
 export type MoveTaskItemDto = z.infer<typeof moveTaskItemSchema>;
@@ -188,23 +189,27 @@ export const loginSchema = z.object({
 });
 export type LoginRequestDto = z.infer<typeof loginSchema>;
 
+export const passwordSchema = z.string()
+  .min(6, "Password must be at least 6 characters long")
+  .regex(passwordRegex, "Password must contain at least one uppercase letter, one lowercase letter, and one number");
+
 export const registerSchema = z.object({
-	email: z.string().email({ message: "Invalid email" }).max(150, { message: "Email too long" }),
-	password: z.string().min(6, { message: "Password must be at least 6 characters" }).max(100, { message: "Password too long" }),
+	email: z.string().email({ message: "Invalid email" }).max(320, { message: "Email too long" }),
+	password: passwordSchema,
 	displayName: z.string().min(2, { message: "Display name must be at least 2 characters" }).max(50, { message: "Display name too long" }),
 	avatarUrl: z.string().url({ message: "Invalid URL" }).max(2048, { message: "URL too long" }).nullish(),
 });
 export type RegisterRequestDto = z.infer<typeof registerSchema>;
 
 export const forgotPasswordSchema = z.object({
-	email: z.string().email({ message: "Invalid email" }).max(100, { message: "Email too long" }),
+	email: z.string().email({ message: "Invalid email" }).max(320, { message: "Email too long" }),
 });
 export type ForgotPasswordRequestDto = z.infer<typeof forgotPasswordSchema>;
 
 export const resetPasswordSchema = z.object({
 	email: z.string().email({ message: "Invalid email" }).max(320, { message: "Email too long" }),
 	code: z.string().max(6, { message: "Code too long" }),
-	newPassword: z.string().min(6, { message: "Password must be at least 6 characters" }).max(100, { message: "Password too long" }),
+	newPassword: passwordSchema,
 });
 export type ResetPasswordRequestDto = z.infer<typeof resetPasswordSchema>;
 
@@ -229,7 +234,7 @@ export const googleLoginSchema = z.object({
 });
 export type GoogleLoginRequestDto = z.infer<typeof googleLoginSchema>;
 
-export const sendInvitationSchema =  z.object({
+export const sendInvitationSchema = z.object({
 	email: z.string().email({ message: "Invalid email" }).max(320, { message: "Email too long" }),
 	role: z.nativeEnum(WorkspaceRole),
 })

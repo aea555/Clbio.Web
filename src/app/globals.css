@@ -7,6 +7,8 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
+  --border: #e2e8f0;
+  --card: #ffffff;
   
   /* Default Blue */
   --accent-color: #4c99e6; 
@@ -14,11 +16,122 @@
   --accent-color-light: #4c99e61a;
 }
 
-/* 3. Dark Mode Override */
-/* This matches <html class="dark"> */
+/* --- LIGHT THEMES --- */
+
+/* light3: Cloud (Classic Soft White) */
+:root[data-bg="default"] {
+  --background: #fdfdfd;
+  --card: #ffffff;
+  --border: #e2e8f0;
+  --foreground: #0f172a;
+}
+
+/* light1: Parchment (Faint Tan/Paper) */
+:root[data-bg="zinc"] {
+  --background: #f4f1ea; 
+  --card: #f9f7f2;
+  --border: #e4decb;
+  --foreground: #43392b;
+}
+
+/* light2: Twilight (Faint Purple-Blue) */
+:root[data-bg="midnight"] {
+  --background: #f0f2ff;
+  --card: #f8f9ff;
+  --border: #dbe0fe;
+  --foreground: #1e1b4b;
+}
+
 :root.dark {
-  --background: #0a0a0a;
-  --foreground: #ededed;
+  --background: #0f172a; /* Fallback to Slate background */
+  --foreground: #f1f5f9;
+  --card: #1e293b;
+  --border: #334155;
+}
+
+/* --- Dark Mode Styles (Overrides) --- */
+:root.dark[data-bg="default"] {
+  --background: #0f172a; /* Slate 900 */
+  --card: #1e293b;
+  --border: #334155;
+  --foreground: #f1f5f9;
+}
+
+:root.dark[data-bg="zinc"] {
+  --background: #09090b; /* Zinc 950 */
+  --card: #18181b;
+  --border: #27272a;
+  --foreground: #fafafa;
+}
+
+:root.dark[data-bg="midnight"] {
+  --background: #000000; /* Pure Black */
+  --card: #09090b;
+  --border: #1a1a1a;
+  --foreground: #ffffff;
+}
+
+/* dark4: Crimson Night (Faint Dark Brick Red) */
+:root.dark[data-bg="darkcrimson"] {
+  --background: #1a0f0f;
+  --card: #251616;
+  --border: #452a2a;
+  --foreground: #fcecec;
+}
+
+/* dark5: Deep Cobalt (Faint Dark Blue) */
+:root.dark[data-bg="darkblue"] {
+  --background: #0a0f1d;
+  --card: #11192e;
+  --border: #1e293b;
+  --foreground: #e0e7ff;
+}
+
+/* --- High Contrast Mode --- */
+:root[data-contrast="high"] {
+  /* High Legibility Palette */
+  --background: #ffffff !important;
+  --foreground: #000000 !important;
+  --card: #ffffff !important;
+  --border: #000000 !important; 
+  
+  /* High contrast but not neon */
+  --accent-color: #0056b3 !important; 
+  --accent-color-hover: #000000 !important;
+  --accent-color-light: #eef6ff !important;
+}
+
+:root.dark[data-contrast="high"] {
+  /* High Legibility Dark */
+  --background: #0a0a0a !important;
+  --foreground: #ffffff !important;
+  --card: #0a0a0a !important;
+  --border: #444444 !important; /* Visible but not piercing white */
+  
+  --accent-color: #38bdf8 !important; /* Sky blue */
+  --accent-color-hover: #ffffff !important;
+  --accent-color-light: #082f49 !important;
+}
+
+:root[data-contrast="high"] * {
+  box-shadow: none !important;      /* Remove all shadows */
+  text-shadow: none !important;     /* Remove text effects */
+}
+
+:root[data-contrast="high"] .shadow-sm, 
+:root[data-contrast="high"] .shadow-lg,
+:root[data-contrast="high"] .shadow-md {
+    box-shadow: none !important;
+    border: 1px solid var(--border) !important; /* Replace shadows with borders */
+}
+
+/* Make buttons and inputs pop without being too thick */
+:root[data-contrast="high"] button, 
+:root[data-contrast="high"] input, 
+:root[data-contrast="high"] select,
+:root[data-contrast="high"] textarea {
+  border: 1.5px solid var(--border) !important;
+  border-radius: 4px !important; /* Sharper corners often help contrast */
 }
 
 /* 4. Accent Color Overrides */
@@ -51,6 +164,8 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-border-base: var(--border);
   
   --font-sans: var(--font-inter), var(--font-geist-sans), sans-serif; 
   --font-mono: var(--font-geist-mono);
@@ -96,4 +211,5 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
 }

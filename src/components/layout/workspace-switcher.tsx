@@ -43,7 +43,7 @@ export function WorkspaceSwitcher({ onCreateClick }: WorkspaceSwitcherProps) {
       {/* Trigger Button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className={`w-full flex items-center gap-3 p-2 rounded-lg transition-colors group min-w-0 ${
+        className={`hover: cursor-pointer w-full flex items-center gap-3 p-2 rounded-lg transition-colors group min-w-0 ${
             isOpen ? "bg-white dark:bg-[#1a2430] shadow-sm" : "hover:bg-white dark:hover:bg-[#1a2430]"
         }`}
       >
@@ -89,7 +89,7 @@ export function WorkspaceSwitcher({ onCreateClick }: WorkspaceSwitcherProps) {
                     <button
                        key={ws.id}
                        onClick={() => handleSwitch(ws.id)}
-                       className="w-full text-left px-3 py-2 flex hover:cursor-pointer items-center gap-3 hover:bg-[#f8fafb] dark:hover:bg-[#2d3a4a] transition-colors"
+                       className="hover: cursor-pointer w-full text-left px-3 py-2 flex hover:cursor-pointer items-center gap-3 hover:bg-[#f8fafb] dark:hover:bg-[#2d3a4a] transition-colors"
                     >
                        <div className={`w-6 h-6 rounded flex items-center justify-center text-[10px] font-bold text-white shrink-0 ${
                           isActive ? "bg-primary" : "bg-gray-400 dark:bg-gray-600"

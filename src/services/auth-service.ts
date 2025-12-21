@@ -5,7 +5,8 @@ import {
   ForgotPasswordRequestDto, 
   ResetPasswordRequestDto,
   VerifyEmailOtpRequestDto,
-  ResendVerificationOtpRequestDto
+  ResendVerificationOtpRequestDto,
+  GoogleLoginRequestDto
 } from "@/lib/schemas/schemas"; // <--- Updated import path
 import { ReadUserDto, TokenResponseDto, ApiResponse } from "@/types/dtos";
 
@@ -46,8 +47,6 @@ export const authService = {
    * Used to hydrate the AuthStore on page load or after login
    */
   getMe: async (): Promise<ReadUserDto> => {
-    // Assuming you have an endpoint like [HttpGet("me")] in UserController
-    // If not, we might need to rely on decoding the token, but fetching is safer.
     const response = await apiClient.get<ApiResponse<ReadUserDto>>("/api/proxy/users/me");
     return response.data.data as ReadUserDto; // .value comes from your ApiResponse wrapper
   },
@@ -55,10 +54,10 @@ export const authService = {
   /**
    * 5. GOOGLE LOGIN
    */
-  loginWithGoogle: async (idToken: string): Promise<ReadUserDto> => {
-    // Similar to standard login, but sends the Google ID Token
-    await apiClient.post("/api/auth/google", { idToken });
-    return authService.getMe();
+  googleLogin: async (data: GoogleLoginRequestDto) => {
+    // POST /api/auth/google-login
+    const response = await apiClient.post<ApiResponse<TokenResponseDto>>("/api/auth/google", data);
+    return response.data.data;
   },
 
   /**

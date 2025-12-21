@@ -1,161 +1,220 @@
 "use client";
 
 import { useTheme } from "next-themes";
-import { useEffect, useState } from "react";
-import { useThemeStore, AccentColor } from "@/store/use-theme-store";
+import { useEffect, useState, useMemo } from "react";
+import { useThemeStore, AccentColor, BackgroundTheme } from "@/store/use-theme-store";
 
-// Define our palette options
 const ACCENT_COLORS: { id: AccentColor; name: string; color: string }[] = [
-  { id: "blue", name: "Ocean", color: "#4c99e6" },
-  { id: "emerald", name: "Forest", color: "#10b981" },
-  { id: "violet", name: "Royal", color: "#8b5cf6" },
-  { id: "amber", name: "Sunset", color: "#f59e0b" },
-  { id: "rose", name: "Berry", color: "#f43f5e" },
+    { id: "blue", name: "Ocean", color: "#4c99e6" },
+    { id: "emerald", name: "Forest", color: "#10b981" },
+    { id: "violet", name: "Royal", color: "#8b5cf6" },
+    { id: "amber", name: "Sunset", color: "#f59e0b" },
+    { id: "rose", name: "Berry", color: "#f43f5e" },
 ];
 
 export default function GeneralSettingsPage() {
-  const { theme, setTheme } = useTheme();
-  const { accentColor, setAccentColor } = useThemeStore();
-  const [mounted, setMounted] = useState(false);
+    const { theme, setTheme } = useTheme();
+    const {
+        accentColor, setAccentColor,
+        backgroundTheme, setBackgroundTheme,
+        highContrast, setHighContrast
+    } = useThemeStore();
 
-  useEffect(() => {
-    setMounted(true);
-    // Ensure attribute is synced on mount
-    document.documentElement.setAttribute("data-accent", accentColor);
-  }, [accentColor]);
+    const [mounted, setMounted] = useState(false);
 
-  if (!mounted) return null;
+    useEffect(() => {
+        setMounted(true);
+    }, []);
 
-  return (
-    <div className="space-y-8 animate-in fade-in duration-300">
-      
-      {/* Header */}
-      <div className="border-b border-[#e8edf3] dark:border-[#2d3a4a] pb-4">
-        <h1 className="text-2xl font-bold text-[#0e141b] dark:text-[#e8edf3]">General Settings</h1>
-        <p className="text-[#507395] dark:text-[#94a3b8] mt-1">Customize your workspace appearance and preferences.</p>
-      </div>
+    // Configuration for background previews based on current theme mode
+    const bgThemes = useMemo(() => {
+        // Determine if we should show dark or light previews
+        const isDark = theme === 'dark' || (theme === 'system' && typeof window !== 'undefined' && window.matchMedia('(prefers-color-scheme: dark)').matches);
 
-      {/* 1. Theme Mode (Light/Dark) */}
-      <section className="bg-white dark:bg-[#1a2430] rounded-xl border border-[#e8edf3] dark:border-[#2d3a4a] p-6 shadow-sm">
-        <h3 className="text-lg font-semibold text-[#0e141b] dark:text-[#e8edf3] mb-4 flex items-center gap-2">
-            <span className="material-symbols-outlined text-[#507395]">contrast</span>
-            Appearance
-        </h3>
-        
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {["light", "dark", "system"].map((mode) => (
-             <button
-                key={mode}
-                onClick={() => setTheme(mode)}
-                className={`group relative flex flex-col items-center gap-3 p-4 rounded-xl border-2 transition-all ${
-                  theme === mode
-                    ? "border-primary bg-primary-light" // Using new dynamic classes
-                    : "border-[#e8edf3] dark:border-[#3e4d5d] hover:border-[#bcccdc] dark:hover:border-[#507395]"
-                }`}
-              >
-                {/* Visual Preview */}
-                <div className={`w-full aspect-video rounded-lg border flex flex-col overflow-hidden shadow-sm ${
-                    mode === 'dark' 
-                        ? 'bg-[#111921] border-[#2d3a4a]' 
-                        : mode === 'system' 
-                            ? 'bg-gradient-to-br from-[#f8fafb] to-[#111921] border-[#e8edf3] dark:border-[#3e4d5d]'
-                            : 'bg-[#f8fafb] border-[#e8edf3]'
-                }`}>
-                    {mode === 'system' ? (
-                        <div className="w-full h-full flex items-center justify-center">
-                            <span className="material-symbols-outlined text-4xl text-[#507395]">computer</span>
-                        </div>
-                    ) : (
-                        <>
-                            <div className={`h-3 w-full border-b ${mode === 'dark' ? 'bg-[#1a2430] border-[#2d3a4a]' : 'bg-white border-[#e8edf3]'}`}></div>
-                            <div className="flex-1 flex p-2 gap-2">
-                                <div className={`w-1/4 h-full rounded ${mode === 'dark' ? 'bg-[#2d3a4a]' : 'bg-gray-200/50'}`}></div>
-                                <div className="w-3/4 h-full space-y-2">
-                                    <div className={`w-full h-2 rounded ${mode === 'dark' ? 'bg-[#1a2430]' : 'bg-white'}`}></div>
-                                    <div className={`w-2/3 h-2 rounded ${mode === 'dark' ? 'bg-[#1a2430]' : 'bg-white'}`}></div>
+        // Base themes available in both modes
+        const themes = [
+            {
+                id: "default" as BackgroundTheme,
+                name: isDark ? "Slate" : "Cloud",
+                desc: isDark ? "Classic deep blue-grey" : "Classic soft white clarity",
+                bg: isDark ? "bg-[#0f172a]" : "bg-[#fdfdfd]",
+                card: isDark ? "bg-[#1e293b]" : "bg-white",
+                border: isDark ? "border-[#334155]" : "border-[#e2e8f0]"
+            },
+            {
+                id: "zinc" as BackgroundTheme,
+                name: isDark ? "Zinc" : "Parchment",
+                desc: isDark ? "Industrial neutral dark" : "Faint tan paper finish",
+                bg: isDark ? "bg-[#09090b]" : "bg-[#f4f1ea]",
+                card: isDark ? "bg-[#18181b]" : "bg-[#f9f7f2]",
+                border: isDark ? "border-[#27272a]" : "border-[#e4decb]"
+            },
+            {
+                id: "midnight" as BackgroundTheme,
+                name: isDark ? "Midnight" : "Twilight",
+                desc: isDark ? "Pure OLED black" : "Faint purple-blue mist",
+                bg: isDark ? "bg-black" : "bg-[#f0f2ff]",
+                card: isDark ? "bg-[#09090b]" : "bg-[#f8f9ff]",
+                border: isDark ? "border-[#1a1a1a]" : "border-[#dbe0fe]"
+            },
+        ];
+
+        // Add the extra colorful dark themes only when in dark mode
+        if (isDark) {
+            themes.push(
+                {
+                    id: "darkcrimson" as BackgroundTheme,
+                    name: "Crimson",
+                    desc: "Faint dark brick red",
+                    bg: "bg-[#1a0f0f]",
+                    card: "bg-[#251616]",
+                    border: "border-[#452a2a]"
+                },
+                {
+                    id: "darkblue" as BackgroundTheme,
+                    name: "Cobalt",
+                    desc: "Faint deep dark blue",
+                    bg: "bg-[#0a0f1d]",
+                    card: "bg-[#11192e]",
+                    border: "border-[#1e293b]"
+                }
+            );
+        }
+
+        return themes;
+    }, [theme]);
+
+    if (!mounted) return null;
+
+    return (
+        <div className="space-y-8 animate-in fade-in duration-300 pb-20">
+            {/* Header */}
+            <div className="border-b border-border-base pb-4">
+                <h1 className="text-2xl font-bold text-foreground">General Settings</h1>
+                <p className="text-muted-foreground mt-1">Customize your workspace appearance and preferences.</p>
+            </div>
+
+            {/* 1. Theme Mode & High Contrast */}
+            <section className="bg-card rounded-xl border border-border-base p-6 shadow-sm">
+                <div className="flex items-center justify-between mb-6">
+                    <h3 className="text-lg font-semibold text-foreground flex items-center gap-2">
+                        <span className="material-symbols-outlined text-muted-foreground">contrast</span>
+                        Appearance
+                    </h3>
+
+                    <button
+                        onClick={() => setHighContrast(!highContrast)}
+                        className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border-2 transition-all text-xs font-bold ${highContrast
+                            ? "border-primary bg-primary text-white"
+                            : "border-border-base text-muted-foreground hover:border-primary/50"
+                            }`}
+                    >
+                        <span className="material-symbols-outlined text-[18px]">visibility</span>
+                        High Contrast {highContrast ? 'On' : 'Off'}
+                    </button>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    {["light", "dark", "system"].map((mode) => (
+                        <button
+                            key={mode}
+                            onClick={() => setTheme(mode)}
+                            className={`group relative flex flex-col items-center gap-3 p-4 rounded-xl border-2 transition-all ${theme === mode ? "border-primary bg-primary-light" : "border-border-base hover:border-primary/30"
+                                }`}
+                        >
+                            <div className={`w-full aspect-video rounded-lg border flex flex-col overflow-hidden shadow-sm ${mode === 'dark' ? 'bg-[#111921] border-[#2d3a4a]' : mode === 'system' ? 'bg-gradient-to-br from-[#f8fafb] to-[#111921] border-border-base' : 'bg-[#f8fafb] border-[#e8edf3]'
+                                }`}>
+                                {mode === 'system' ? (
+                                    <div className="w-full h-full flex items-center justify-center bg-white/50 dark:bg-black/20">
+                                        <span className="material-symbols-outlined text-4xl text-muted-foreground">computer</span>
+                                    </div>
+                                ) : (
+                                    <>
+                                        <div className={`h-3 w-full border-b ${mode === 'dark' ? 'bg-[#1a2430] border-[#2d3a4a]' : 'bg-white border-[#e8edf3]'}`}></div>
+                                        <div className="flex-1 flex p-2 gap-2">
+                                            <div className={`w-1/4 h-full rounded ${mode === 'dark' ? 'bg-[#2d3a4a]' : 'bg-gray-200/50'}`}></div>
+                                            <div className="w-3/4 h-full space-y-2">
+                                                <div className={`w-full h-2 rounded ${mode === 'dark' ? 'bg-[#2d3a4a]' : 'bg-white border border-[#e8edf3]'}`}></div>
+                                                <div className={`w-2/3 h-2 rounded ${mode === 'dark' ? 'bg-primary/40' : 'bg-primary/20'}`}></div>
+                                            </div>
+                                        </div>
+                                    </>
+                                )}
+                            </div>
+                            <span className="text-sm font-medium capitalize">{mode}</span>
+                        </button>
+                    ))}
+                </div>
+            </section>
+
+            {/* 2. Background Styles (Visual Previews) */}
+            <section className="bg-card rounded-xl border border-border-base p-6 shadow-sm">
+                <h3 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
+                    <span className="material-symbols-outlined text-muted-foreground">palette</span>
+                    {theme === 'light' ? 'Light Mode Style' : 'Dark Mode Style'}
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    {bgThemes.map((bg) => (
+                        <button
+                            key={bg.id}
+                            onClick={() => setBackgroundTheme(bg.id)}
+                            className={`group relative flex flex-col gap-3 p-4 rounded-xl border-2 transition-all ${backgroundTheme === bg.id
+                                    ? "border-primary bg-primary-light"
+                                    : "border-border-base hover:border-primary/30"
+                                }`}
+                        >
+                            <div className={`w-full aspect-video rounded-lg border-2 flex flex-col overflow-hidden shadow-sm ${bg.bg} ${bg.border}`}>
+                                <div className={`h-3 w-full border-b ${bg.card} ${bg.border}`}></div>
+                                <div className="flex-1 flex p-2 gap-2">
+                                    <div className={`w-1/4 h-full rounded ${bg.card} border ${bg.border}`}></div>
+                                    <div className="w-3/4 h-full space-y-2">
+                                        <div className={`w-full h-2 rounded ${bg.card} border ${bg.border}`}></div>
+                                        <div className="w-full h-2 rounded flex gap-1">
+                                            <div className="w-2/3 h-full rounded bg-primary/40"></div>
+                                            <div className="w-1/3 h-full rounded bg-primary/20"></div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
-                        </>
-                    )}
+                            <div className="text-left">
+                                <p className="text-sm font-bold">{bg.name}</p>
+                                <p className="text-[11px] text-muted-foreground">{bg.desc}</p>
+                            </div>
+
+                            {backgroundTheme === bg.id && (
+                                <div className="absolute top-2 right-2 text-primary">
+                                    <span className="material-symbols-outlined text-[18px] fill-1">check_circle</span>
+                                </div>
+                            )}
+                        </button>
+                    ))}
                 </div>
-                
-                <div className="flex items-center gap-2">
-                   <span className="material-symbols-outlined fill-1" style={{ 
-                       color: mode === 'light' ? '#f59e0b' : mode === 'dark' ? '#818cf8' : '#507395' 
-                   }}>
-                       {mode === 'light' ? 'light_mode' : mode === 'dark' ? 'dark_mode' : 'settings_system_daydream'}
-                   </span>
-                   <span className={`text-sm font-medium capitalize ${theme === mode ? "text-primary" : "text-[#507395] dark:text-[#94a3b8]"}`}>
-                       {mode}
-                   </span>
+            </section>
+
+            {/* 3. Accent Color */}
+            <section className="bg-card rounded-xl border border-border-base p-6 shadow-sm">
+                <h3 className="text-lg font-semibold text-foreground mb-1 flex items-center gap-2">
+                    <span className="material-symbols-outlined text-muted-foreground">colorize</span>
+                    Accent Color
+                </h3>
+                <p className="text-sm text-muted-foreground mb-6">Choose a primary color for your workspace.</p>
+
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
+                    {ACCENT_COLORS.map((color) => (
+                        <button
+                            key={color.id}
+                            onClick={() => setAccentColor(color.id)}
+                            className={`relative flex flex-col items-center gap-3 p-4 rounded-xl border-2 transition-all hover:bg-muted/50 ${accentColor === color.id ? "border-primary bg-primary-light" : "border-border-base"
+                                }`}
+                        >
+                            <div className="w-12 h-12 rounded-full shadow-sm ring-4 ring-background flex items-center justify-center transition-transform active:scale-95" style={{ backgroundColor: color.color }}>
+                                {accentColor === color.id && <span className="material-symbols-outlined text-white font-bold drop-shadow-md animate-in zoom-in">check</span>}
+                            </div>
+                            <span className={`text-sm font-medium ${accentColor === color.id ? "text-primary" : "text-foreground"}`}>{color.name}</span>
+                        </button>
+                    ))}
                 </div>
-                
-                {theme === mode && (
-                    <div className="absolute top-3 right-3 text-primary animate-in zoom-in">
-                        <span className="material-symbols-outlined text-[20px]">check_circle</span>
-                    </div>
-                )}
-             </button>
-          ))}
+            </section>
         </div>
-      </section>
-
-      {/* 2. Accent Color */}
-      <section className="bg-white dark:bg-[#1a2430] rounded-xl border border-[#e8edf3] dark:border-[#2d3a4a] p-6 shadow-sm">
-        <h3 className="text-lg font-semibold text-[#0e141b] dark:text-[#e8edf3] mb-1 flex items-center gap-2">
-            <span className="material-symbols-outlined text-[#507395]">palette</span>
-            Accent Color
-        </h3>
-        <p className="text-sm text-[#507395] dark:text-[#94a3b8] mb-6">
-            Choose a primary color for buttons, links, and active states.
-        </p>
-
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
-            {ACCENT_COLORS.map((color) => (
-                <button
-                    key={color.id}
-                    onClick={() => setAccentColor(color.id)}
-                    className={`relative flex flex-col items-center gap-3 p-4 rounded-xl border-2 transition-all hover:bg-gray-50 dark:hover:bg-[#111921] ${
-                        accentColor === color.id 
-                            ? "border-primary bg-primary-light" 
-                            : "border-[#e8edf3] dark:border-[#3e4d5d]"
-                    }`}
-                >
-                    {/* Color Swatch */}
-                    <div 
-                        className="w-12 h-12 rounded-full shadow-sm ring-4 ring-white dark:ring-[#2d3a4a] flex items-center justify-center transition-transform active:scale-95"
-                        style={{ backgroundColor: color.color }}
-                    >
-                        {accentColor === color.id && (
-                            <span className="material-symbols-outlined text-white font-bold drop-shadow-md animate-in zoom-in">check</span>
-                        )}
-                    </div>
-
-                    <span className={`text-sm font-medium ${accentColor === color.id ? "text-primary" : "text-[#0e141b] dark:text-[#e8edf3]"}`}>
-                        {color.name}
-                    </span>
-                </button>
-            ))}
-        </div>
-
-        {/* Live Preview of Buttons */}
-        <div className="mt-8 pt-6 border-t border-[#e8edf3] dark:border-[#2d3a4a]">
-            <p className="text-xs font-bold text-[#507395] uppercase tracking-wider mb-4">Preview</p>
-            <div className="flex flex-wrap gap-4 items-center">
-                <button className="px-4 py-2 rounded-lg bg-primary text-white text-sm font-bold shadow-sm hover:opacity-90 transition-opacity">
-                    Primary Button
-                </button>
-                <button className="px-4 py-2 rounded-lg bg-white dark:bg-[#111921] border border-primary text-primary text-sm font-bold shadow-sm hover:bg-primary-light transition-colors">
-                    Secondary Button
-                </button>
-                <div className="text-sm">
-                    <span className="text-[#0e141b] dark:text-[#e8edf3]">Links will look like </span>
-                    <a href="#" className="text-primary hover:underline font-medium">this link</a>
-                    <span className="text-[#0e141b] dark:text-[#e8edf3]">.</span>
-                </div>
-            </div>
-        </div>
-      </section>
-    </div>
-  );
+    );
 }

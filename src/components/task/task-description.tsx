@@ -38,13 +38,13 @@ export function TaskDescription({ task, workspaceId, isArchived = false }: { tas
           <button 
             onClick={handleSave}
             disabled={updateTask.isPending}
-            className="px-4 py-1.5 bg-primary text-white text-sm font-bold rounded-md hover:bg-primary-hover transition-colors"
+            className="hover:cursor-pointer px-4 py-1.5 bg-primary text-white text-sm font-bold rounded-md hover:bg-primary-hover transition-colors"
           >
             Save
           </button>
           <button 
             onClick={() => setIsEditing(false)}
-            className="px-4 py-1.5 text-gray-500 hover:bg-gray-100 dark:hover:bg-[#2d3a4a] text-sm font-medium rounded-md transition-colors"
+            className="hover:cursor-pointer px-4 py-1.5 text-gray-500 hover:bg-gray-100 dark:hover:bg-[#2d3a4a] text-sm font-medium rounded-md transition-colors"
           >
             Cancel
           </button>

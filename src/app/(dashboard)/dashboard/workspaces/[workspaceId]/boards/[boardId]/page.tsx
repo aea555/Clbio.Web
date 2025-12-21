@@ -1,14 +1,14 @@
 "use client";
 
 import { useState, useMemo, useEffect } from "react";
-import { useParams, useRouter } from "next/navigation";
-import { useBoard, useColumns, useBoardTasks, useWorkspace } from "@/hooks/use-queries"; // Added useWorkspace
+import { notFound, useParams, useRouter } from "next/navigation";
+import { useBoard, useColumns, useBoardTasks, useWorkspace } from "@/hooks/use-queries";
 import { useColumnMutations, useTaskMutations } from "@/hooks/use-mutations";
 import { useWorkspaceStore } from "@/store/use-workspace-store";
 import { BoardHeader } from "@/components/board/board-header";
 import { Column } from "@/components/board/column";
 import { CreateColumnModal } from "@/components/board/create-column-modal";
-import { ArchivedBanner } from "@/components/dashboard/archived-banner"; // Added Banner
+import { ArchivedBanner } from "@/components/dashboard/archived-banner";
 import { usePermissions } from "@/providers/permission-provider";
 import { Permission } from "@/lib/rbac/permissions";
 import { useWorkspacePermissions } from "@/hooks/use-workspace-permissions";
@@ -37,7 +37,6 @@ import { ReadColumnDto, ReadTaskItemDto } from "@/types/dtos";
 
 export default function BoardPage() {
   const params = useParams();
-  const router = useRouter();
   const workspaceId = params.workspaceId as string;
   const boardId = params.boardId as string;
 
@@ -45,14 +44,13 @@ export default function BoardPage() {
   const { data: board, isLoading: isBoardLoading } = useBoard(workspaceId, boardId);
   const { data: columnsData, isLoading: isColumnsLoading } = useColumns(workspaceId, boardId);
   const { data: tasksData, isLoading: isTasksLoading } = useBoardTasks(workspaceId, boardId);
-  const { data: workspace } = useWorkspace(workspaceId); // Fetch workspace for Banner
+  const { data: workspace } = useWorkspace(workspaceId);
 
   // 2. Local State
   const [columns, setColumns] = useState<ReadColumnDto[]>([]);
   const [tasks, setTasks] = useState<ReadTaskItemDto[]>([]);
   const [activeDragItem, setActiveDragItem] = useState<any>(null);
   const [activeDragType, setActiveDragType] = useState<"Column" | "Task" | null>(null);
-
   const [isCreateColumnOpen, setIsCreateColumnOpen] = useState(false);
 
   // 3. Hooks & Mutations
@@ -80,23 +78,14 @@ export default function BoardPage() {
     if (tasksData) setTasks(tasksData);
   }, [tasksData]);
 
-  // 6. DnD Sensors (Disable when Archived)
-  const pointerSensor = useSensor(PointerSensor, {
-    activationConstraint: { distance: 5 },
-  });
-  const keyboardSensor = useSensor(KeyboardSensor);
-
+  // 6. DnD Sensors
   const sensors = useSensors(
-    useSensor(PointerSensor, {
-      activationConstraint: { distance: 5 },
-    }),
+    useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
     useSensor(KeyboardSensor)
   );
 
-  // --- Handlers ---
-
   const onDragStart = (event: DragStartEvent) => {
-    if (isArchived) return; // Double protection
+    if (isArchived) return;
     const { active } = event;
     setActiveDragType(active.data.current?.type);
     setActiveDragItem(active.data.current?.column || active.data.current?.task);
@@ -109,14 +98,13 @@ export default function BoardPage() {
 
     const activeId = active.id;
     const overId = over.id;
-
     const isActiveTask = active.data.current?.type === "Task";
     const isOverTask = over.data.current?.type === "Task";
     const isOverColumn = over.data.current?.type === "Column";
 
     if (!isActiveTask) return;
 
-    if (isActiveTask && isOverTask) {
+    if (isOverTask) {
       setTasks((prev) => {
         const activeIndex = prev.findIndex((t) => t.id === activeId);
         const overIndex = prev.findIndex((t) => t.id === overId);
@@ -129,7 +117,7 @@ export default function BoardPage() {
       });
     }
 
-    if (isActiveTask && isOverColumn) {
+    if (isOverColumn) {
       setTasks((prev) => {
         const activeIndex = prev.findIndex((t) => t.id === activeId);
         if (prev[activeIndex].columnId !== overId) {
@@ -149,18 +137,15 @@ export default function BoardPage() {
     setActiveDragType(null);
 
     if (!over) return;
-
     const activeId = active.id;
     const overId = over.id;
 
-    if (active.data.current?.type === "Column") {
-      if (activeId !== overId) {
-        const oldIndex = columns.findIndex((c) => c.id === activeId);
-        const newIndex = columns.findIndex((c) => c.id === overId);
-        const newColumns = arrayMove(columns, oldIndex, newIndex);
-        setColumns(newColumns);
-        reorderColumns.mutate(newColumns.map(c => c.id));
-      }
+    if (active.data.current?.type === "Column" && activeId !== overId) {
+      const oldIndex = columns.findIndex((c) => c.id === activeId);
+      const newIndex = columns.findIndex((c) => c.id === overId);
+      const newColumns = arrayMove(columns, oldIndex, newIndex);
+      setColumns(newColumns);
+      reorderColumns.mutate(newColumns.map(c => c.id));
     }
 
     if (active.data.current?.type === "Task") {
@@ -182,21 +167,25 @@ export default function BoardPage() {
 
   if (isBoardLoading || isColumnsLoading || isTasksLoading) {
     return (
-      <div className="flex items-center justify-center h-full bg-[#f8fafb] dark:bg-[#111921]">
+      <div className="flex items-center justify-center h-full bg-background">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
       </div>
     );
   }
 
-  if (!board) return <div className="p-8 text-[#507395]">Board not found.</div>;
+  if (!board) {
+    notFound(); 
+    return null; 
+  }
 
   return (
-    <div className="flex flex-col h-full bg-[#f8fafb] dark:bg-[#111921] relative overflow-hidden">
-      
-      {/* FIX: Add Archived Banner */}
+    <div className="flex flex-col h-full bg-background relative overflow-hidden transition-colors duration-300 w-full">
+
       {isArchived && workspace && (
-         <ArchivedBanner workspaceId={workspaceId} workspaceName={workspace.name} />
+        <ArchivedBanner workspaceId={workspaceId} workspaceName={workspace.name} />
       )}
+
+      <div className="absolute inset-0 bg-black/[0.02] dark:bg-black/[0.15] pointer-events-none" />
 
       <BoardHeader board={board} workspaceId={workspaceId} isArchived={isArchived} />
 
@@ -209,28 +198,25 @@ export default function BoardPage() {
       >
         <div className="flex-1 overflow-x-auto overflow-y-hidden custom-scrollbar">
           <div className="h-full flex px-6 py-6 gap-6 min-w-max">
-
             <SortableContext items={columns.map(c => c.id)} strategy={horizontalListSortingStrategy}>
-              {columns.map((col) => {
-                const colTasks = tasks.filter(t => t.columnId === col.id);
-                return (
-                  <Column
-                    key={col.id}
-                    column={col}
-                    tasks={colTasks}
-                    workspaceId={workspaceId}
-                    boardId={boardId}
-                    isArchived={isArchived} // FIX: Pass isArchived
-                  />
-                );
-              })}
+              {columns.map((col) => (
+                <Column
+                  key={col.id}
+                  column={col}
+                  tasks={tasks.filter(t => t.columnId === col.id)}
+                  workspaceId={workspaceId}
+                  boardId={boardId}
+                  isArchived={isArchived}
+                />
+              ))}
             </SortableContext>
 
             {can(Permission.CreateColumn) && !isArchived && (
               <div className="w-72 flex-shrink-0">
                 <button
                   onClick={() => setIsCreateColumnOpen(true)}
-                  className="w-full flex items-center gap-2 p-3 rounded-xl border-2 border-dashed border-[#e8edf3] dark:border-[#2d3a4a] text-[#507395] dark:text-[#94a3b8] hover:border-primary hover:text-primary hover:bg-primary/5 dark:hover:bg-primary/10 transition-all font-bold text-sm h-12"
+                  // FIX: Border and text colors synchronized with theme
+                  className="hover:cursor-pointer w-full flex items-center gap-2 p-3 rounded-xl border-2 border-dashed border-border-base text-muted-foreground hover:border-primary hover:text-primary hover:bg-primary-light transition-all font-bold text-sm h-12"
                 >
                   <span className="material-symbols-outlined text-[20px]">add</span>
                   Add another list
@@ -240,7 +226,7 @@ export default function BoardPage() {
           </div>
         </div>
 
-        <DragOverlay>
+        <DragOverlay dropAnimation={null}>
           {activeDragItem && activeDragType === "Column" && (
             <Column
               column={activeDragItem}
@@ -251,12 +237,11 @@ export default function BoardPage() {
             />
           )}
           {activeDragItem && activeDragType === "Task" && (
-            <div className="w-72">
+            <div className="w-72 rotate-3 opacity-90">
               <TaskCard task={activeDragItem} onClick={() => { }} />
             </div>
           )}
         </DragOverlay>
-
       </DndContext>
 
       <CreateColumnModal

@@ -651,6 +651,13 @@ export function useAuthMutations() {
     onError: (error: any) => toast.error(getErrorMessage(error)),
   });
 
+  const googleLoginMutation = useMutation({
+    mutationFn: authService.googleLogin,
+    onError: (error: any) => {
+      toast.error(getErrorMessage(error));
+    },
+  });
+
   return {
     loginMutation,
     logoutMutation,
@@ -658,7 +665,8 @@ export function useAuthMutations() {
     forgotPasswordMutation,
     resetPasswordMutation,
     verifyEmailMutation,
-    resendVerificationMutation
+    resendVerificationMutation,
+    googleLoginMutation
   };
 }
 
@@ -709,7 +717,7 @@ export function useInvitationMutations() {
 
     onSuccess: (_, variables) => {
       // 1. Invalidate Invitations (to remove the pending card)
-      queryClient.invalidateQueries({ queryKey: ["workspaceInvitations"] });
+      queryClient.invalidateQueries({ queryKey: ["workspace-invitations"] });
 
       if (variables.accept) {
         queryClient.invalidateQueries({ queryKey: ["workspaces"] });

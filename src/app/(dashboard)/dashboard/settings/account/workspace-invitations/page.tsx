@@ -18,6 +18,7 @@ export default function WorkspaceInvitationsPage() {
   const pageSize = 10;
   
   const { data: result, isLoading } = useWorkspaceInvitations();
+  console.log(result);
   const { respondToInvitation } = useInvitationMutations();
 
   const [actionInvitation, setActionInvitation] = useState<{ id: string, accept: boolean } | null>(null);
@@ -134,14 +135,14 @@ export default function WorkspaceInvitationsPage() {
                           <button
                             onClick={() => setActionInvitation({ id: invite.id, accept: true })}
                             /* FIX: Dynamic Accept Button */
-                            className="flex items-center gap-1 px-3 py-1.5 bg-primary hover:bg-primary-hover text-white rounded-lg text-xs font-bold transition-colors shadow-sm"
+                            className="hover: cursor-pointer flex items-center gap-1 px-3 py-1.5 bg-primary hover:bg-primary-hover text-white rounded-lg text-xs font-bold transition-colors shadow-sm"
                           >
                             <span className="material-symbols-outlined text-[16px]">check</span>
                             Accept
                           </button>
                           <button
                             onClick={() => setActionInvitation({ id: invite.id, accept: false })}
-                            className="flex items-center gap-1 px-3 py-1.5 bg-white border border-gray-200 text-gray-600 hover:bg-red-50 hover:text-red-600 hover:border-red-200 rounded-lg text-xs font-bold transition-colors shadow-sm dark:bg-transparent dark:border-gray-700 dark:text-gray-400"
+                            className="hover: cursor-pointer flex items-center gap-1 px-3 py-1.5 bg-white border border-gray-200 text-gray-600 hover:bg-red-50 hover:text-red-600 hover:border-red-200 rounded-lg text-xs font-bold transition-colors shadow-sm dark:bg-transparent dark:border-gray-700 dark:text-gray-400"
                           >
                             <span className="material-symbols-outlined text-[16px]">close</span>
                             Decline

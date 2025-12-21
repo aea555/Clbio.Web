@@ -15,14 +15,12 @@ const settingsMenu = [
     href: "/dashboard/settings/theme",
     icon: "palette",
   },
-  /*
   {
     title: "Notifications",
     description: "Configure how you receive alerts and updates.",
     href: "/dashboard/settings/notifications", 
     icon: "notifications",
   },
-  */
 ];
 
 export default function SettingsHubPage() {

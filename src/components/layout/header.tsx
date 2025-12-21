@@ -22,13 +22,11 @@ export function Header() {
   const [isNotifOpen, setIsNotifOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   
-  // --- Search State ---
   const [searchQuery, setSearchQuery] = useState("");
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const debouncedSearch = useDebounce(searchQuery, 300); 
   const searchRef = useRef<HTMLDivElement>(null);
 
-  // --- Search Query ---
   const { data: searchResults, isLoading: isSearching } = useBoardSearch(
     activeWorkspaceId || "", 
     debouncedSearch, 
@@ -51,32 +49,24 @@ export function Header() {
   const handleBoardClick = (boardId: string) => {
     setIsSearchFocused(false);
     setSearchQuery(""); 
-    router.push(`/w/${activeWorkspaceId}/b/${boardId}`);
+    router.push(`/dashboard/workspaces/${activeWorkspaceId}/boards/${boardId}`);
   };
 
-  // --- Dynamic Breadcrumb Logic ---
   const getBreadcrumbs = () => {
-    // 1. Account & General Contexts (Non-Workspace)
     if (pathname.includes("/workspace-invitations")) {
         return { parent: "Account", parentHref: "/dashboard", current: "Invitations" };
     }
-    
-    // App Settings Routes
     if (pathname.startsWith("/dashboard/settings")) {
         if (pathname.includes("/general")) return { parent: "Settings", parentHref: "/dashboard/settings", current: "Appearance" };
         if (pathname.includes("/account")) return { parent: "Settings", parentHref: "/dashboard/settings", current: "Account" };
         if (pathname.includes("/notifications")) return { parent: "Settings", parentHref: "/dashboard/settings", current: "Notifications" };
-        // Root Settings Page
         return { parent: "Dashboard", parentHref: "/dashboard", current: "App Settings" };
     }
 
-    // 2. Workspace Context (Default)
     let current = "Boards";
-    
-    // Check specific workspace sub-pages
     if (pathname.includes("/members")) current = "Members";
     else if (pathname.includes("/audit-logs")) current = "Audit Logs";
-    else if (pathname.includes("/settings")) current = "Settings"; // Workspace Settings
+    else if (pathname.includes("/settings")) current = "Settings"; 
     else if (pathname.includes("/b/")) current = "Board View";
 
     return { 
@@ -89,26 +79,28 @@ export function Header() {
   const breadcrumbs = getBreadcrumbs();
 
   return (
-    <header className="h-16 border-b border-[#e8edf3] dark:border-[#2d3a4a] flex items-center justify-between px-4 md:px-6 bg-white dark:bg-[#1a2430] flex-shrink-0 z-10 font-sans transition-all duration-300">
+    // FIX: Using bg-card and border-border-base for theme synchronization
+    <header className="relative z-[50] h-16 border-b border-border-base flex items-center justify-between px-4 md:px-6 bg-card flex-shrink-0 z-10 font-sans transition-all duration-300">
       
       {/* Left: Toggle & Breadcrumbs */}
       <div className="flex items-center gap-4">
         {!isSidebarOpen && (
           <button 
             onClick={toggleSidebar}
-            className="flex items-center justify-center p-2 -ml-2 text-[#507395] hover:text-[#0e141b] dark:text-[#94a3b8] dark:hover:text-[#e8edf3] hover:bg-gray-100 dark:hover:bg-[#2d3a4a] rounded-lg transition-colors"
+            // FIX: Hover backgrounds and text colors using theme variables
+            className="hover: cursor-pointer flex items-center justify-center p-2 -ml-2 text-muted-foreground hover:text-foreground hover:bg-background rounded-lg transition-colors"
             title="Open Sidebar"
           >
             <span className="material-symbols-outlined text-[24px] leading-none">menu</span>
           </button>
         )}
 
-        <div className="flex items-center gap-2 text-sm text-[#507395] dark:text-[#94a3b8]">
+        <div className="flex items-center gap-2 text-sm text-muted-foreground">
           <Link href={breadcrumbs.parentHref} className="hover:text-primary cursor-pointer transition-colors sm:inline">
             {breadcrumbs.parent}
           </Link>
           <span className="material-symbols-outlined text-base hidden sm:inline">chevron_right</span>
-          <span className="text-[#0e141b] dark:text-[#e8edf3] font-medium truncate max-w-[150px] sm:max-w-none">
+          <span className="text-foreground font-medium truncate max-w-[150px] sm:max-w-none">
             {breadcrumbs.current}
           </span>
         </div>
@@ -119,45 +111,46 @@ export function Header() {
         
         {/* --- Search Bar --- */}
         <div className="relative group hidden md:block" ref={searchRef}>
-          <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[#507395] dark:text-[#94a3b8] group-focus-within:text-primary transition-colors text-[20px]">
+          <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground group-focus-within:text-primary transition-colors text-[20px]">
             search
           </span>
           <input 
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             onFocus={() => setIsSearchFocused(true)}
-            className="pl-10 pr-4 py-2 bg-[#f8fafb] dark:bg-[#111921] border border-transparent focus:border-primary/30 focus:bg-white dark:focus:bg-[#1a2430] rounded-full text-sm w-48 lg:w-64 outline-none transition-all placeholder-[#507395]/70 text-[#0e141b] dark:text-[#e8edf3]" 
+            // FIX: Search bar background matches main background, flips to card color on focus
+            className="pl-10 pr-4 py-2 bg-background border border-border-base focus:border-primary/50 focus:bg-card rounded-full text-sm w-48 lg:w-64 outline-none transition-all placeholder-muted-foreground/60 text-foreground" 
             placeholder="Search boards..." 
             type="text"
           />
 
           {/* Search Dropdown */}
           {isSearchFocused && searchQuery.length > 1 && (
-            <div className="absolute top-full left-0 right-0 mt-2 bg-white dark:bg-[#1a2430] rounded-xl shadow-xl border border-[#e8edf3] dark:border-[#2d3a4a] overflow-hidden min-w-[280px] z-50 animate-in fade-in zoom-in-95 duration-100">
+            <div className="absolute top-full left-0 right-0 mt-2 bg-card rounded-xl shadow-xl border border-border-base overflow-hidden min-w-[280px] z-50 animate-in fade-in zoom-in-95 duration-100">
               {isSearching ? (
-                <div className="p-4 text-center text-[#507395] text-sm">Searching...</div>
+                <div className="p-4 text-center text-muted-foreground text-sm">Searching...</div>
               ) : searchResults && searchResults.length > 0 ? (
                 <ul className="py-2">
-                  <li className="px-4 py-1 text-xs font-semibold text-[#507395] uppercase tracking-wider">Boards</li>
+                  <li className="px-4 py-1 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Boards</li>
                   {searchResults.map((board: ReadBoardDto) => (
                     <li key={board.id}>
                       <button 
                         onClick={() => handleBoardClick(board.id)}
-                        className="w-full text-left px-4 py-2.5 hover:bg-[#f8fafb] dark:hover:bg-[#2d3a4a] transition-colors flex items-center gap-3"
+                        className="hover:cursor-pointer w-full text-left px-4 py-2.5 hover:bg-background transition-colors flex items-center gap-3"
                       >
-                        <div className="w-8 h-8 rounded bg-gradient-to-br from-blue-400 to-indigo-500 flex items-center justify-center text-white font-bold text-xs shrink-0">
+                        <div className="w-8 h-8 rounded bg-primary flex items-center justify-center text-white font-bold text-xs shrink-0">
                           {board.name.substring(0, 2).toUpperCase()}
                         </div>
                         <div className="min-w-0">
-                          <p className="text-sm font-medium text-[#0e141b] dark:text-[#e8edf3] truncate">{board.name}</p>
-                          <p className="text-xs text-[#507395] truncate">{board.description || "No description"}</p>
+                          <p className="text-sm font-medium text-foreground truncate">{board.name}</p>
+                          <p className="text-xs text-muted-foreground truncate">{board.description || "No description"}</p>
                         </div>
                       </button>
                     </li>
                   ))}
                 </ul>
               ) : (
-                <div className="p-4 text-center text-[#507395] text-sm">
+                <div className="p-4 text-center text-muted-foreground text-sm">
                   No boards found for "{searchQuery}"
                 </div>
               )}
@@ -165,7 +158,7 @@ export function Header() {
           )}
         </div>
 
-        <div className="h-6 w-px bg-[#e8edf3] dark:border-[#2d3a4a] hidden md:block"></div>
+        <div className="h-6 w-px bg-border-base hidden md:block"></div>
 
         {/* User Profile & Notifications */}
         <div className="flex items-center gap-3">
@@ -176,12 +169,12 @@ export function Header() {
               className={`flex items-center hover:cursor-pointer justify-center p-2 rounded-full transition-colors ${
                 isNotifOpen 
                   ? "bg-primary-light text-primary" 
-                  : "text-[#507395] hover:text-primary hover:bg-[#f8fafb] dark:hover:bg-[#111921]"
+                  : "text-muted-foreground hover:text-primary hover:bg-background"
               }`}
             >
               <span className="material-symbols-outlined text-[24px] leading-none">notifications</span>
               {unreadCount && unreadCount.count > 0 && (
-                <span className="absolute top-2 right-2 h-2.5 w-2.5 rounded-full bg-red-500 border-2 border-white dark:border-[#1a2430]"></span>
+                <span className="absolute top-2 right-2 h-2.5 w-2.5 rounded-full bg-red-500 border-2 border-card"></span>
               )}
             </button>
 
@@ -191,7 +184,7 @@ export function Header() {
             />
           </div>
           
-          {/* Profile Avatar (With Dropdown) */}
+          {/* Profile Avatar */}
           <div className="relative">
             <button 
               onClick={() => { setIsProfileOpen(!isProfileOpen); setIsNotifOpen(false); }}
@@ -201,7 +194,7 @@ export function Header() {
                 <img 
                   src={user.avatarUrl} 
                   alt={user.displayName || "Profile"} 
-                  className={`size-9 rounded-full object-cover transition-all bg-gray-100 dark:bg-[#2d3a4a] ${
+                  className={`size-9 rounded-full object-cover transition-all bg-background ${
                     isProfileOpen ? "ring-2 ring-primary" : "ring-2 ring-transparent hover:ring-primary/50"
                   }`}
                 />

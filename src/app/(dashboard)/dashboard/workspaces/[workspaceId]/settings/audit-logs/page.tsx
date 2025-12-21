@@ -1,17 +1,24 @@
 "use client";
 
 import { useState } from "react";
-import { useParams } from "next/navigation";
-import { useActivityLogs } from "@/hooks/use-queries";
+import { notFound, useParams } from "next/navigation";
+import { useActivityLogs, useWorkspace } from "@/hooks/use-queries";
 import { SettingsTabs } from "@/components/dashboard/settings-tabs";
 import { useWorkspacePermissions } from "@/hooks/use-workspace-permissions";
 import { ArchivedBanner } from "@/components/dashboard/archived-banner";
 import { usePermissions } from "@/providers/permission-provider"; //
+import { useWorkspaceStore } from "@/store/use-workspace-store";
 
 export default function WorkspaceAuditLogsPage() {
   const params = useParams();
   const workspaceId = params.workspaceId as string;
+  const { data } = useWorkspace(workspaceId);
 
+  if (!data) {
+    notFound();
+    return null;
+  }
+  
   // Pagination State
   const [page, setPage] = useState(1);
   const pageSize = 10;
@@ -27,8 +34,6 @@ export default function WorkspaceAuditLogsPage() {
   const logs = result?.items || [];
   // Fix: Safe calculation for total pages using the API result
   const totalPages = result ? Math.ceil(result.meta.totalCount / result.meta.pageSize) : 1;
-  console.log("Result: ", result);
-  console.log("Total Pages: ", totalPages)
 
   // Helper to color-code actions
   const getActionColor = (action: string) => {
@@ -144,14 +149,14 @@ export default function WorkspaceAuditLogsPage() {
               <button
                 onClick={() => setPage(p => Math.max(1, p - 1))}
                 disabled={page === 1 || isFetching}
-                className="px-3 py-1.5 rounded-lg border border-[#e8edf3] dark:border-[#3e4d5d] text-sm font-medium hover:bg-gray-50 dark:hover:bg-[#111921] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                className="hover:cursor-pointer px-3 py-1.5 rounded-lg border border-[#e8edf3] dark:border-[#3e4d5d] text-sm font-medium hover:bg-gray-50 dark:hover:bg-[#111921] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
                 Previous
               </button>
               <button
                 onClick={() => setPage(p => Math.min(totalPages, p + 1))}
                 disabled={page === totalPages || isFetching}
-                className="px-3 py-1.5 rounded-lg border border-[#e8edf3] dark:border-[#3e4d5d] text-sm font-medium hover:bg-gray-50 dark:hover:bg-[#111921] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                className="hover:cursor-pointer px-3 py-1.5 rounded-lg border border-[#e8edf3] dark:border-[#3e4d5d] text-sm font-medium hover:bg-gray-50 dark:hover:bg-[#111921] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
                 Next
               </button>
