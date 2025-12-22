@@ -134,7 +134,7 @@ export interface TokenResponseDto extends ResponseDtoBase {
 	refreshExpiresUtc: string;
 }
 
-export interface ActivityLogDto {
+export interface ActivityLogDto extends ResponseDtoBase {
 	workspaceId: string;
 	actorId: string;
 	actorDisplayName: string;
