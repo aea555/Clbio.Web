@@ -636,8 +636,13 @@ export function useAuthMutations() {
     onError: (error: any) => toast.error(getErrorMessage(error)),
   });
 
-  const resetPasswordMutation = useMutation({
-    mutationFn: authService.resetPassword,
+  const resetPasswordValidateOtpMutation = useMutation({
+    mutationFn: authService.resetPasswordValidateOtp,
+    onError: (error: any) => toast.error(getErrorMessage(error)),
+  });
+
+  const resetPasswordWithTokenMutation = useMutation({
+    mutationFn: authService.resetPasswordWithToken,
     onError: (error: any) => toast.error(getErrorMessage(error)),
   });
 
@@ -663,7 +668,8 @@ export function useAuthMutations() {
     logoutMutation,
     registerMutation,
     forgotPasswordMutation,
-    resetPasswordMutation,
+    resetPasswordValidateOtpMutation,
+    resetPasswordWithTokenMutation,
     verifyEmailMutation,
     resendVerificationMutation,
     googleLoginMutation

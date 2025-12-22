@@ -3,11 +3,11 @@
 import { useState, useRef } from "react";
 import { notFound, useParams, useRouter } from "next/navigation";
 import Link from "next/link";
-import { useTask, useAttachments, useWorkspace } from "@/hooks/use-queries";
+import { useTask, useAttachments, useWorkspace, useMyWorkspaceMembership } from "@/hooks/use-queries";
 import { useTaskMutations, useAttachmentMutations } from "@/hooks/use-mutations";
 import { usePermissions } from "@/providers/permission-provider";
 import { Permission } from "@/lib/rbac/permissions";
-import { TaskProgressStatus } from "@/types/enums";
+import { TaskProgressStatus, WorkspaceRole } from "@/types/enums";
 import { TaskDescription } from "@/components/task/task-description";
 import { TaskActivity } from "@/components/task/task-activity";
 import { ConfirmationModal } from "@/components/ui/confirmation-modal";
@@ -17,6 +17,7 @@ import { TaskAssignee } from "@/components/task/task-assignee";
 import { toast } from "sonner";
 import { useWorkspacePermissions } from "@/hooks/use-workspace-permissions";
 import { ArchivedBanner } from "@/components/dashboard/archived-banner";
+import { useAuthStore } from "@/store/use-auth-store";
 
 const isImageFile = (file: ReadAttachmentDto) => {
     if (file.contentType?.startsWith("image/")) return true;
@@ -35,9 +36,11 @@ export default function TaskDetailPage() {
     const boardId = params.boardId as string;
     const taskId = params.taskId as string;
 
+    const { user } = useAuthStore();
     const { data: task, isLoading: isTaskLoading } = useTask(workspaceId, taskId);
     const { data: attachments } = useAttachments(workspaceId, taskId);
     const { data: workspace } = useWorkspace(workspaceId);
+    const { data: myMembership } = useMyWorkspaceMembership(workspaceId);
 
     const { can } = usePermissions();
     const { isArchived } = useWorkspacePermissions(workspaceId);
@@ -73,7 +76,8 @@ export default function TaskDetailPage() {
     };
 
     const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-        if (isArchived) return;
+        if (isArchived || !can(Permission.CreateAttachment)) return;
+        
         if (e.target.files && e.target.files.length > 0) {
             const files = Array.from(e.target.files);
             uploadAttachment.mutate(files);
@@ -119,6 +123,18 @@ export default function TaskDetailPage() {
         });
     };
 
+    // Mirrors the backend DeleteAsync logic
+    const canDeleteAttachment = (file: ReadAttachmentDto) => {
+        if (isArchived) return false;
+        if (!user) return false;
+
+        if (file.uploadedById === user.id) return true;
+        if (myMembership?.role === WorkspaceRole.Owner) return true;
+        if (myMembership?.role === WorkspaceRole.PrivilegedMember) return true;
+
+        return false;
+    };
+
     const renderDate = (dateStr: string | undefined) => {
         if (!dateStr) return "Unknown date";
         const date = new Date(dateStr);
@@ -135,7 +151,6 @@ export default function TaskDetailPage() {
     }
 
     return (
-        // Changed bg-background and added the subtle dark tint overlay
         <div className="min-h-full bg-background flex flex-col relative overflow-hidden transition-colors duration-300">
 
             {/* The Tint Overlay */}
@@ -146,7 +161,7 @@ export default function TaskDetailPage() {
                     className="fixed inset-0 z-[100] bg-black/95 flex items-center justify-center p-4 animate-in fade-in duration-200"
                     onClick={() => setPreviewAttachment(null)}
                 >
-                    <button onClick={() => setPreviewAttachment(null)} className="absolute top-4 right-4 text-white/70 hover:text-white z-50">
+                    <button onClick={() => setPreviewAttachment(null)} className="absolute top-4 right-4 text-white/70 hover:text-white z-50 hover:cursor-pointer">
                         <span className="material-symbols-outlined text-[32px]">close</span>
                     </button>
                     <div className="relative w-full h-full flex items-center justify-center p-4 md:p-8" onClick={(e) => e.stopPropagation()}>
@@ -172,7 +187,7 @@ export default function TaskDetailPage() {
 
                 {/* Breadcrumb */}
                 <div className="max-w-5xl mx-auto mb-6 flex items-center gap-2 text-sm text-muted-foreground">
-                    <Link href={`/dashboard/workspaces/${workspaceId}/boards/${boardId}`} className="hover:text-primary transition-colors flex items-center gap-1">
+                    <Link href={`/dashboard/workspaces/${workspaceId}/boards/${boardId}`} className="hover:text-primary transition-colors flex items-center gap-1 hover:cursor-pointer">
                         <span className="material-symbols-outlined text-[18px]">arrow_back</span>
                         Back to Board
                     </Link>
@@ -204,7 +219,7 @@ export default function TaskDetailPage() {
                                             setIsEditingTitle(true);
                                         }
                                     }}
-                                    className={`text-2xl font-bold text-foreground ${!isArchived && can(Permission.UpdateTask) ? "cursor-pointer hover:text-primary transition-colors" : ""}`}
+                                    className={`text-2xl font-bold text-foreground ${!isArchived && can(Permission.UpdateTask) ? "cursor-pointer hover:text-primary transition-colors hover:cursor-pointer" : ""}`}
                                 >
                                     {task.title}
                                 </h1>
@@ -238,7 +253,7 @@ export default function TaskDetailPage() {
                                     <h3 className="font-bold text-foreground">Attachments</h3>
                                 </div>
 
-                                {!isArchived && (
+                                {!isArchived && can(Permission.CreateAttachment) && (
                                     <>
                                         <button onClick={() => fileInputRef.current?.click()} className="hover:cursor-pointer text-xs font-bold text-primary hover:underline">
                                             Add File
@@ -255,7 +270,7 @@ export default function TaskDetailPage() {
                                         const isPdf = isPdfFile(file);
                                         return (
                                             <div key={file.id} className="flex items-center gap-3 p-3 rounded-lg border border-border-base hover:bg-background transition-colors group relative bg-card">
-                                                <div onClick={(e) => handleFileClick(e, file)} className="flex items-center gap-3 flex-1 min-w-0 cursor-pointer">
+                                                <div onClick={(e) => handleFileClick(e, file)} className="flex items-center gap-3 flex-1 min-w-0 cursor-pointer hover:cursor-pointer">
                                                     <div className="w-10 h-10 bg-background rounded flex items-center justify-center text-muted-foreground font-bold text-xs uppercase flex-shrink-0 overflow-hidden relative border border-border-base">
                                                         {isImage ? (
                                                             <img src={file.url} alt="Thumbnail" className="w-full h-full object-cover" />
@@ -275,11 +290,11 @@ export default function TaskDetailPage() {
                                                 </div>
 
                                                 <div className="absolute top-2 right-2 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity bg-card shadow-md rounded border border-border-base">
-                                                    <button onClick={(e) => handleDownload(e, file)} className="flex items-center justify-center hover: cursor-pointer p-1 text-muted-foreground hover:text-primary transition-colors" title="Download">
+                                                    <button onClick={(e) => handleDownload(e, file)} className="flex items-center justify-center hover:cursor-pointer p-1 text-muted-foreground hover:text-primary transition-colors" title="Download">
                                                         <span className="material-symbols-outlined text-[18px]">download</span>
                                                     </button>
-                                                    {!isArchived && (
-                                                        <button onClick={() => setAttachmentToDelete(file)} className="flex items-center justify-center hover: cursor-pointer p-1 text-muted-foreground hover:text-red-500 transition-colors" title="Delete">
+                                                    {canDeleteAttachment(file) && (
+                                                        <button onClick={() => setAttachmentToDelete(file)} className="flex items-center justify-center hover:cursor-pointer p-1 text-muted-foreground hover:text-red-500 transition-colors" title="Delete">
                                                             <span className="material-symbols-outlined text-[18px]">close</span>
                                                         </button>
                                                     )}

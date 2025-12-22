@@ -15,6 +15,7 @@ export interface ApiResponse<T = any> {
 export type ApiResponseMessage = ApiResponse<string | null>;
 
 export interface ResponseDtoBase {
+	id: string;
 	correlationId?: string | null;
 	createdAt: string; // ISO 8601
 	updatedAt?: string | null;
@@ -22,14 +23,12 @@ export interface ResponseDtoBase {
 }
 
 export interface ReadUserDto extends ResponseDtoBase {
-	id: string;
 	email: string;
 	displayName: string;
 	avatarUrl?: string | null;
 }
 
 export interface ReadBoardDto extends ResponseDtoBase {
-	id: string;
 	name: string;
 	description?: string | null;
 	workspaceId: string;
@@ -37,7 +36,6 @@ export interface ReadBoardDto extends ResponseDtoBase {
 }
 
 export interface ReadColumnDto extends ResponseDtoBase {
-	id: string;
 	name: string;
 	boardId: string;
 	taskCount?: number;
@@ -45,7 +43,6 @@ export interface ReadColumnDto extends ResponseDtoBase {
 }
 
 export interface ReadTaskItemDto extends ResponseDtoBase {
-	id: string;
 	title: string;
 	description?: string | null;
 	position: number;
@@ -62,7 +59,6 @@ export interface ReadTaskItemDto extends ResponseDtoBase {
 }
 
 export interface ReadAttachmentDto extends ResponseDtoBase {
-	id: string;
 	fileName: string;
 	url: string;
 	contentType?: string | null;
@@ -78,7 +74,6 @@ export interface UploadAvatarResponse extends ResponseDtoBase {
 }
 
 export interface ReadCommentDto extends ResponseDtoBase {
-	id: string;
 	body: string;
 	taskId: string;
 	authorId: string;
@@ -87,7 +82,6 @@ export interface ReadCommentDto extends ResponseDtoBase {
 }
 
 export interface ReadNotificationDto extends ResponseDtoBase {
-	id: string;
 	messageText: string;
 	title: string;
 	isRead: boolean;
@@ -98,7 +92,6 @@ export interface NotificationUnreadCount extends ResponseDtoBase {
 }
 
 export interface ReadWorkspaceDto extends ResponseDtoBase {
-	id: string;
 	name: string;
 	description?: string | null;
 	ownerId: string;
@@ -109,7 +102,6 @@ export interface ReadWorkspaceDto extends ResponseDtoBase {
 }
 
 export interface ReadWorkspaceMemberDto extends ResponseDtoBase {
-	id: string;
 	workspaceId: string;
 	userId: string;
 	userDisplayName: string;
@@ -118,7 +110,6 @@ export interface ReadWorkspaceMemberDto extends ResponseDtoBase {
 }
 
 export interface ReadActivityLogDto extends ResponseDtoBase {
-	id: string;
 	workspaceId: string;
 	actorId: string;
 	actorDisplayName: string;
@@ -131,7 +122,6 @@ export interface ReadActivityLogDto extends ResponseDtoBase {
 }
 
 export interface ReadRoleDto {
-	id: string;
 	displayName: string;
 	description?: string | null;
 	workspaceRoleValue?: number | null;
@@ -145,7 +135,6 @@ export interface TokenResponseDto extends ResponseDtoBase {
 }
 
 export interface ActivityLogDto {
-	id: string;
 	workspaceId: string;
 	actorId: string;
 	actorDisplayName: string;
@@ -160,7 +149,6 @@ export interface ActivityLogDto {
 
 export interface ReadWorkspaceInvitationDto extends ResponseDtoBase
 {
-	id: string;
 	workspaceId: string;
 	workspaceName: string;
 	inviterName: string;

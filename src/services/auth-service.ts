@@ -1,13 +1,15 @@
 import { apiClient } from "@/lib/axios-client";
-import { 
-  LoginRequestDto as LoginRequest, 
-  RegisterRequestDto, 
-  ForgotPasswordRequestDto, 
-  ResetPasswordRequestDto,
+import {
+  LoginRequestDto as LoginRequest,
+  RegisterRequestDto,
+  ForgotPasswordRequestDto,
   VerifyEmailOtpRequestDto,
   ResendVerificationOtpRequestDto,
-  GoogleLoginRequestDto
+  GoogleLoginRequestDto,
+  ResetPasswordValidateOtpDto,
+  ResetPasswordWithTokenDto
 } from "@/lib/schemas/schemas"; // <--- Updated import path
+import { post } from "@/lib/service-factory";
 import { ReadUserDto, TokenResponseDto, ApiResponse } from "@/types/dtos";
 
 export const authService = {
@@ -68,9 +70,12 @@ export const authService = {
     return apiClient.post("/api/proxy/auth/forgot-password", data);
   },
 
-  resetPassword: async (data: ResetPasswordRequestDto) => {
-    // AllowAnonymous in backend
-    return apiClient.post("/api/proxy/auth/reset-password", data);
+  resetPasswordValidateOtp: async (data: ResetPasswordValidateOtpDto) => {
+    return post<string>("/api/proxy/auth/reset-password-validate-otp", data);
+  },
+
+  resetPasswordWithToken: async (data: ResetPasswordWithTokenDto) => {
+    return post<string>("/api/proxy/auth/reset-password-with-token", data);
   },
 
   /**

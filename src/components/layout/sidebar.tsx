@@ -179,7 +179,7 @@ export function Sidebar() {
             </button>
             <button
               onClick={() => setIsLogoutModalOpen(true)}
-              className="flex items-center justify-center p-2 text-muted-foreground hover:text-red-500 hover:bg-red-500/10 rounded-md transition-colors"
+              className="flex hover:cursor-pointer items-center justify-center p-2 text-muted-foreground hover:text-red-500 hover:bg-red-500/10 rounded-md transition-colors"
               title="Logout"
             >
               <span className="material-symbols-outlined text-[20px]">logout</span>

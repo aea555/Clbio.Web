@@ -190,8 +190,8 @@ export const loginSchema = z.object({
 export type LoginRequestDto = z.infer<typeof loginSchema>;
 
 export const passwordSchema = z.string()
-  .min(6, "Password must be at least 6 characters long")
-  .regex(passwordRegex, "Password must contain at least one uppercase letter, one lowercase letter, and one number");
+	.min(6, "Password must be at least 6 characters long")
+	.regex(passwordRegex, "Password must contain at least one uppercase letter, one lowercase letter, and one number");
 
 export const registerSchema = z.object({
 	email: z.string().email({ message: "Invalid email" }).max(320, { message: "Email too long" }),
@@ -206,16 +206,23 @@ export const forgotPasswordSchema = z.object({
 });
 export type ForgotPasswordRequestDto = z.infer<typeof forgotPasswordSchema>;
 
-export const resetPasswordSchema = z.object({
+export const resetPasswordValidateOtpSchema = z.object({
 	email: z.string().email({ message: "Invalid email" }).max(320, { message: "Email too long" }),
 	code: z.string().max(6, { message: "Code too long" }),
-	newPassword: passwordSchema,
 });
-export type ResetPasswordRequestDto = z.infer<typeof resetPasswordSchema>;
+
+export type ResetPasswordValidateOtpDto = z.infer<typeof resetPasswordValidateOtpSchema>;
+
+export const resetPasswordWithTokenSchema = z.object({
+	token: z.string().max(32, { message: "Token too long (max 32 characters)" }),
+	newPassword: passwordSchema
+});
+
+export type ResetPasswordWithTokenDto = z.infer<typeof resetPasswordWithTokenSchema>;
 
 export const verifyEmailOtpSchema = z.object({
 	email: z.email({ message: "Invalid email" }).max(320, { message: "Email too long" }),
-	otp: z.string().max(6, { message: "OTP too long" }),
+	code: z.string().max(6, { message: "OTP too long" }),
 });
 export type VerifyEmailOtpRequestDto = z.infer<typeof verifyEmailOtpSchema>;
 

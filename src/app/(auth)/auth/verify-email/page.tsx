@@ -26,7 +26,7 @@ export default function VerifyEmailPage() {
   const router = useRouter();
   const setUser = useAuthStore((state) => state.setUser);
   
-  // Store State (from Register/Login)
+  // Store State
   const { email: storeEmail, password, setVerificationContext, clearVerificationContext } = useVerificationStore();
   
   // Local UI State
@@ -35,7 +35,7 @@ export default function VerifyEmailPage() {
 
   const { verifyEmailMutation, loginMutation, resendVerificationMutation } = useAuthMutations();
 
-  // 1. Init: If we have an email from the store, go straight to OTP step
+  // 1. Init
   useEffect(() => {
     if (storeEmail) {
       setTargetEmail(storeEmail);
@@ -43,7 +43,7 @@ export default function VerifyEmailPage() {
     }
   }, [storeEmail]);
 
-  // 2. Cleanup on leave
+  // 2. Cleanup
   useEffect(() => {
     return () => clearVerificationContext();
   }, [clearVerificationContext]);
@@ -55,14 +55,12 @@ export default function VerifyEmailPage() {
     });
 
     const onSendCode = (data: EmailStepData) => {
-      // Trigger Resend API to send the code
-      resendVerificationMutation.mutate({email: data.email}, {
+      resendVerificationMutation.mutate({ email: data.email }, {
         onSuccess: () => {
           setTargetEmail(data.email);
           setStep("OTP_INPUT");
-          // Update store context just in case (without password)
           setVerificationContext(data.email); 
-          toast.success("If an account with that email exists and is not already verified, a verification code has been resent successfully.");
+          toast.warning("If the account with the email exists and needs verification, a Verification code has been sent.");
         }
       });
     };
@@ -84,7 +82,7 @@ export default function VerifyEmailPage() {
         <button
           type="submit"
           disabled={resendVerificationMutation.isPending}
-          className="w-full rounded-lg bg-[#4c99e6] py-3 text-sm font-bold text-white shadow-sm hover:bg-blue-600 focus:outline-none transition-colors disabled:opacity-70"
+          className="w-full rounded-lg bg-[#4c99e6] py-3 text-sm font-bold text-white shadow-sm hover:bg-blue-600 focus:outline-none transition-colors disabled:opacity-70 hover:cursor-pointer"
         >
           {resendVerificationMutation.isPending ? "Sending..." : "Send Verification Code"}
         </button>
@@ -98,12 +96,15 @@ export default function VerifyEmailPage() {
       resolver: zodResolver(otpStepSchema),
     });
 
+    // Extract onChange to wrap it for strict number enforcement
+    const { onChange, ...otpRegisterRest } = register("otp");
+
     const onVerify = (data: OtpStepData) => {
-      verifyEmailMutation.mutate({ email: targetEmail, otp: data.otp }, {
+      // Backend DTO requires 'code', so we map it here
+      verifyEmailMutation.mutate({ email: targetEmail, code: data.otp }, {
         onSuccess: () => {
           toast.success("Email verified successfully!");
 
-          // Auto-Login Check (Only if password exists AND email matches)
           if (password && targetEmail === storeEmail) {
             toast.loading("Logging you in...");
             loginMutation.mutate({ email: targetEmail, password }, {
@@ -120,7 +121,6 @@ export default function VerifyEmailPage() {
               }
             });
           } else {
-            // Manual Login Fallback
             clearVerificationContext();
             toast.info("Verification complete. Please log in.");
             router.push("/auth/login");
@@ -136,12 +136,19 @@ export default function VerifyEmailPage() {
               Verification Code
             </label>
             <input
-              {...register("otp")}
+              {...otpRegisterRest}
+              onChange={(e) => {
+                e.target.value = e.target.value.replace(/[^0-9]/g, "");
+                onChange(e);
+              }}
               id="otp"
               type="text"
+              inputMode="numeric"
               maxLength={6}
               placeholder="123456"
-              className="block w-full text-center text-3xl font-bold tracking-[0.5em] rounded-lg border border-[#e8edf3] dark:border-[#3e4d5d] bg-white dark:bg-[#111921] py-4 text-[#0e141b] dark:text-white placeholder-gray-300 focus:border-[#4c99e6] focus:ring-1 focus:ring-[#4c99e6] outline-none transition-colors"
+              autoComplete="one-time-code"
+              className="block w-full text-center text-4xl font-mono font-bold tracking-[0.5em] rounded-xl border-2 border-[#e8edf3] dark:border-[#3e4d5d] bg-white dark:bg-[#111921] py-4 text-[#0e141b] dark:text-white placeholder-gray-200 focus:border-[#4c99e6] focus:ring-0 focus:outline-none transition-all shadow-sm"
+              style={{ textIndent: '0.5em' }}
             />
             {errors.otp && <p className="text-red-500 text-center text-xs mt-1">{errors.otp.message}</p>}
           </div>
@@ -149,7 +156,7 @@ export default function VerifyEmailPage() {
           <button
             type="submit"
             disabled={verifyEmailMutation.isPending || loginMutation.isPending}
-            className="w-full rounded-lg bg-[#4c99e6] py-3 text-sm font-bold text-white shadow-sm hover:bg-blue-600 focus:outline-none transition-colors disabled:opacity-70"
+            className="w-full rounded-lg bg-[#4c99e6] py-3 text-sm font-bold text-white shadow-sm hover:bg-blue-600 focus:outline-none transition-colors disabled:opacity-70 hover:cursor-pointer"
           >
             {(verifyEmailMutation.isPending || loginMutation.isPending) ? "Verifying..." : "Verify & Continue"}
           </button>
@@ -158,7 +165,7 @@ export default function VerifyEmailPage() {
              <button 
                type="button"
                onClick={() => setStep("EMAIL_INPUT")}
-               className="text-sm text-[#507395] dark:text-gray-400 hover:text-[#4c99e6] transition-colors"
+               className="text-sm text-[#507395] dark:text-gray-400 hover:text-[#4c99e6] transition-colors hover:cursor-pointer"
              >
                Change email address?
              </button>
@@ -171,14 +178,17 @@ export default function VerifyEmailPage() {
     <div className="bg-[#f6f7f8] dark:bg-[#111921] min-h-screen flex flex-col font-sans">
       <header className="flex items-center justify-between border-b border-[#e8edf3] dark:border-[#2d3a46] px-10 py-3 bg-white dark:bg-[#1a242f]">
         <div className="flex items-center gap-4 text-[#0e141b] dark:text-white">
-          <div className="flex items-center gap-2 text-primary">
+          <div className="flex items-center gap-2 text-primary cursor-default">
             <span className="material-symbols-outlined text-3xl fill-1">grid_view</span>
             <span className="text-xl font-black tracking-tighter text-foreground uppercase">Clbio</span>
           </div>
         </div>
         <div className="flex items-center gap-4">
            <span className="text-sm text-[#507395] dark:text-gray-400">Already verified?</span>
-           <button onClick={() => router.push("/auth/login")} className="text-sm font-bold text-[#4c99e6] hover:underline">
+           <button 
+             onClick={() => router.push("/auth/login")} 
+             className="text-sm font-bold text-[#4c99e6] hover:underline hover:cursor-pointer"
+           >
              Sign in
            </button>
         </div>

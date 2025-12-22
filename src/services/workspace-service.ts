@@ -30,6 +30,9 @@ export const workspaceService = {
 
   // --- MEMBERS ---
 
+  getMyWorkspaceMembership: (workspaceId: string) => 
+    get<ReadWorkspaceMemberDto>(`/api/proxy/workspaces/${workspaceId}/members/me`),
+
   getMembers: (workspaceId: string) => 
     get<ReadWorkspaceMemberDto[]>(`/api/proxy/workspaces/${workspaceId}/members`),
 
