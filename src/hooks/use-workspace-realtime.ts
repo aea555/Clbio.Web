@@ -76,13 +76,12 @@ export function useWorkspaceRealtime(workspaceId: string) {
   // =========================================================
   // ATTACHMENT EVENTS
   // =========================================================
-  // Assuming these events affect the workspace audit log or task attachments
   useSocketEventListener("WorkspaceAttachmentCreated", (data: { workspaceId: string, taskId: string }) => {
-    queryClient.invalidateQueries({ queryKey: ["attachments", data.taskId] });
+    queryClient.invalidateQueries({ queryKey: ["attachments", data.workspaceId, data.taskId] });
   });
 
   useSocketEventListener("WorkspaceAttachmentDeleted", (data: { workspaceId: string, taskId: string }) => {
-    queryClient.invalidateQueries({ queryKey: ["attachments", data.taskId] });
+    queryClient.invalidateQueries({ queryKey: ["attachments", data.workspaceId, data.taskId] });
   });
 
   // =========================================================

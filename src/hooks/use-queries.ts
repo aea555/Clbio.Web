@@ -37,6 +37,14 @@ export function useWorkspaceMembers(workspaceId: string) {
   });
 }
 
+export function useMyWorkspaceMembership(workspaceId: string){
+  return useQuery({
+    queryKey: ["workspaces", "members", "mymembership", workspaceId],
+    queryFn: () => workspaceService.getMyWorkspaceMembership(workspaceId),
+    enabled: !!workspaceId
+  });
+}
+
 export function useWorkspaceInvitations(){
   return useQuery({
     queryKey: ["workspace-invitations"],
@@ -119,7 +127,7 @@ export function useComments(workspaceId: string, taskId: string) {
 
 export function useAttachments(workspaceId: string, taskId: string) {
   return useQuery({
-    queryKey: ["attachments", taskId],
+    queryKey: ["attachments", workspaceId, taskId],
     queryFn: () => attachmentService.getAll(workspaceId, taskId),
     enabled: !!workspaceId && !!taskId,
   });
