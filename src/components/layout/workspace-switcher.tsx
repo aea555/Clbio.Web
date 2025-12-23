@@ -1,17 +1,16 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { useRouter, usePathname } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useWorkspaces } from "@/hooks/use-queries";
 import { useWorkspaceStore } from "@/store/use-workspace-store";
 
 interface WorkspaceSwitcherProps {
-  onCreateClick: () => void; // Callback to open the modal
+  onCreateClick: () => void;
 }
 
 export function WorkspaceSwitcher({ onCreateClick }: WorkspaceSwitcherProps) {
   const router = useRouter();
-  const pathname = usePathname();
   const dropdownRef = useRef<HTMLDivElement>(null);
   
   const [isOpen, setIsOpen] = useState(false);
@@ -34,17 +33,18 @@ export function WorkspaceSwitcher({ onCreateClick }: WorkspaceSwitcherProps) {
   const handleSwitch = (workspaceId: string) => {
     setActiveWorkspaceId(workspaceId);
     setIsOpen(false);
-
     router.push("/dashboard")
   };
 
   return (
-    <div className="relative" ref={dropdownRef}>
+    <div className="relative w-full" ref={dropdownRef}>
       {/* Trigger Button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className={`hover: cursor-pointer w-full flex items-center gap-3 p-2 rounded-lg transition-colors group min-w-0 ${
-            isOpen ? "bg-white dark:bg-[#1a2430] shadow-sm" : "hover:bg-white dark:hover:bg-[#1a2430]"
+        className={`hover:cursor-pointer w-full flex items-center gap-3 p-2 rounded-lg transition-colors group min-w-0 border ${
+            isOpen 
+            ? "bg-white dark:bg-[#1a2430] border-[#e8edf3] dark:border-[#3e4d5d] shadow-sm" 
+            : "border-transparent hover:bg-white dark:hover:bg-[#1a2430] hover:border-[#e8edf3] dark:hover:border-[#3e4d5d]"
         }`}
       >
         {/* Workspace Avatar */}
@@ -58,7 +58,7 @@ export function WorkspaceSwitcher({ onCreateClick }: WorkspaceSwitcherProps) {
             {isLoading ? "Loading..." : (activeWorkspace?.name || "Select Workspace")}
           </h1>
           <span className="text-[10px] text-[#507395] dark:text-[#94a3b8] truncate">
-            {activeWorkspace ? "" : "No workspace"}
+            {activeWorkspace ? "Active" : "No workspace"}
           </span>
         </div>
 
@@ -72,24 +72,25 @@ export function WorkspaceSwitcher({ onCreateClick }: WorkspaceSwitcherProps) {
 
       {/* Dropdown Menu */}
       {isOpen && (
-        <div className="absolute top-full left-0 right-0 mt-2 bg-white dark:bg-[#1a2430] rounded-xl shadow-xl border border-[#e8edf3] dark:border-[#2d3a4a] overflow-hidden z-50 animate-in fade-in zoom-in-95 duration-100 origin-top">
+        // Added specific background colors here (bg-white / dark:bg-[#1a2430]) to block text behind it
+        <div className="absolute top-full left-0 right-0 mt-2 bg-white dark:bg-[#1a2430] rounded-xl shadow-xl border border-[#e8edf3] dark:border-[#3e4d5d] overflow-hidden z-50 animate-in fade-in zoom-in-95 duration-100 origin-top">
            
            {/* Header */}
-           <div className="px-3 py-2 border-b border-[#e8edf3] dark:border-[#2d3a4a] bg-[#f8fafb] dark:bg-[#111921]">
+           <div className="px-3 py-2 border-b border-[#e8edf3] dark:border-[#3e4d5d] bg-[#f8fafb] dark:bg-[#111921]">
               <span className="text-xs font-bold text-[#507395] dark:text-[#94a3b8] uppercase tracking-wider">
                  My Workspaces
               </span>
            </div>
 
            {/* List */}
-           <div className="max-h-[240px] overflow-y-auto py-1">
+           <div className="max-h-[240px] overflow-y-auto py-1 custom-scrollbar">
               {workspaces?.map((ws) => {
                  const isActive = activeWorkspaceId === ws.id;
                  return (
                     <button
                        key={ws.id}
                        onClick={() => handleSwitch(ws.id)}
-                       className="hover: cursor-pointer w-full text-left px-3 py-2 flex hover:cursor-pointer items-center gap-3 hover:bg-[#f8fafb] dark:hover:bg-[#2d3a4a] transition-colors"
+                       className="hover:cursor-pointer w-full text-left px-3 py-2 flex items-center gap-3 hover:bg-[#f8fafb] dark:hover:bg-[#2d3a4a] transition-colors"
                     >
                        <div className={`w-6 h-6 rounded flex items-center justify-center text-[10px] font-bold text-white shrink-0 ${
                           isActive ? "bg-primary" : "bg-gray-400 dark:bg-gray-600"
@@ -110,7 +111,7 @@ export function WorkspaceSwitcher({ onCreateClick }: WorkspaceSwitcherProps) {
            </div>
 
            {/* Footer Action */}
-           <div className="p-2 border-t border-[#e8edf3] dark:border-[#2d3a4a]">
+           <div className="p-2 border-t border-[#e8edf3] dark:border-[#3e4d5d]">
               <button
                  onClick={() => { setIsOpen(false); onCreateClick(); }}
                  className="flex w-full hover:cursor-pointer items-center justify-center gap-2 rounded-lg py-2 px-3 bg-primary-light text-primary hover:bg-primary-light/80 transition-colors text-xs font-bold"

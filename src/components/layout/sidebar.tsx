@@ -47,7 +47,6 @@ export function Sidebar() {
   const isInvitationsActive = pathname.includes("/dashboard/settings/account/workspace-invitations");
   const isAppSettingsActive = pathname.startsWith("/dashboard/settings") && !isInvitationsActive;
 
-  // FIX: Dynamic classes using CSS variables for backgrounds and text
   const getLinkClasses = (isActive: boolean) =>
     `flex items-center gap-3 px-3 py-2 rounded-lg transition-all relative ${isActive
       ? "bg-card shadow-sm text-primary font-bold border border-border-base"
@@ -83,9 +82,8 @@ export function Sidebar() {
         className={`
           fixed inset-y-0 left-0 z-50 h-full flex flex-col 
           border-r border-border-base bg-background font-sans
-          transition-all duration-300 ease-in-out
-          ${isSidebarOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"}
-          ${isSidebarOpen ? "w-64" : "lg:w-0 lg:border-none lg:overflow-hidden"} 
+          transition-transform duration-300 ease-in-out w-64
+          ${isSidebarOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0 lg:w-0 lg:border-none lg:overflow-hidden"} 
         `}
       >
         {/* Header containing the Workspace Switcher */}
@@ -97,7 +95,7 @@ export function Sidebar() {
           
           <button 
             onClick={() => setSidebarOpen(false)}
-            className="flex hover: cursor-pointer items-center justify-center p-2 text-muted-foreground hover:text-primary hover:bg-card rounded-lg transition-colors flex-shrink-0"
+            className="flex hover:cursor-pointer items-center justify-center p-2 text-muted-foreground hover:text-primary hover:bg-card rounded-lg transition-colors flex-shrink-0"
             title="Collapse Sidebar"
           >
              <span className="material-symbols-outlined text-[20px] leading-none">
@@ -106,7 +104,7 @@ export function Sidebar() {
           </button>
         </div>
 
-        <nav className="flex-1 overflow-y-auto px-3 py-4 flex flex-col gap-6 whitespace-nowrap custom-scrollbar">
+        <nav className="flex-1 overflow-y-auto px-3 py-4 flex flex-col gap-6 whitespace-nowrap custom-scrollbar z-10">
           
           {/* CLUSTER 1: WORKSPACE */}
           <div className="flex flex-col gap-1">
@@ -173,7 +171,7 @@ export function Sidebar() {
 
         {/* Footer Actions */}
         <div className="p-4 border-t border-border-base flex items-center justify-between border-dashed mt-auto">
-            <button className="flex items-center gap-2 p-2 text-muted-foreground hover:text-primary transition-colors text-sm font-medium hover:bg-card rounded-md">
+            <button className="hover:cursor-pointer flex items-center gap-2 p-2 text-muted-foreground hover:text-primary transition-colors text-sm font-medium hover:bg-card rounded-md">
               <span className="material-symbols-outlined text-[20px]">help</span>
               Help
             </button>
@@ -187,6 +185,7 @@ export function Sidebar() {
         </div>
       </aside>
 
+      {/* Spacer for Desktop Pushing Content */}
       <div 
          className={`flex-shrink-0 transition-all duration-300 ease-in-out hidden lg:block ${isSidebarOpen ? "w-64" : "w-0"}`} 
       />
