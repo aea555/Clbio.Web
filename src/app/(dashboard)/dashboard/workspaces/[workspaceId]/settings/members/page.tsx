@@ -185,23 +185,25 @@ export default function WorkspaceMembersPage() {
               <tbody className="divide-y divide-[#e8edf3] dark:divide-[#2d3a4a]">
                 {members?.map((member) => {
                   const isManaged = canManageMember(member);
-                  // Check status
                   const isOnline = onlineUserIds?.includes(member.userId);
 
                   return (
                     <tr key={member.id} className="group hover:bg-[#f8fafb] dark:hover:bg-[#111921]/50 transition-colors">
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-3">
-                          {/* Replaced manual div with UserAvatar */}
+
                           <UserAvatar
                             src={member.userAvatarUrl}
                             name={member.userDisplayName}
                             isOnline={isOnline}
                             size="md"
                           />
-                          <div>
-                            <div className="font-medium text-[#0e141b] dark:text-[#e8edf3]">{member.userDisplayName}</div>
-                            {/*<div className="text-xs text-[#507395]">{member.email}</div>*/}
+
+                          {/* Added min-w-0 to allow truncation inside flex child */}
+                          <div className="min-w-0">
+                            <div className="font-medium text-[#0e141b] dark:text-[#e8edf3] truncate">
+                              {member.userDisplayName}
+                            </div>
                           </div>
                         </div>
                       </td>
@@ -241,7 +243,7 @@ export default function WorkspaceMembersPage() {
                         {isManaged && can(Permission.RemoveMember) && (
                           <button
                             onClick={() => confirmRemove(member.userId)}
-                            className="hover: cursor-pointer inline-flex items-center justify-center text-[#507395] hover:text-red-500 transition-colors p-2 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20"
+                            className="hover:cursor-pointer inline-flex items-center justify-center text-[#507395] hover:text-red-500 transition-colors p-2 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20"
                             title="Remove member"
                           >
                             <span className="material-symbols-outlined text-[20px]">delete</span>

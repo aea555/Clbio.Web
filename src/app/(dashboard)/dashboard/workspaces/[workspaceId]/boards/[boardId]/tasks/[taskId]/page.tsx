@@ -166,7 +166,7 @@ export default function TaskDetailPage() {
                     </button>
                     <div className="relative w-full h-full flex items-center justify-center p-4 md:p-8" onClick={(e) => e.stopPropagation()}>
                         {isImageFile(previewAttachment) ? (
-                            <img src={previewAttachment.url} alt={previewAttachment.fileName} className="max-w-full max-h-[85vh] rounded-lg shadow-2xl object-contain border border-white/10" />
+                            <img crossOrigin="anonymous" src={previewAttachment.url} alt={previewAttachment.fileName} className="max-w-full max-h-[85vh] rounded-lg shadow-2xl object-contain border border-white/10" />
                         ) : (
                             <iframe src={previewAttachment.url} className="w-full max-w-5xl h-[85vh] bg-white rounded-lg shadow-2xl" title="PDF Preview" />
                         )}
@@ -273,7 +273,7 @@ export default function TaskDetailPage() {
                                                 <div onClick={(e) => handleFileClick(e, file)} className="flex items-center gap-3 flex-1 min-w-0 cursor-pointer hover:cursor-pointer">
                                                     <div className="w-10 h-10 bg-background rounded flex items-center justify-center text-muted-foreground font-bold text-xs uppercase flex-shrink-0 overflow-hidden relative border border-border-base">
                                                         {isImage ? (
-                                                            <img src={file.url} alt="Thumbnail" className="w-full h-full object-cover" />
+                                                            <img crossOrigin="anonymous" src={file.url} alt="Thumbnail" className="w-full h-full object-cover" />
                                                         ) : isPdf ? (
                                                             <span className="material-symbols-outlined text-[20px] text-red-500">picture_as_pdf</span>
                                                         ) : (
