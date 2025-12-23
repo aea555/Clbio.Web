@@ -20,8 +20,7 @@ export default function SocketProvider({ children }: { children: ReactNode }) {
   const [connection, setConnection] = useState<signalR.HubConnection | null>(null);
   const [isConnected, setIsConnected] = useState(false);
   const { isAuthenticated } = useAuthStore();
-  const HUB_URL = process.env.NEXT_PUBLIC_API_URL?.replace("/api", "") + "/hubs/app";
-
+  const HUB_URL = `${process.env.NEXT_PUBLIC_API_ORIGIN}/hubs/app`;
 
   useEffect(() => {
     // Only connect if the user is authenticated
