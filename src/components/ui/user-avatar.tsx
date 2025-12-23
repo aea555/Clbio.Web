@@ -18,7 +18,7 @@ export function UserAvatar({ src, name, isOnline = false, className, size = "md"
   };
 
   return (
-    <div className={cn("relative inline-block", className)}>
+    <div className={cn("relative inline-block shrink-0", className)}>
       {src ? (
         <img
           src={src}
