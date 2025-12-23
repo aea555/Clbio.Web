@@ -79,16 +79,15 @@ export function Header() {
   const breadcrumbs = getBreadcrumbs();
 
   return (
-    // FIX: Using bg-card and border-border-base for theme synchronization
-    <header className="relative z-[50] h-16 border-b border-border-base flex items-center justify-between px-4 md:px-6 bg-card flex-shrink-0 z-10 font-sans transition-all duration-300">
+    // FIX: Lowered Z-index to z-40 so it sits BELOW the sidebar (z-50) on mobile
+    <header className="relative z-40 h-16 border-b border-border-base flex items-center justify-between px-4 md:px-6 bg-card flex-shrink-0 font-sans transition-all duration-300">
       
       {/* Left: Toggle & Breadcrumbs */}
       <div className="flex items-center gap-4">
         {!isSidebarOpen && (
           <button 
             onClick={toggleSidebar}
-            // FIX: Hover backgrounds and text colors using theme variables
-            className="hover: cursor-pointer flex items-center justify-center p-2 -ml-2 text-muted-foreground hover:text-foreground hover:bg-background rounded-lg transition-colors"
+            className="hover:cursor-pointer flex items-center justify-center p-2 -ml-2 text-muted-foreground hover:text-foreground hover:bg-background rounded-lg transition-colors"
             title="Open Sidebar"
           >
             <span className="material-symbols-outlined text-[24px] leading-none">menu</span>
@@ -96,7 +95,7 @@ export function Header() {
         )}
 
         <div className="flex items-center gap-2 text-sm text-muted-foreground">
-          <Link href={breadcrumbs.parentHref} className="hover:text-primary cursor-pointer transition-colors sm:inline">
+          <Link href={breadcrumbs.parentHref} className="hover:text-primary hover:cursor-pointer transition-colors sm:inline">
             {breadcrumbs.parent}
           </Link>
           <span className="material-symbols-outlined text-base hidden sm:inline">chevron_right</span>
@@ -118,7 +117,6 @@ export function Header() {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             onFocus={() => setIsSearchFocused(true)}
-            // FIX: Search bar background matches main background, flips to card color on focus
             className="pl-10 pr-4 py-2 bg-background border border-border-base focus:border-primary/50 focus:bg-card rounded-full text-sm w-48 lg:w-64 outline-none transition-all placeholder-muted-foreground/60 text-foreground" 
             placeholder="Search boards..." 
             type="text"
@@ -126,7 +124,7 @@ export function Header() {
 
           {/* Search Dropdown */}
           {isSearchFocused && searchQuery.length > 1 && (
-            <div className="absolute top-full left-0 right-0 mt-2 bg-card rounded-xl shadow-xl border border-border-base overflow-hidden min-w-[280px] z-50 animate-in fade-in zoom-in-95 duration-100">
+            <div className="absolute top-full left-0 right-0 mt-2 bg-popover rounded-xl shadow-xl border border-border-base overflow-hidden min-w-[280px] z-50 animate-in fade-in zoom-in-95 duration-100">
               {isSearching ? (
                 <div className="p-4 text-center text-muted-foreground text-sm">Searching...</div>
               ) : searchResults && searchResults.length > 0 ? (
@@ -136,7 +134,7 @@ export function Header() {
                     <li key={board.id}>
                       <button 
                         onClick={() => handleBoardClick(board.id)}
-                        className="hover:cursor-pointer w-full text-left px-4 py-2.5 hover:bg-background transition-colors flex items-center gap-3"
+                        className="hover:cursor-pointer w-full text-left px-4 py-2.5 hover:bg-muted/50 transition-colors flex items-center gap-3"
                       >
                         <div className="w-8 h-8 rounded bg-primary flex items-center justify-center text-white font-bold text-xs shrink-0">
                           {board.name.substring(0, 2).toUpperCase()}
@@ -168,7 +166,7 @@ export function Header() {
               onClick={() => setIsNotifOpen(!isNotifOpen)}
               className={`flex items-center hover:cursor-pointer justify-center p-2 rounded-full transition-colors ${
                 isNotifOpen 
-                  ? "bg-primary-light text-primary" 
+                  ? "bg-primary/10 text-primary" 
                   : "text-muted-foreground hover:text-primary hover:bg-background"
               }`}
             >
