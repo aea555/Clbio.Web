@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl"; //
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
@@ -8,32 +9,32 @@ interface SettingsTabsProps {
 }
 
 export function SettingsTabs({ workspaceId }: SettingsTabsProps) {
+  const t = useTranslations("SettingsTabs"); //
   const pathname = usePathname();
   const baseUrl = `/dashboard/workspaces/${workspaceId}/settings`;
 
   const tabs = [
-    { name: "General", href: baseUrl },
-    { name: "Members", href: `${baseUrl}/members` },
-    { name: "Audit Logs", href: `${baseUrl}/audit-logs` },
+    { name: t("general"), href: baseUrl },
+    { name: t("members"), href: `${baseUrl}/members` },
+    { name: t("audit_logs"), href: `${baseUrl}/audit-logs` },
   ];
 
   return (
     <div className="border-b border-[#e8edf3] dark:border-[#2d3a4a] mb-8">
       <nav className="-mb-px flex space-x-8">
         {tabs.map((tab) => {
-          // Exact match for root "General" tab, startsWith for others
+          // Exact match logic preserved
           const isActive = tab.href === baseUrl 
             ? pathname === baseUrl 
             : pathname.startsWith(tab.href);
 
           return (
             <Link
-              key={tab.name}
+              key={tab.href}
               href={tab.href}
               className={`
                 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors
                 ${isActive 
-                  /* FIX: Dynamic Primary Border and Text */
                   ? "border-primary text-primary" 
                   : "border-transparent text-[#507395] dark:text-[#94a3b8] hover:text-[#0e141b] dark:hover:text-[#e8edf3] hover:border-gray-300"}
               `}

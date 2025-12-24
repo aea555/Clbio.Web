@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
+import { useTranslations } from "next-intl"; //
 import { useWorkspaceInvitations } from "@/hooks/use-queries"; 
 import { useWorkspaceStore } from "@/store/use-workspace-store";
 import { useAuthMutations } from "@/hooks/use-mutations";
@@ -12,6 +13,7 @@ import { useUIStore } from "@/store/use-ui-store";
 import { WorkspaceSwitcher } from "./workspace-switcher"; 
 
 export function Sidebar() {
+  const t = useTranslations("Sidebar"); //
   const pathname = usePathname();
   const { isSidebarOpen, setSidebarOpen } = useUIStore();
   const [isMobile, setIsMobile] = useState(false);
@@ -64,9 +66,9 @@ export function Sidebar() {
         isOpen={isLogoutModalOpen}
         onClose={() => setIsLogoutModalOpen(false)}
         onConfirm={() => logoutMutation.mutate()}
-        title="Sign Out"
-        description="Are you sure you want to sign out?"
-        confirmText="Sign Out"
+        title={t("logout_modal.title")}
+        description={t("logout_modal.description")}
+        confirmText={t("logout_modal.confirm")}
         variant="primary"
         isLoading={logoutMutation.isPending}
       />
@@ -86,7 +88,6 @@ export function Sidebar() {
           ${isSidebarOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0 lg:w-0 lg:border-none lg:overflow-hidden"} 
         `}
       >
-        {/* Header containing the Workspace Switcher */}
         <div className="p-4 border-b border-border-base flex items-center justify-between gap-2">
           
           <div className="flex-1 min-w-0">
@@ -96,7 +97,7 @@ export function Sidebar() {
           <button 
             onClick={() => setSidebarOpen(false)}
             className="flex hover:cursor-pointer items-center justify-center p-2 text-muted-foreground hover:text-primary hover:bg-card rounded-lg transition-colors flex-shrink-0"
-            title="Collapse Sidebar"
+            title={t("collapse_sidebar")}
           >
              <span className="material-symbols-outlined text-[20px] leading-none">
                {isMobile ? "close" : "first_page"}
@@ -110,13 +111,13 @@ export function Sidebar() {
           <div className="flex flex-col gap-1">
              <div className="px-3 mb-1">
                 <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider opacity-60">
-                   Workspace
+                   {t("cluster_workspace")}
                 </span>
              </div>
 
              <Link href="/dashboard" className={getLinkClasses(isBoardsActive)}>
                <span className={`material-symbols-outlined text-[24px] ${isBoardsActive ? "fill-1" : ""}`}>dashboard</span>
-               <span className="text-sm">Boards</span>
+               <span className="text-sm">{t("boards")}</span>
              </Link>
 
              <Link
@@ -125,7 +126,7 @@ export function Sidebar() {
                className={`${getLinkClasses(isWorkspaceMembersActive)} ${!activeWorkspaceId ? "opacity-40 cursor-not-allowed" : ""}`}
              >
                <span className={`material-symbols-outlined text-[24px] ${isWorkspaceMembersActive ? "fill-1" : ""}`}>group</span>
-               <span className="text-sm">Members</span>
+               <span className="text-sm">{t("members")}</span>
              </Link>
 
              <Link
@@ -133,7 +134,7 @@ export function Sidebar() {
                className={getLinkClasses(isWorkspaceSettingsActive)}
              >
                <span className={`material-symbols-outlined text-[24px] ${isWorkspaceSettingsActive ? "fill-1" : ""}`}>settings</span>
-               <span className="text-sm">Settings</span>
+               <span className="text-sm">{t("settings")}</span>
              </Link>
           </div>
 
@@ -141,7 +142,7 @@ export function Sidebar() {
           <div className="flex flex-col gap-1">
              <div className="px-3 mb-1">
                 <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider opacity-60">
-                   General
+                   {t("cluster_general")}
                 </span>
              </div>
 
@@ -150,7 +151,7 @@ export function Sidebar() {
                className={getLinkClasses(isInvitationsActive)}
              >
                <span className={`material-symbols-outlined text-[24px] ${isInvitationsActive ? "fill-1" : ""}`}>mail</span>
-               <span className="text-sm">Invitations</span>
+               <span className="text-sm">{t("invitations")}</span>
                {pendingCount > 0 && (
                  <span className="absolute right-2 bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full ring-2 ring-background">
                    {pendingCount}
@@ -163,29 +164,27 @@ export function Sidebar() {
                className={getLinkClasses(isAppSettingsActive)}
              >
                <span className={`material-symbols-outlined text-[24px] ${isAppSettingsActive ? "fill-1" : ""}`}>tune</span>
-               <span className="text-sm">App Settings</span>
+               <span className="text-sm">{t("app_settings")}</span>
              </Link>
           </div>
 
         </nav>
 
-        {/* Footer Actions */}
         <div className="p-4 border-t border-border-base flex items-center justify-between border-dashed mt-auto">
             <button className="hover:cursor-pointer flex items-center gap-2 p-2 text-muted-foreground hover:text-primary transition-colors text-sm font-medium hover:bg-card rounded-md">
               <span className="material-symbols-outlined text-[20px]">help</span>
-              Help
+              {t("help")}
             </button>
             <button
               onClick={() => setIsLogoutModalOpen(true)}
               className="flex hover:cursor-pointer items-center justify-center p-2 text-muted-foreground hover:text-red-500 hover:bg-red-500/10 rounded-md transition-colors"
-              title="Logout"
+              title={t("logout")}
             >
               <span className="material-symbols-outlined text-[20px]">logout</span>
             </button>
         </div>
       </aside>
 
-      {/* Spacer for Desktop Pushing Content */}
       <div 
          className={`flex-shrink-0 transition-all duration-300 ease-in-out hidden lg:block ${isSidebarOpen ? "w-64" : "w-0"}`} 
       />

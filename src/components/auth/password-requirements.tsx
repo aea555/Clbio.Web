@@ -1,13 +1,18 @@
+"use client";
+
 import { cn } from "@/lib/utils";
+import { useTranslations } from "next-intl";
 
 export function PasswordRequirements({ value }: { value: string }) {
-  if (!value) return null; // Don't show if input is empty
+  const t = useTranslations("PasswordRequirements");
+
+  if (!value) return null; 
 
   const requirements = [
-    { label: "At least 6 characters", met: value.length >= 6 },
-    { label: "At least one uppercase letter", met: /[A-Z]/.test(value) },
-    { label: "At least one lowercase letter", met: /[a-z]/.test(value) },
-    { label: "At least one number", met: /\d/.test(value) },
+    { label: t("length"), met: value.length >= 6 },
+    { label: t("uppercase"), met: /[A-Z]/.test(value) },
+    { label: t("lowercase"), met: /[a-z]/.test(value) },
+    { label: t("number"), met: /\d/.test(value) },
   ];
 
   return (

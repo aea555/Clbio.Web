@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useTranslations } from "next-intl"; //
 import { useTaskMutations } from "@/hooks/use-mutations";
 import { CreateTaskItemDto, createTaskItemSchema } from "@/lib/schemas/schemas";
 import { createPortal } from "react-dom";
@@ -16,6 +17,7 @@ interface CreateTaskModalProps {
 }
 
 export function CreateTaskModal({ isOpen, onClose, workspaceId, boardId, columnId }: CreateTaskModalProps) {
+   const t = useTranslations("Board.create_task"); //
    const { createTask } = useTaskMutations(workspaceId, boardId);
    const [mounted, setMounted] = useState(false);
 
@@ -55,7 +57,7 @@ export function CreateTaskModal({ isOpen, onClose, workspaceId, boardId, columnI
             onClick={(e) => e.stopPropagation()}
          >
             <div className="px-6 py-4 border-b border-[#e8edf3] dark:border-[#2d3a4a] bg-[#f8fafb] dark:bg-[#111921] flex justify-between items-center">
-               <h3 className="font-bold text-[#0e141b] dark:text-[#e8edf3]">New Task</h3>
+               <h3 className="font-bold text-[#0e141b] dark:text-[#e8edf3]">{t("title")}</h3>
                <button onClick={onClose} className="text-[#507395] hover:text-[#0e141b] dark:hover:text-white transition-colors">
                   <span className="material-symbols-outlined text-[20px]">close</span>
                </button>
@@ -66,25 +68,24 @@ export function CreateTaskModal({ isOpen, onClose, workspaceId, boardId, columnI
                <input type="hidden" {...register("columnId")} />
 
                <div className="space-y-1.5">
-                  <label className="block text-sm font-semibold text-[#0e141b] dark:text-[#e8edf3]">Task Title</label>
+                  <label className="block text-sm font-semibold text-[#0e141b] dark:text-[#e8edf3]">{t("task_title_label")}</label>
                   <textarea
                      {...register("title")}
                      autoFocus
                      rows={2}
-                     /* FIX: Dynamic focus colors */
                      className="block w-full rounded-lg border border-[#e8edf3] dark:border-[#3e4d5d] bg-white dark:bg-[#111921] py-2 px-3 text-sm text-[#0e141b] dark:text-white focus:border-primary focus:ring-1 focus:ring-primary outline-none resize-none transition-colors"
-                     placeholder="What needs to be done?"
+                     placeholder={t("task_title_placeholder")}
                   />
                   {errors.title && <p className="text-red-500 text-xs">{errors.title.message}</p>}
                </div>
 
                <div className="space-y-1.5">
-                  <label className="block text-sm font-semibold text-[#0e141b] dark:text-[#e8edf3]">Description <span className="font-normal text-[#507395]">(Optional)</span></label>
+                  <label className="block text-sm font-semibold text-[#0e141b] dark:text-[#e8edf3]">{t("description_label")} <span className="font-normal text-[#507395]">{t("optional_hint")}</span></label>
                   <textarea
                      {...register("description")}
                      rows={3}
                      className="block w-full rounded-lg border border-[#e8edf3] dark:border-[#3e4d5d] bg-white dark:bg-[#111921] py-2 px-3 text-sm text-[#0e141b] dark:text-white focus:border-primary focus:ring-1 focus:ring-primary outline-none resize-none transition-colors"
-                     placeholder="Add details..."
+                     placeholder={t("description_placeholder")}
                   />
                </div>
 
@@ -92,18 +93,17 @@ export function CreateTaskModal({ isOpen, onClose, workspaceId, boardId, columnI
                   <button
                      type="button"
                      onClick={onClose}
-                     className="px-4 py-2 text-sm font-medium text-[#507395] hover:bg-gray-100 dark:hover:bg-[#2d3a4a] rounded-lg transition-colors"
+                     className="px-4 py-2 text-sm font-medium text-[#507395] hover:bg-gray-100 dark:hover:bg-[#2d3a4a] rounded-lg transition-colors hover:cursor-pointer"
                   >
-                     Cancel
+                     {t("cancel_button")}
                   </button>
                   <button
                      type="submit"
                      disabled={createTask.isPending}
-                     /* FIX: Dynamic button colors */
-                     className="px-5 py-2 bg-primary hover:bg-primary-hover text-white rounded-lg text-sm font-bold shadow-sm transition-colors flex items-center gap-2"
+                     className="px-5 py-2 bg-primary hover:bg-primary-hover text-white rounded-lg text-sm font-bold shadow-sm transition-colors flex items-center gap-2 hover:cursor-pointer"
                   >
                      {createTask.isPending && <span className="w-3 h-3 border-2 border-white/50 border-t-white rounded-full animate-spin"></span>}
-                     Create Task
+                     {t("create_button")}
                   </button>
                </div>
             </form>

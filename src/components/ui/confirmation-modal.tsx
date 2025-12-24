@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
+import { useTranslations } from "next-intl"; //
 
 interface ConfirmationModalProps {
   isOpen: boolean;
@@ -21,13 +22,19 @@ export function ConfirmationModal({
   onConfirm,
   title,
   description,
-  confirmText = "Confirm",
-  cancelText = "Cancel",
+  confirmText,
+  cancelText,
   variant = "primary",
   isLoading = false,
 }: ConfirmationModalProps) {
+  const t = useTranslations("ConfirmationModal"); //
   const [mounted, setMounted] = useState(false);
-  // Close on Escape key
+
+  // Use provided props or fall back to localized defaults
+  const finalConfirmText = confirmText || t("default_confirm");
+  const finalCancelText = cancelText || t("default_cancel");
+
+  // Close on Escape key (Logic preserved)
   useEffect(() => {
     setMounted(true);
     const handleEscape = (e: KeyboardEvent) => {
@@ -41,7 +48,6 @@ export function ConfirmationModal({
 
   // Variant Styles
   const confirmBtnStyles = {
-    /* FIX: Replaced hardcoded hex values with dynamic primary classes */
     primary: "bg-primary hover:bg-primary-hover text-white",
     danger: "bg-red-600 hover:bg-red-700 text-white",
     warning: "bg-amber-500 hover:bg-amber-600 text-white",
@@ -57,7 +63,6 @@ export function ConfirmationModal({
           {/* Icon based on variant */}
           <div className={`mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full ${variant === 'danger' ? 'bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400' :
               variant === 'warning' ? 'bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400' :
-                /* FIX: Replaced bg-blue-100/text-blue-600 with dynamic primary theme */
                 'bg-primary-light text-primary'
             }`}>
             <span className="material-symbols-outlined text-[28px]">
@@ -75,9 +80,9 @@ export function ConfirmationModal({
           <button
             onClick={onClose}
             disabled={isLoading}
-            className="hover:cursor-pointer flex-1 px-4 py-2.5 rounded-lg border border-[#e8edf3] dark:border-[#3e4d5d] text-sm font-medium text-[#507395] hover:bg-gray-50 dark:hover:bg-[#111921] transition-colors disabled:opacity-50"
+            className="hover:cursor-pointer flex-1 px-4 py-2.5 rounded-lg border border-[#e8edf3] dark:border-[#3e4d5d] text-sm font-medium text-[#507395] hover:bg-gray-100 dark:hover:bg-[#111921] transition-colors disabled:opacity-50"
           >
-            {cancelText}
+            {finalCancelText}
           </button>
           <button
             onClick={onConfirm}
@@ -85,7 +90,7 @@ export function ConfirmationModal({
             className={`hover:cursor-pointer flex-1 px-4 py-2.5 rounded-lg text-sm font-bold shadow-sm transition-colors disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2 ${confirmBtnStyles[variant]}`}
           >
             {isLoading && <span className="material-symbols-outlined animate-spin text-[18px]">progress_activity</span>}
-            {confirmText}
+            {finalConfirmText}
           </button>
         </div>
       </div>

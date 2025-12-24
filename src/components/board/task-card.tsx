@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl"; //
 import { ReadTaskItemDto } from "@/types/dtos";
 import { TaskProgressStatus } from "@/types/enums";
 import { useSortable } from "@dnd-kit/sortable";
@@ -11,7 +12,9 @@ interface TaskCardProps {
 }
 
 export function TaskCard({ task, onClick }: TaskCardProps) {
-  // DnD Hook
+  const t = useTranslations("TaskCard"); //
+
+  // DnD Hook (Logic preserved)
   const {
     attributes,
     listeners,
@@ -59,7 +62,7 @@ export function TaskCard({ task, onClick }: TaskCardProps) {
         {task.assigneeAvatarUrl && (
            <img 
              src={task.assigneeAvatarUrl} 
-             alt="Assignee" 
+             alt={t("assignee_alt")} 
              className="w-5 h-5 rounded-full object-cover flex-shrink-0 ring-1 ring-white dark:ring-[#2d3a4a]" 
            />
         )}
@@ -67,7 +70,7 @@ export function TaskCard({ task, onClick }: TaskCardProps) {
 
       <div className="flex items-center justify-between mt-3">
          <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${getStatusColor(task.progressStatus)}`}>
-            {TaskProgressStatus[task.progressStatus]}
+            {t(`status.${task.progressStatus}`)}
          </span>
 
          <div className="flex items-center gap-2 text-[#507395] text-xs">

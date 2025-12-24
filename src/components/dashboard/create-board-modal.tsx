@@ -2,6 +2,7 @@
 
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useTranslations } from "next-intl"; //
 import { useWorkspaceStore } from "@/store/use-workspace-store";
 import { useBoardMutations } from "@/hooks/use-mutations";
 import { toast } from "sonner";
@@ -10,6 +11,7 @@ import { CreateBoardDto, createBoardSchema } from "@/lib/schemas/schemas";
 import { createPortal } from "react-dom";
 
 export function CreateBoardModal({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
+  const t = useTranslations("CreateBoardModal"); //
   const { activeWorkspaceId } = useWorkspaceStore();
   const { createBoard } = useBoardMutations(activeWorkspaceId || "");
   const [mounted, setMounted] = useState(false);
@@ -41,7 +43,7 @@ export function CreateBoardModal({ isOpen, onClose }: { isOpen: boolean; onClose
 
   const onSubmit = (data: CreateBoardDto) => {
     if (!activeWorkspaceId) {
-      toast.error("No active workspace selected");
+      toast.error(t("errors.no_workspace"));
       return;
     }
 
@@ -53,7 +55,7 @@ export function CreateBoardModal({ isOpen, onClose }: { isOpen: boolean; onClose
       },
       {
         onSuccess: () => {
-          toast.success("Board created successfully!");
+          toast.success(t("success"));
           onClose();
         },
       }
@@ -69,11 +71,11 @@ export function CreateBoardModal({ isOpen, onClose }: { isOpen: boolean; onClose
         onClick={(e) => e.stopPropagation()} 
       >
         {/* Header */}
-        <div className="px-6 py-4 border-b border-[#e8edf3] dark:border-[#2d3a4a] flex justify-between items-center bg-[#f8fafb] dark:bg-[#111921]">
-          <h3 className="text-lg font-bold text-[#0e141b] dark:text-[#e8edf3]">Create New Board</h3>
+        <div className="px-6 py-4 border-b border-[#e8edf3] dark:border-[#2d3a4a] bg-[#f8fafb] dark:bg-[#111921] flex justify-between items-center">
+          <h3 className="text-lg font-bold text-[#0e141b] dark:text-[#e8edf3]">{t("title")}</h3>
           <button 
             onClick={onClose}
-            className="text-[#507395] hover:text-[#0e141b] dark:hover:text-white transition-colors"
+            className="text-[#507395] hover:text-[#0e141b] dark:hover:text-white transition-colors hover:cursor-pointer"
           >
             <span className="material-symbols-outlined text-[20px]">close</span>
           </button>
@@ -84,18 +86,14 @@ export function CreateBoardModal({ isOpen, onClose }: { isOpen: boolean; onClose
           {/* Name Field */}
           <div className="space-y-1.5">
             <label className="block text-sm font-semibold text-[#0e141b] dark:text-[#e8edf3]" htmlFor="name">
-              Board Title <span className="text-red-500">*</span>
+              {t("board_title_label")} <span className="text-red-500">*</span>
             </label>
             <input
               {...register("name")}
               id="name"
               type="text"
-              placeholder="e.g. Q4 Marketing Plan"
+              placeholder={t("board_title_placeholder")}
               autoFocus
-              /* FIX: Removed hardcoded focus colors.
-                 Changed focus:border-[#4c99e6] -> focus:border-primary
-                 Changed focus:ring-[#4c99e6]   -> focus:ring-primary
-              */
               className="block w-full rounded-lg border border-[#e8edf3] dark:border-[#3e4d5d] bg-white dark:bg-[#111921] py-2.5 px-4 text-[#0e141b] dark:text-white placeholder-gray-400 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-colors text-sm"
             />
             {errors.name && <p className="text-red-500 text-xs">{errors.name.message}</p>}
@@ -104,15 +102,13 @@ export function CreateBoardModal({ isOpen, onClose }: { isOpen: boolean; onClose
           {/* Description Field */}
           <div className="space-y-1.5">
             <label className="block text-sm font-semibold text-[#0e141b] dark:text-[#e8edf3]" htmlFor="description">
-              Description <span className="text-[#507395] font-normal text-xs">(Optional)</span>
+              {t("description_label")} <span className="text-[#507395] font-normal text-xs">{t("optional_hint")}</span>
             </label>
             <textarea
               {...register("description")}
               id="description"
               rows={3}
-              placeholder="What is this board for?"
-              /* FIX: Updated textarea focus colors as well 
-              */
+              placeholder={t("description_placeholder")}
               className="block w-full rounded-lg border border-[#e8edf3] dark:border-[#3e4d5d] bg-white dark:bg-[#111921] py-2.5 px-4 text-[#0e141b] dark:text-white placeholder-gray-400 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-colors text-sm resize-none"
             />
             {errors.description && <p className="text-red-500 text-xs">{errors.description.message}</p>}
@@ -123,22 +119,22 @@ export function CreateBoardModal({ isOpen, onClose }: { isOpen: boolean; onClose
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 rounded-lg text-sm font-medium text-[#507395] hover:bg-gray-100 dark:hover:bg-[#2d3a4a] transition-colors"
+              className="px-4 py-2 rounded-lg text-sm font-medium text-[#507395] hover:bg-gray-100 dark:hover:bg-[#2d3a4a] transition-colors hover:cursor-pointer"
             >
-              Cancel
+              {t("cancel")}
             </button>
             <button
               type="submit"
               disabled={createBoard.isPending}
-              className="flex items-center gap-2 px-5 py-2 rounded-lg bg-primary text-white text-sm font-bold shadow-sm hover:bg-primary-hover transition-colors disabled:opacity-70 disabled:cursor-not-allowed"
+              className="flex items-center gap-2 px-5 py-2 rounded-lg bg-primary text-white text-sm font-bold shadow-sm hover:bg-primary-hover transition-colors disabled:opacity-70 disabled:cursor-not-allowed hover:cursor-pointer"
             >
               {createBoard.isPending ? (
                 <>
                   <span className="material-symbols-outlined animate-spin text-[18px]">progress_activity</span>
-                  Creating...
+                  {t("creating")}
                 </>
               ) : (
-                "Create Board"
+                t("submit")
               )}
             </button>
           </div>

@@ -1,15 +1,19 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { useComments, useOnlinePresence } from "@/hooks/use-queries"; // Added presence hook
+import { useTranslations, useLocale } from "next-intl"; //
+import { useComments, useOnlinePresence } from "@/hooks/use-queries";
 import { useCommentMutations } from "@/hooks/use-mutations";
 import { useAuthStore } from "@/store/use-auth-store";
 import { formatDistanceToNow } from "date-fns";
-import { UserAvatar } from "@/components/ui/user-avatar"; // Added component
+import { tr, enUS } from "date-fns/locale"; //
+import { UserAvatar } from "@/components/ui/user-avatar";
 import { ConfirmationModal } from "../ui/confirmation-modal";
 import { usePermissions } from "@/providers/permission-provider";
 
 export function TaskActivity({ taskId, workspaceId, isArchived = false }: { taskId: string, workspaceId: string, isArchived?: boolean }) {
+   const t = useTranslations("TaskActivity"); //
+   const locale = useLocale(); //
    const { user } = useAuthStore();
    const { can } = usePermissions();
    const { data: comments, isLoading } = useComments(workspaceId, taskId);
@@ -18,13 +22,14 @@ export function TaskActivity({ taskId, workspaceId, isArchived = false }: { task
    const [isDeleteCommentModalOpen, setIsDeleteCommentModalOpen] = useState(false);
    const [commentIdToDelete, setCommentIdToDelete] = useState("");
 
+   // Date-fns locale selector
+   const dateLocale = locale === "tr" ? tr : enUS;
+
    const authorIds = useMemo(() => {
-      // Get unique IDs to prevent duplicate checks
       const ids = comments?.map(c => c.authorId).filter(Boolean) || [];
       return Array.from(new Set(ids));
    }, [comments]);
 
-   // 2. Poll for Online Status
    const { data: onlineUserIds } = useOnlinePresence(authorIds);
 
    const handleSubmit = (e: React.FormEvent) => {
@@ -54,9 +59,9 @@ export function TaskActivity({ taskId, workspaceId, isArchived = false }: { task
             isOpen={isDeleteCommentModalOpen} 
             onClose={() => handleDeleteCommentModalClick("")} 
             onConfirm={handleDelete} 
-            title="Delete Comment?" 
-            description="This will permanently delete the comment." 
-            confirmText="Delete Comment" 
+            title={t("delete_modal.title")} 
+            description={t("delete_modal.description")} 
+            confirmText={t("delete_modal.confirm")} 
             variant="warning" 
             isLoading={deleteComment.isPending} 
          />
@@ -64,18 +69,18 @@ export function TaskActivity({ taskId, workspaceId, isArchived = false }: { task
          <div className="flex justify-between items-center">
             <h3 className="font-bold text-[#0e141b] dark:text-[#e8edf3] flex items-center gap-2">
                <span className="material-symbols-outlined text-[20px]">format_list_bulleted</span>
-               Activity
+               {t("title")}
             </h3>
          </div>
 
-         {/* Input */}
+         {/* Input Area */}
          {!isArchived && (
             <div className="flex gap-3">
                <div className="flex-shrink-0">
                   <UserAvatar
                      workspaceId={workspaceId}
                      src={user?.avatarUrl}
-                     name={user?.displayName || "Me"}
+                     name={user?.displayName || t("me")}
                      size="md"
                   />
                </div>
@@ -85,7 +90,7 @@ export function TaskActivity({ taskId, workspaceId, isArchived = false }: { task
                      <textarea
                         value={newComment}
                         onChange={(e) => setNewComment(e.target.value)}
-                        placeholder="Write a comment..."
+                        placeholder={t("input_placeholder")}
                         rows={2}
                         className="w-full px-3 py-2 rounded-lg border border-[#e8edf3] dark:border-[#3e4d5d] bg-white dark:bg-[#1a2430] focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-colors text-sm resize-none"
                      />
@@ -96,7 +101,7 @@ export function TaskActivity({ taskId, workspaceId, isArchived = false }: { task
                         disabled={createComment.isPending}
                         className="hover:cursor-pointer px-4 py-1.5 bg-primary hover:bg-primary-hover text-white text-xs font-bold rounded-md transition-colors"
                      >
-                        Save
+                        {t("save")}
                      </button>
                   )}
                </form>
@@ -104,12 +109,10 @@ export function TaskActivity({ taskId, workspaceId, isArchived = false }: { task
          )}
 
 
-         {/* List */}
+         {/* Comment List */}
          <div className="space-y-4">
             {comments?.map((comment) => (
                <div key={comment.id} className="flex gap-3 group">
-
-                  {/* Author Avatar with Presence */}
                   <div className="flex-shrink-0">
                      <UserAvatar
                         workspaceId={workspaceId}
@@ -126,20 +129,19 @@ export function TaskActivity({ taskId, workspaceId, isArchived = false }: { task
                            {comment.authorDisplayName}
                         </span>
                         <span className="text-xs text-[#507395]">
-                           {formatDistanceToNow(new Date(comment.createdAt), { addSuffix: true })}
+                           {formatDistanceToNow(new Date(comment.createdAt), { addSuffix: true, locale: dateLocale })}
                         </span>
                      </div>
                      <div className="text-sm text-[#0e141b] dark:text-[#e8edf3] bg-white dark:bg-[#1a2430] p-3 rounded-lg border border-[#e8edf3] dark:border-[#2d3a4a] shadow-sm whitespace-pre-wrap">
                         {comment.body}
                      </div>
                      <div className="flex items-center gap-2 mt-1">
-                        {/* Show delete if own comment */}
                         {!isArchived && user?.id === comment.authorId && (
                            <button
                               onClick={() => handleDeleteCommentModalClick(comment.id)}
                               className="hover:cursor-pointer text-xs text-[#507395] hover:text-red-500 underline opacity-0 group-hover:opacity-100 transition-opacity"
                            >
-                              Delete
+                              {t("delete")}
                            </button>
                         )}
                      </div>

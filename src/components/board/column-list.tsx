@@ -3,7 +3,7 @@
 import { ReadColumnDto, ReadTaskItemDto } from "@/types/dtos";
 import { usePermissions } from "@/providers/permission-provider";
 import { Permission } from "@/lib/rbac/permissions";
-// import { useTasks } from "@/hooks/use-queries"; // You need to implement this!
+import { useTranslations } from "next-intl"; //
 
 interface ColumnListProps {
   workspaceId: string;
@@ -25,6 +25,7 @@ export function ColumnList({ workspaceId, boardId, columns }: ColumnListProps) {
 }
 
 function SingleColumn({ column, workspaceId }: { column: ReadColumnDto, workspaceId: string }) {
+  const t = useTranslations("Column"); //
   const { can } = usePermissions();
   
   // --- TODO: IMPLEMENT TASK FETCHING ---
@@ -48,7 +49,7 @@ function SingleColumn({ column, workspaceId }: { column: ReadColumnDto, workspac
          
          <div className="flex items-center">
             {can(Permission.UpdateColumn) && (
-               <button className="p-1 text-[#507395] hover:text-primary hover:bg-gray-100 dark:hover:bg-[#1a2430] rounded">
+               <button className="p-1 text-[#507395] hover:text-primary hover:bg-gray-100 dark:hover:bg-[#1a2430] rounded hover:cursor-pointer">
                   <span className="material-symbols-outlined text-[18px]">more_horiz</span>
                </button>
             )}
@@ -60,7 +61,7 @@ function SingleColumn({ column, workspaceId }: { column: ReadColumnDto, workspac
          
          {tasks.length === 0 && (
             <div className="h-full flex flex-col items-center justify-center text-[#507395] opacity-60">
-               <span className="text-xs italic">No tasks</span>
+               <span className="text-xs italic">{t("no_tasks")}</span>
             </div>
          )}
 
@@ -74,9 +75,9 @@ function SingleColumn({ column, workspaceId }: { column: ReadColumnDto, workspac
 
       {/* Add Task Button Footer */}
       {can(Permission.CreateTask) && (
-         <button className="mt-3 flex items-center gap-2 p-2 rounded-lg text-[#507395] hover:text-primary hover:bg-white dark:hover:bg-[#1a2430] transition-colors text-sm font-bold w-full">
+         <button className="mt-3 flex items-center gap-2 p-2 rounded-lg text-[#507395] hover:text-primary hover:bg-white dark:hover:bg-[#1a2430] transition-colors text-sm font-bold w-full hover:cursor-pointer">
             <span className="material-symbols-outlined text-[18px]">add</span>
-            Add Task
+            {t("add_task")}
          </button>
       )}
     </div>

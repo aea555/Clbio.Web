@@ -1,0 +1,685 @@
+{
+  "ForgotPassword": {
+    "title_step1": "Forgot Password",
+    "title_step2": "Enter OTP",
+    "title_step3": "Set new password",
+    "desc_step1": "Enter your email and we'll send you a reset link.",
+    "desc_step2": "Enter the 6-digit code sent to your email.",
+    "desc_step3": "Your new password must be different from previous used passwords.",
+    "remember_password": "Remember password?",
+    "sign_in": "Sign in",
+    "back_to_login": "Back to Login",
+    "email_label": "Email Address",
+    "email_placeholder": "name@company.com",
+    "send_link_button": "Send Reset Link",
+    "sending": "Sending...",
+    "otp_instruction": "We sent a 6-digit code to",
+    "otp_placeholder": "000000",
+    "verify_code_button": "Verify Code",
+    "verifying": "Verifying...",
+    "didnt_receive_code": "Didn't receive the code? ",
+    "resend_click": "Click to resend",
+    "new_password_label": "New Password",
+    "confirm_password_label": "Confirm Password",
+    "reset_password_button": "Reset Password",
+    "resetting": "Resetting...",
+    "toasts": {
+      "reset_code_sent": "Reset code sent to your email",
+      "code_verified": "Code verified successfully",
+      "password_reset_success": "Password reset successfully!"
+    },
+    "errors": {
+      "invalid_email": "Invalid email address",
+      "otp_length": "Code must be 6 digits",
+      "passwords_dont_match": "Passwords do not match"
+    }
+  },
+  "Login": {
+    "title": "Welcome back",
+    "description": "Please enter your details to sign in.",
+    "dont_have_account": "Don't have an account?",
+    "sign_up": "Sign up",
+    "google_signin": "Continue with Google",
+    "or_continue_email": "or continue with email",
+    "email_label": "Email Address",
+    "email_placeholder": "name@company.com",
+    "password_label": "Password",
+    "password_placeholder": "••••••••",
+    "forgot_password": "Forgot Password?",
+    "signin_button": "Sign In",
+    "signing_in": "Signing in...",
+    "show_password": "Show password",
+    "hide_password": "Hide password",
+    "toasts": {
+      "welcome": "Welcome back, {name}!",
+      "profile_fail": "Login successful, but failed to load user profile.",
+      "verification_required": "Account requires verification.",
+      "google_fail": "Google Login Failed",
+      "google_credential_fail": "Google login failed to retrieve credentials."
+    },
+    "errors": {
+      "invalid_email": "Please enter a valid email address",
+      "password_min": "Password must be at least 6 characters"
+    }
+  },
+  "Register": {
+    "title": "Create an account",
+    "description": "Enter your details to get started.",
+    "already_have_account": "Already have an account?",
+    "log_in": "Log in",
+    "google_signup": "Sign up with Google",
+    "or_continue_email": "or continue with email",
+    "full_name_label": "Full Name",
+    "full_name_placeholder": "John Doe",
+    "email_label": "Email Address",
+    "email_placeholder": "name@company.com",
+    "password_label": "Password",
+    "password_placeholder": "••••••••",
+    "confirm_password_label": "Confirm Password",
+    "confirm_password_placeholder": "••••••••",
+    "create_account_button": "Create Account",
+    "creating_account": "Creating Account...",
+    "toasts": {
+      "google_fail": "Google Sign Up Failed",
+      "google_signup_fail": "Google sign-up failed.",
+      "welcome_created": "Account created! Welcome, {name}!",
+      "profile_load_fail": "Sign up successful, but failed to load profile.",
+      "registration_failed": "Registration failed.",
+      "verify_email": "Account created successfully! Please verify your email.",
+      "account_exists": "Account exists. Please verify your email."
+    },
+    "errors": {
+      "confirm_required": "Please confirm your password",
+      "passwords_dont_match": "Passwords do not match"
+    }
+  },
+  "VerifyEmail": {
+    "title_verify": "Verify your email",
+    "title_check": "Check your email",
+    "desc_verify": "Enter your email address to verify your account.",
+    "desc_check_prefix": "We sent a 6-digit code to",
+    "already_verified": "Already verified?",
+    "sign_in": "Sign in",
+    "email_label": "Email Address",
+    "email_placeholder": "name@company.com",
+    "send_code_button": "Send Verification Code",
+    "sending": "Sending...",
+    "verification_code_label": "Verification Code",
+    "otp_placeholder": "123456",
+    "verify_button": "Verify & Continue",
+    "verifying": "Verifying...",
+    "change_email": "Change email address?",
+    "toasts": {
+      "code_sent_info": "If the account with the email exists and needs verification, a Verification code has been sent.",
+      "verify_success": "Email verified successfully!",
+      "logging_in": "Logging you in...",
+      "verify_complete_info": "Verification complete. Please log in."
+    },
+    "errors": {
+      "invalid_email": "Please enter a valid email address",
+      "otp_length": "Code must be exactly 6 digits"
+    }
+  },
+  "NotFound": {
+    "subtitle": "Lost in the workspace?",
+    "description": "The page you're looking for doesn't exist or has been moved to a different coordinate.",
+    "go_back": "Go Back",
+    "dashboard": "Dashboard"
+  },
+  "Landing": {
+    "nav": {
+      "sign_in": "Sign In",
+      "get_started": "Get Started"
+    },
+    "hero": {
+      "badge": "Technical Demonstration",
+      "title_part1": "Full-Stack",
+      "title_part2": ".NET Architecture.",
+      "description": "A robust project management system engineered with ASP.NET Core and Next.js. Featuring real-time event broadcasting via SignalR Hubs and a persistence layer powered by EF Core.",
+      "live_demo": "Live Demo",
+      "frontend_code": "Frontend Code",
+      "backend_code": "Backend Code"
+    },
+    "features": {
+      "signalr": {
+        "title": "SignalR Integration",
+        "desc": "Real-time communication via .NET SignalR, utilizing persistent connections for live UI reactivity."
+      },
+      "architecture": {
+        "title": "Clean Architecture",
+        "desc": "Backend follows N-Layer patterns with clear separation of Concerns, Repositories, and Business Logic."
+      },
+      "security": {
+        "title": "Identity & JWT",
+        "desc": "Stateless authentication using ASP.NET Core Identity and JWT tokens for secure, scalable API access."
+      }
+    },
+    "portfolio_note": {
+      "title": "Portfolio Note",
+      "desc": "This project is a technical showcase for aea555. It is intended to demonstrate a high level of full-stack proficiency, particularly in handling complex state and real-time backend events."
+    },
+    "footer": {
+      "copy": "© 2025 Engineering Showcase by aea555"
+    }
+  },
+  "Dashboard": {
+    "title": "Your Boards",
+    "subtitle": "Manage your projects, track tasks, and collaborate.",
+    "no_workspace": "Please select or create a workspace to get started.",
+    "create_board": "Create Board",
+    "create_new_board_tile": "Create new board",
+    "no_description": "No description provided.",
+    "sort": {
+      "most_recent": "Most Recent",
+      "alphabetical": "Alphabetical",
+      "last_updated": "Last Updated"
+    },
+    "menu": {
+      "edit": "Edit",
+      "delete": "Delete"
+    },
+    "delete_modal": {
+      "title": "Delete Board?",
+      "description": "Are you sure you want to delete \"{name}\"? This action cannot be undone and all tasks inside will be lost.",
+      "confirm": "Delete"
+    },
+    "toasts": {
+      "delete_success": "Board deleted successfully"
+    }
+  },
+  "WorkspaceSettings": {
+    "title": "Workspace Settings",
+    "subtitle": "Manage your workspace preferences.",
+    "loading": "Loading settings...",
+    "general_info": "General Information",
+    "name_label": "Workspace Name",
+    "description_label": "Description",
+    "save_changes": "Save Changes",
+    "saving": "Saving...",
+    "actions_title": "Workspace Actions",
+    "actions_subtitle": "Manage the visibility and existence of this workspace.",
+    "restore_button": "Restore Workspace",
+    "archive_button": "Archive Workspace",
+    "delete_button": "Delete Workspace",
+    "leave_button": "Leave Workspace",
+    "modals": {
+      "delete_title": "Delete Workspace?",
+      "delete_desc": "Are you sure you want to permanently delete \"{name}\"?",
+      "delete_confirm": "Yes, Delete",
+      "archive_title": "Archive Workspace?",
+      "archive_desc": "Archive \"{name}\" to hide it and make it read-only.",
+      "archive_confirm": "Archive",
+      "restore_title": "Restore Workspace?",
+      "restore_desc": "Restore \"{name}\" to active status?",
+      "restore_confirm": "Restore",
+      "leave_title": "Leave the Workspace?",
+      "leave_desc": "Are you sure you want to leave this workspace? You will lose access to all boards and tasks.",
+      "leave_confirm": "Leave the Workspace"
+    },
+    "errors": {
+      "name_min": "Name must be at least 3 characters",
+      "name_max": "Name must be at most 50 characters",
+      "desc_max": "Description must be at most 200 characters"
+    }
+  },
+  "WorkspaceMembers": {
+    "title": "Workspace Settings",
+    "subtitle": "Manage members and roles.",
+    "loading": "Loading members...",
+    "member_list": "Member List",
+    "invite_member": "Invite Member",
+    "no_access": "No access",
+    "current_workspace": "Current Workspace",
+    "fallback_member": "this member",
+    "table": {
+      "user": "User",
+      "role": "Role",
+      "joined": "Joined",
+      "update_role": "Update Role",
+      "remove": "Remove"
+    },
+    "roles": {
+      "0": "Member",
+      "1": "Admin",
+      "2": "Owner"
+    },
+    "modals": {
+      "remove_title": "Remove Member?",
+      "remove_desc": "Are you sure you want to remove {name} from the workspace? They will lose access to all boards and tasks.",
+      "remove_confirm": "Remove Member",
+      "role_title": "Update Member Role?",
+      "role_desc": "Are you sure you want to update {name}'s workspace role from {oldRole} to {newRole}?",
+      "role_confirm": "Update Role"
+    }
+  },
+  "AuditLogs": {
+    "title": "Workspace Settings",
+    "subtitle": "Track all activity and security events in this workspace.",
+    "log_title": "Activity Log",
+    "refreshing": "Refreshing...",
+    "current_workspace": "Current Workspace",
+    "table": {
+      "headers": {
+        "actor": "Actor",
+        "action": "Action",
+        "details": "Details",
+        "entity": "Entity",
+        "date": "Date"
+      },
+      "empty": "No activity recorded yet.",
+      "actions": {
+        "create": "Create",
+        "update": "Update",
+        "delete": "Delete",
+        "other": "Other"
+      }
+    },
+    "pagination": {
+      "page_info": "Page {page} of {total}",
+      "results_info": "Showing {start} to {end} of {total} results",
+      "prev": "Previous",
+      "next": "Next"
+    }
+  },
+  "Board": {
+    "add_column": "Add another list",
+    "header": {
+      "toggle_description": "Toggle Description",
+      "edit_board": "Edit Board"
+    },
+    "create_column": {
+      "title": "Add List",
+      "label": "List Name",
+      "placeholder": "e.g. To Do",
+      "cancel": "Cancel",
+      "submit": "Add List",
+      "adding": "Adding...",
+      "success": "Column created!"
+    },
+    "create_task": {
+      "title": "New Task",
+      "task_title_label": "Task Title",
+      "task_title_placeholder": "What needs to be done?",
+      "description_label": "Description",
+      "optional_hint": "(Optional)",
+      "description_placeholder": "Add details...",
+      "cancel_button": "Cancel",
+      "create_button": "Create Task"
+    }
+  },
+  "TaskDetail": {
+    "back_to_board": "Back to Board",
+    "created_at": "Created {date}",
+    "in_list": "In List:",
+    "description": "Description",
+    "attachments": "Attachments",
+    "add_file": "Add File",
+    "no_attachments": "No attachments yet.",
+    "status": "Status",
+    "details": "Details",
+    "due_date": "Due Date",
+    "no_date_set": "No date set",
+    "delete_task_button": "Delete Task",
+    "unknown_date": "Unknown date",
+    "invalid_date": "Invalid date",
+    "status_options": {
+      "todo": "To Do",
+      "in_progress": "In Progress",
+      "review": "Review",
+      "done": "Done"
+    },
+    "modals": {
+      "delete_task_title": "Delete Task?",
+      "delete_task_desc": "This will permanently delete the task, its comments, and attachments.",
+      "delete_task_confirm": "Delete Task",
+      "delete_file_title": "Delete File?",
+      "delete_file_desc": "Are you sure you want to delete \"{name}\"?",
+      "delete_file_confirm": "Delete File"
+    }
+  },
+  "PasswordRequirements": {
+    "length": "At least 6 characters",
+    "uppercase": "At least one uppercase letter",
+    "lowercase": "At least one lowercase letter",
+    "number": "At least one number"
+  },
+  "Column": {
+    "no_tasks": "No tasks",
+    "drop_tasks": "Drop tasks here",
+    "add_task": "Add Task",
+    "delete_modal": {
+      "title": "Delete List?",
+      "description": "Are you sure? All tasks in this list will be deleted.",
+      "confirm": "Delete List"
+    }
+  },
+  "TaskCard": {
+    "assignee_alt": "Assignee",
+    "status": {
+      "0": "Assigned",
+      "1": "In Progress",
+      "2": "Review",
+      "3": "Done"
+    }
+  },
+  "AddMemberModal": {
+    "title": "Invite Member",
+    "email_label": "Email Address",
+    "email_placeholder": "colleague@company.com",
+    "role_label": "Role",
+    "role_member": "Member",
+    "role_admin": "Admin",
+    "cancel": "Cancel",
+    "sending": "Sending...",
+    "send_invite": "Send Invite"
+  },
+  "ArchivedBanner": {
+    "heading": "This workspace is archived.",
+    "subheading": "You cannot edit boards, tasks, or settings while archived.",
+    "action_button": "Restore Workspace",
+    "modal": {
+      "title": "Unarchive Workspace?",
+      "description": "Do you want to restore \"{name}\"? You will be able to edit boards and members again.",
+      "confirm": "Restore Workspace"
+    }
+  },
+  "CreateBoardModal": {
+    "title": "Create New Board",
+    "board_title_label": "Board Title",
+    "board_title_placeholder": "e.g. Q4 Marketing Plan",
+    "description_label": "Description",
+    "optional_hint": "(Optional)",
+    "description_placeholder": "What is this board for?",
+    "cancel": "Cancel",
+    "creating": "Creating...",
+    "submit": "Create Board",
+    "errors": {
+      "no_workspace": "No active workspace selected"
+    },
+    "success": "Board created successfully!"
+  },
+  "CreateWorkspaceModal": {
+    "title": "Create New Workspace",
+    "name_label": "Workspace Name",
+    "name_placeholder": "e.g. Acme Corp",
+    "desc_label": "Description",
+    "optional_hint": "(Optional)",
+    "desc_placeholder": "What is this team working on?",
+    "cancel": "Cancel",
+    "creating": "Creating...",
+    "submit": "Create Workspace",
+    "success": "Workspace created successfully!"
+  },
+  "EditBoardModal": {
+    "title": "Edit Board",
+    "name_label": "Board Name",
+    "description_label": "Description",
+    "optional_hint": "(Optional)",
+    "cancel": "Cancel",
+    "saving": "Saving...",
+    "save_changes": "Save Changes",
+    "success": "Board updated successfully!"
+  },
+  "ProfileDropdown": {
+    "my_profile": "My Profile",
+    "appearance": "Appearance",
+    "logout_button": "Sign Out",
+    "fallback_user": "User",
+    "logout_modal": {
+      "title": "Sign Out",
+      "description": "Are you sure you want to sign out?",
+      "confirm": "Sign Out"
+    }
+  },
+  "SettingsTabs": {
+    "general": "General",
+    "members": "Members",
+    "audit_logs": "Audit Logs"
+  },
+  "Header": {
+    "open_sidebar": "Open Sidebar",
+    "search_placeholder": "Search boards...",
+    "searching": "Searching...",
+    "results_header_boards": "Boards",
+    "no_description": "No description",
+    "no_results": "No boards found for \"{query}\"",
+    "breadcrumbs": {
+      "account": "Account",
+      "invitations": "Invitations",
+      "settings": "Settings",
+      "appearance": "Appearance",
+      "notifications": "Notifications",
+      "app_settings": "App Settings",
+      "boards": "Boards",
+      "members": "Members",
+      "audit_logs": "Audit Logs",
+      "board_view": "Board View",
+      "dashboard": "Dashboard"
+    }
+  },
+  "NotificationDropdown": {
+    "title": "Notifications",
+    "mark_all_read": "Mark all read",
+    "empty": "No notifications yet.",
+    "mark_as_read": "Mark as read",
+    "view_all": "View all notifications"
+  },
+  "Sidebar": {
+    "cluster_workspace": "Workspace",
+    "boards": "Boards",
+    "members": "Members",
+    "settings": "Settings",
+    "cluster_general": "General",
+    "invitations": "Invitations",
+    "app_settings": "App Settings",
+    "help": "Help",
+    "logout": "Logout",
+    "collapse_sidebar": "Collapse Sidebar",
+    "logout_modal": {
+      "title": "Sign Out",
+      "description": "Are you sure you want to sign out?",
+      "confirm": "Sign Out"
+    },
+    "switcher": {
+      "loading": "Loading...",
+      "select_workspace": "Select Workspace",
+      "active": "Active",
+      "no_workspace": "No workspace",
+      "header": "My Workspaces",
+      "create_new": "Create New Workspace"
+    }
+  },
+  "TaskActivity": {
+    "title": "Activity",
+    "me": "Me",
+    "input_placeholder": "Write a comment...",
+    "save": "Save",
+    "delete": "Delete",
+    "delete_modal": {
+      "title": "Delete Comment?",
+      "description": "This will permanently delete the comment.",
+      "confirm": "Delete Comment"
+    }
+  },
+  "TaskAssignee": {
+    "label": "Assignee",
+    "unknown": "Unknown",
+    "assign_to_me": "Assign to me",
+    "me": "Me",
+    "remove_assignment": "Remove assignment",
+    "unassigned": "Unassigned",
+    "search_placeholder": "Search members...",
+    "no_members": "No members found."
+  },
+  "TaskDescription": {
+    "placeholder_edit": "Add a more detailed description...",
+    "placeholder_empty": "Add a description...",
+    "save": "Save",
+    "cancel": "Cancel"
+  },
+  "ConfirmationModal": {
+    "default_confirm": "Confirm",
+    "default_cancel": "Cancel"
+  },
+  "NotificationsPage": {
+    "title": "Notifications",
+    "subtitle": "Stay updated with your workspace activity.",
+    "filter_all": "All",
+    "filter_unread": "Unread",
+    "mark_all_read": "Mark all as read",
+    "empty_state": "No notifications found.",
+    "tooltips": {
+      "mark_read": "Mark as read",
+      "delete": "Delete"
+    },
+    "pagination": {
+      "previous": "Previous",
+      "next": "Next",
+      "page_info": "Page {page} of {total}"
+    }
+  },
+  "WorkspaceInvitations": {
+    "title": "Workspace Invitations",
+    "subtitle": "Manage your pending invitations to join other workspaces.",
+    "incoming_title": "Incoming Invitations",
+    "empty_state": "You have no pending invitations.",
+    "page_info": "Page {page} of {total}",
+    "table": {
+      "workspace": "Workspace",
+      "invited_by": "Invited By",
+      "role": "Role",
+      "sent": "Sent",
+      "status": "Status",
+      "actions": "Actions"
+    },
+    "roles": {
+      "member": "Member",
+      "admin": "Admin",
+      "owner": "Owner"
+    },
+    "status": {
+      "pending": "Pending",
+      "accepted": "Accepted",
+      "declined": "Declined"
+    },
+    "actions": {
+      "accept": "Accept",
+      "decline": "Decline"
+    },
+    "modal": {
+      "accept_title": "Accept Invitation?",
+      "decline_title": "Decline Invitation?",
+      "accept_desc": "You will join this workspace immediately and gain access to its boards.",
+      "decline_desc": "This invitation will be removed from your list.",
+      "confirm_join": "Join Workspace",
+      "confirm_decline": "Decline"
+    },
+    "pagination": {
+      "previous": "Previous",
+      "next": "Next"
+    },
+    "unknown_workspace": "Unknown Workspace",
+    "system": "System"
+  },
+  "ProfilePage": {
+    "title": "Public Profile",
+    "subtitle": "Manage how others see you in your workspaces.",
+    "delete_modal": {
+      "title": "Remove Profile Picture?",
+      "description": "Are you sure you want to remove your profile picture? This will revert to the default initials avatar.",
+      "confirm": "Remove"
+    },
+    "crop": {
+      "zoom": "Zoom",
+      "cancel": "Cancel",
+      "apply": "Apply Crop"
+    },
+    "avatar": {
+      "preview": "PREVIEW",
+      "change": "Change",
+      "info": "Allowed: JPG, PNG, WEBP. Max 5MB.",
+      "discard": "Discard preview",
+      "remove_title": "Remove profile picture"
+    },
+    "form": {
+      "display_name": "Display Name",
+      "display_name_info": "This name will be visible to other members.",
+      "email": "Email Address",
+      "email_info": "Email address cannot be changed.",
+      "save": "Save Changes",
+      "saving": "Saving..."
+    },
+    "messages": {
+      "invalid_file": "Invalid file.",
+      "crop_failed": "Failed to crop image",
+      "update_failed": "Profile update failed"
+    }
+  },
+  "NotificationSettings": {
+    "title": "Notification Settings",
+    "subtitle": "Manage your workspace alerts and sounds.",
+    "sounds_title": "Notification Sounds",
+    "sounds_subtitle": "Hear an alert when you receive a notification.",
+    "volume_label": "Alert Volume",
+    "select_sound_label": "Select Alert Sound",
+    "sounds": {
+      "chime": "Chime",
+      "pop": "Pop"
+    }
+  },
+  "GeneralSettings": {
+    "title": "General Settings",
+    "subtitle": "Customize your workspace appearance and preferences.",
+    "appearance": {
+      "title": "Appearance",
+      "high_contrast": "High Contrast",
+      "on": "On",
+      "off": "Off",
+      "modes": {
+        "light": "Light",
+        "dark": "Dark",
+        "system": "System"
+      }
+    },
+    "bg_styles": {
+      "light_title": "Light Mode Style",
+      "dark_title": "Dark Mode Style",
+      "themes": {
+        "default": { "dark": "Slate", "dark_desc": "Classic deep blue-grey", "light": "Cloud", "light_desc": "Classic soft white clarity" },
+        "zinc": { "dark": "Zinc", "dark_desc": "Industrial neutral dark", "light": "Parchment", "light_desc": "Faint tan paper finish" },
+        "midnight": { "dark": "Midnight", "dark_desc": "Pure OLED black", "light": "Twilight", "light_desc": "Faint purple-blue mist" },
+        "darkcrimson": { "name": "Crimson", "desc": "Faint dark brick red" },
+        "darkblue": { "name": "Cobalt", "desc": "Faint deep dark blue" }
+      }
+    },
+    "accent": {
+      "title": "Accent Color",
+      "subtitle": "Choose a primary color for your workspace.",
+      "colors": {
+        "blue": "Ocean",
+        "emerald": "Forest",
+        "violet": "Royal",
+        "amber": "Sunset",
+        "rose": "Berry"
+      }
+    }
+  },
+  "SettingsHub": {
+    "title": "App Settings",
+    "subtitle": "Manage your personal preferences and application configurations.",
+    "menu": {
+      "account": {
+        "title": "Account",
+        "description": "Manage your profile details, avatar, and email."
+      },
+      "appearance": {
+        "title": "Appearance",
+        "description": "Customize theme modes and accent colors."
+      },
+      "notifications": {
+        "title": "Notifications",
+        "description": "Configure how you receive alerts and updates."
+      }
+    }
+  }
+}

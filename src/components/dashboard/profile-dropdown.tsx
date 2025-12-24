@@ -2,6 +2,7 @@
 
 import { useRef, useEffect, useState } from "react";
 import Link from "next/link";
+import { useTranslations } from "next-intl"; //
 import { useAuthStore } from "@/store/use-auth-store";
 import { useAuthMutations } from "@/hooks/use-mutations";
 import { ConfirmationModal } from "@/components/ui/confirmation-modal";
@@ -12,6 +13,7 @@ interface ProfileDropdownProps {
 }
 
 export function ProfileDropdown({ isOpen, onClose }: ProfileDropdownProps) {
+  const t = useTranslations("ProfileDropdown"); //
   const dropdownRef = useRef<HTMLDivElement>(null);
   const user = useAuthStore((state) => state.user);
   const { logoutMutation } = useAuthMutations();
@@ -39,19 +41,18 @@ export function ProfileDropdown({ isOpen, onClose }: ProfileDropdownProps) {
         isOpen={showLogoutConfirm}
         onClose={() => setShowLogoutConfirm(false)}
         onConfirm={() => logoutMutation.mutate()}
-        title="Sign Out"
-        description="Are you sure you want to sign out?"
-        confirmText="Sign Out"
+        title={t("logout_modal.title")}
+        description={t("logout_modal.description")}
+        confirmText={t("logout_modal.confirm")}
         variant="primary"
         isLoading={logoutMutation.isPending}
       />
 
       <div
         ref={dropdownRef}
-        // FIX: Using bg-card and border-border-base for theme syncing
         className="absolute top-full right-0 mt-3 w-72 bg-card rounded-xl shadow-xl border border-border-base overflow-hidden z-[100] animate-in fade-in zoom-in-95 duration-100 origin-top-right"
       >
-        {/* 1. Avatar & User Info - Using bg-background for subtle contrast */}
+        {/* 1. Avatar & User Info */}
         <div className="p-6 flex flex-col items-center border-b border-border-base bg-background">
             <Link
                 href="/dashboard/settings/account"
@@ -62,7 +63,6 @@ export function ProfileDropdown({ isOpen, onClose }: ProfileDropdownProps) {
                     <img
                         src={user.avatarUrl}
                         alt="Profile"
-                        // FIX: ring color now matches the background theme
                         className="size-20 rounded-full object-cover shadow-sm ring-4 ring-background group-hover:brightness-75 transition-all"
                     />
                 ) : (
@@ -77,7 +77,7 @@ export function ProfileDropdown({ isOpen, onClose }: ProfileDropdownProps) {
             </Link>
 
             <h3 className="font-bold text-foreground text-lg text-center truncate w-full px-2 leading-tight">
-                {user?.displayName || "User"}
+                {user?.displayName || t("fallback_user")}
             </h3>
             <p className="text-sm text-muted-foreground truncate w-full text-center px-2 mt-1">
                 {user?.email}
@@ -89,24 +89,22 @@ export function ProfileDropdown({ isOpen, onClose }: ProfileDropdownProps) {
             <Link
                 href="/dashboard/settings/account"
                 onClick={onClose}
-                // FIX: Hover matches the background variable
                 className="flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium text-foreground hover:bg-background transition-colors"
             >
                 <div className="w-8 h-8 rounded-full bg-primary-light flex items-center justify-center text-primary">
                   <span className="material-symbols-outlined text-[18px]">person</span>
                 </div>
-                My Profile
+                {t("my_profile")}
             </Link>
              <Link
                 href="/dashboard/settings/theme"
                 onClick={onClose}
                 className="flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium text-foreground hover:bg-background transition-colors"
             >
-                {/* FIX: Using muted-foreground logic for secondary icons */}
                 <div className="w-8 h-8 rounded-full bg-border-base/50 flex items-center justify-center text-muted-foreground">
                   <span className="material-symbols-outlined text-[18px]">settings</span>
                 </div>
-                Appearance
+                {t("appearance")}
             </Link>
         </div>
 
@@ -119,7 +117,7 @@ export function ProfileDropdown({ isOpen, onClose }: ProfileDropdownProps) {
                 <div className="w-8 h-8 rounded-full bg-red-500/10 flex items-center justify-center">
                   <span className="material-symbols-outlined text-[18px]">logout</span>
                 </div>
-                Sign Out
+                {t("logout_button")}
             </button>
         </div>
       </div>
