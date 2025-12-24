@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
+import { useTranslations } from "next-intl"; //
 import { ReadColumnDto, ReadTaskItemDto } from "@/types/dtos";
 import { usePermissions } from "@/providers/permission-provider";
 import { Permission } from "@/lib/rbac/permissions";
@@ -17,10 +18,11 @@ interface ColumnProps {
   tasks: ReadTaskItemDto[];
   workspaceId: string;
   boardId: string;
-  isArchived?: boolean; // Added Prop
+  isArchived?: boolean;
 }
 
 export function Column({ column, tasks, workspaceId, boardId, isArchived = false }: ColumnProps) {
+  const t = useTranslations("Column"); //
   const { can } = usePermissions();
   const router = useRouter();
   const { deleteColumn, updateColumn } = useColumnMutations(workspaceId, boardId);
@@ -30,7 +32,7 @@ export function Column({ column, tasks, workspaceId, boardId, isArchived = false
   const [isEditingName, setIsEditingName] = useState(false);
   const [editName, setEditName] = useState(column.name);
 
-  // DnD for Column itself
+  // DnD sensors & state (Logic preserved)
   const {
     attributes,
     listeners,
@@ -41,7 +43,7 @@ export function Column({ column, tasks, workspaceId, boardId, isArchived = false
   } = useSortable({
     id: column.id,
     data: { type: "Column", column },
-    disabled: isArchived, // FIX: Disable sorting if archived
+    disabled: isArchived,
   });
 
   const style = {
@@ -79,17 +81,16 @@ export function Column({ column, tasks, workspaceId, boardId, isArchived = false
         isOpen={isDeleteConfirmOpen}
         onClose={() => setIsDeleteConfirmOpen(false)}
         onConfirm={() => deleteColumn.mutate(column.id)}
-        title="Delete List?"
-        description="Are you sure? All tasks in this list will be deleted."
-        confirmText="Delete List"
+        title={t("delete_modal.title")}
+        description={t("delete_modal.description")}
+        confirmText={t("delete_modal.confirm")}
         variant="danger"
       />
 
-      {/* Header */}
+      {/* Header (DnD Trigger) */}
       <div 
         {...attributes} 
         {...listeners}
-        // FIX: Remove cursor-grab if archived
         className={`flex items-center justify-between mb-3 px-1 group/header ${isArchived ? "cursor-default" : "cursor-grab active:cursor-grabbing"}`}
       >
          <div className="flex-1 mr-2 min-w-0">
@@ -108,7 +109,6 @@ export function Column({ column, tasks, workspaceId, boardId, isArchived = false
                   <h3 
                     onClick={(e) => {
                         e.stopPropagation();
-                        // FIX: Prevent edit if archived
                         if (!isArchived && can(Permission.UpdateColumn)) setIsEditingName(true);
                     }}
                     className={`font-bold text-[#0e141b] dark:text-[#e8edf3] text-sm truncate ${!isArchived ? "cursor-text hover:border-b-2 hover:border-dashed hover:border-[#507395]" : ""}`}
@@ -123,12 +123,11 @@ export function Column({ column, tasks, workspaceId, boardId, isArchived = false
          </div>
          
          <div className="opacity-0 group-hover/header:opacity-100 transition-opacity flex items-center">
-            {/* FIX: Hide delete button if archived */}
             {can(Permission.DeleteColumn) && !isArchived && (
                <button 
                   onPointerDown={(e) => e.stopPropagation()}
                   onClick={() => setIsDeleteConfirmOpen(true)}
-                  className="p-1 text-[#507395] hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition-colors"
+                  className="p-1 text-[#507395] hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition-colors hover:cursor-pointer"
                >
                   <span className="material-symbols-outlined text-[18px]">delete</span>
                </button>
@@ -136,13 +135,13 @@ export function Column({ column, tasks, workspaceId, boardId, isArchived = false
          </div>
       </div>
 
-      {/* Task List */}
+      {/* Task List (DnD Context) */}
       <div className="flex-1 overflow-y-auto min-h-[100px] bg-gray-100/50 dark:bg-[#111921]/50 rounded-xl border border-transparent p-2 space-y-2 custom-scrollbar">
          <SortableContext items={taskIds} strategy={verticalListSortingStrategy}>
             {tasks.length === 0 && (
                 <div className="h-24 flex flex-col items-center justify-center text-[#507395]/50 border-2 border-dashed border-[#e8edf3] dark:border-[#2d3a4a] rounded-lg select-none">
                    <span className="text-xs font-medium">
-                      {isArchived ? "No tasks" : "Drop tasks here"}
+                      {isArchived ? t("no_tasks") : t("drop_tasks")}
                    </span>
                 </div>
             )}
@@ -157,14 +156,13 @@ export function Column({ column, tasks, workspaceId, boardId, isArchived = false
          </SortableContext>
       </div>
 
-      {/* FIX: Hide Add Task if archived */}
       {can(Permission.CreateTask) && !isArchived && (
          <button 
             onClick={() => setIsCreateTaskOpen(true)}
             className="hover:cursor-pointer mt-3 flex items-center gap-2 p-2 rounded-lg text-[#507395] hover:text-primary hover:bg-white dark:hover:bg-[#1a2430] transition-colors text-sm font-bold w-full"
          >
             <span className="material-symbols-outlined text-[18px]">add</span>
-            Add Task
+            {t("add_task")}
          </button>
       )}
     </div>

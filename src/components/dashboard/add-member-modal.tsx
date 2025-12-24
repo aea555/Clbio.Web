@@ -1,14 +1,16 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useTranslations } from "next-intl"; //
 import { useWorkspaceMutations } from "@/hooks/use-mutations";
-import { useEffect, useState } from "react";
 import { CreateWorkspaceMemberDto, createWorkspaceMemberSchema } from "@/lib/schemas/schemas";
 import { WorkspaceRole } from "@/types/enums";
 import { createPortal } from "react-dom";
 
 export function AddMemberModal({ workspaceId, isOpen, onClose }: { workspaceId: string; isOpen: boolean; onClose: () => void }) {
+  const t = useTranslations("AddMemberModal"); //
   const { inviteMember } = useWorkspaceMutations(workspaceId);
   const [mounted, setMounted] = useState(false);
 
@@ -59,7 +61,7 @@ export function AddMemberModal({ workspaceId, isOpen, onClose }: { workspaceId: 
         
         {/* Header */}
         <div className="px-6 py-4 border-b border-[#e8edf3] dark:border-[#2d3a4a] flex justify-between items-center bg-[#f8fafb] dark:bg-[#111921]">
-          <h3 className="text-lg font-bold text-[#0e141b] dark:text-[#e8edf3]">Invite Member</h3>
+          <h3 className="text-lg font-bold text-[#0e141b] dark:text-[#e8edf3]">{t("title")}</h3>
           <button onClick={onClose} className="hover:cursor-pointer text-[#507395] hover:text-[#0e141b] dark:hover:text-white transition-colors">
             <span className="material-symbols-outlined text-[20px]">close</span>
           </button>
@@ -71,15 +73,14 @@ export function AddMemberModal({ workspaceId, isOpen, onClose }: { workspaceId: 
           {/* Email Input */}
           <div className="space-y-1.5">
             <label className="block text-sm font-semibold text-[#0e141b] dark:text-[#e8edf3]" htmlFor="email">
-              Email Address <span className="text-red-500">*</span>
+              {t("email_label")} <span className="text-red-500">*</span>
             </label>
             <input
               {...register("email")}
               id="email"
               type="email"
-              placeholder="colleague@company.com"
+              placeholder={t("email_placeholder")}
               autoFocus
-              /* FIX: Dynamic Focus Colors */
               className="block w-full rounded-lg border border-[#e8edf3] dark:border-[#3e4d5d] bg-white dark:bg-[#111921] py-2.5 px-4 text-[#0e141b] dark:text-white placeholder-gray-400 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-colors text-sm"
             />
             {errors.email && <p className="text-red-500 text-xs">{errors.email.message}</p>}
@@ -88,17 +89,16 @@ export function AddMemberModal({ workspaceId, isOpen, onClose }: { workspaceId: 
           {/* Role Selection */}
           <div className="space-y-1.5">
             <label className="block text-sm font-semibold text-[#0e141b] dark:text-[#e8edf3]" htmlFor="role">
-              Role <span className="text-red-500">*</span>
+              {t("role_label")} <span className="text-red-500">*</span>
             </label>
             <div className="relative">
               <select
                 {...register("role", { valueAsNumber: true })}
                 id="role"
-                /* FIX: Dynamic Focus Colors */
                 className="block w-full rounded-lg border border-[#e8edf3] dark:border-[#3e4d5d] bg-white dark:bg-[#111921] py-2.5 px-4 text-[#0e141b] dark:text-white appearance-none focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-colors text-sm cursor-pointer"
               >
-                <option value={WorkspaceRole.Member}>Member</option>
-                <option value={WorkspaceRole.PrivilegedMember}>Admin</option>
+                <option value={WorkspaceRole.Member}>{t("role_member")}</option>
+                <option value={WorkspaceRole.PrivilegedMember}>{t("role_admin")}</option>
               </select>
               <span className="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-[#507395] pointer-events-none text-[20px]">
                 expand_more
@@ -113,16 +113,15 @@ export function AddMemberModal({ workspaceId, isOpen, onClose }: { workspaceId: 
               onClick={onClose}
               className="hover:cursor-pointer px-4 py-2 rounded-lg text-sm font-medium text-[#507395] hover:bg-gray-100 dark:hover:bg-[#2d3a4a] transition-colors"
             >
-              Cancel
+              {t("cancel")}
             </button>
             <button
               type="submit"
               disabled={inviteMember.isPending}
-              /* FIX: Dynamic Background and Hover */
               className="flex hover:cursor-pointer items-center gap-2 px-5 py-2 rounded-lg bg-primary text-white text-sm font-bold shadow-sm hover:bg-primary-hover transition-colors disabled:opacity-70"
             >
               <span className="material-symbols-outlined text-[18px]">send</span>
-              {inviteMember.isPending ? "Sending..." : "Send Invite"}
+              {inviteMember.isPending ? t("sending") : t("send_invite")}
             </button>
           </div>
         </form>

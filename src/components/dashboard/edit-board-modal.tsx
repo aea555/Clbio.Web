@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useTranslations } from "next-intl"; //
 import { useBoardMutations } from "@/hooks/use-mutations";
 import { toast } from "sonner";
 import { UpdateBoardDto, updateBoardSchema } from "@/lib/schemas/schemas";
@@ -18,6 +19,7 @@ interface EditBoardModalProps {
 }
 
 export function EditBoardModal({ isOpen, onClose, board, workspaceId }: EditBoardModalProps) {
+  const t = useTranslations("EditBoardModal"); //
   const { updateBoard } = useBoardMutations(workspaceId);
   const [mounted, setMounted] = useState(false);
 
@@ -30,7 +32,7 @@ export function EditBoardModal({ isOpen, onClose, board, workspaceId }: EditBoar
     resolver: zodResolver(updateBoardSchema),
   });
 
-  // Populate form when board opens
+  // Populate form when board opens (Logic preserved)
   useEffect(() => {
     setMounted(true);
 
@@ -53,7 +55,7 @@ export function EditBoardModal({ isOpen, onClose, board, workspaceId }: EditBoar
       }, 
       {
         onSuccess: () => {
-          toast.success("Board updated successfully!");
+          toast.success(t("success"));
           onClose();
         },
         onError: (err) => toast.error(getErrorMessage(err)),
@@ -71,7 +73,7 @@ export function EditBoardModal({ isOpen, onClose, board, workspaceId }: EditBoar
       >
         {/* Header */}
         <div className="px-6 py-4 border-b border-[#e8edf3] dark:border-[#2d3a4a] flex justify-between items-center bg-[#f8fafb] dark:bg-[#111921]">
-          <h3 className="text-lg font-bold text-[#0e141b] dark:text-[#e8edf3]">Edit Board</h3>
+          <h3 className="text-lg font-bold text-[#0e141b] dark:text-[#e8edf3]">{t("title")}</h3>
           <button 
             onClick={onClose}
             className="text-[#507395] hover:cursor-pointer hover:text-[#0e141b] dark:hover:text-white transition-colors"
@@ -88,7 +90,7 @@ export function EditBoardModal({ isOpen, onClose, board, workspaceId }: EditBoar
           {/* Name Field */}
           <div className="space-y-1.5">
             <label className="block text-sm font-semibold text-[#0e141b] dark:text-[#e8edf3]" htmlFor="board-name">
-              Board Name <span className="text-red-500">*</span>
+              {t("name_label")} <span className="text-red-500">*</span>
             </label>
             <input
               {...register("name")}
@@ -102,7 +104,7 @@ export function EditBoardModal({ isOpen, onClose, board, workspaceId }: EditBoar
           {/* Description Field */}
           <div className="space-y-1.5">
             <label className="block text-sm font-semibold text-[#0e141b] dark:text-[#e8edf3]" htmlFor="board-desc">
-              Description <span className="text-[#507395] font-normal text-xs">(Optional)</span>
+              {t("description_label")} <span className="text-[#507395] font-normal text-xs">{t("optional_hint")}</span>
             </label>
             <textarea
               {...register("description")}
@@ -120,14 +122,14 @@ export function EditBoardModal({ isOpen, onClose, board, workspaceId }: EditBoar
               onClick={onClose}
               className="px-4 py-2 hover:cursor-pointer rounded-lg text-sm font-medium text-[#507395] hover:bg-gray-100 dark:hover:bg-[#2d3a4a] transition-colors"
             >
-              Cancel
+              {t("cancel")}
             </button>
             <button
               type="submit"
               disabled={updateBoard.isPending || !isDirty}
               className="flex hover:cursor-pointer items-center gap-2 px-5 py-2 rounded-lg bg-primary text-white text-sm font-bold shadow-sm hover:bg-primary-hover transition-colors disabled:opacity-70 disabled:cursor-not-allowed"
             >
-              {updateBoard.isPending ? "Saving..." : "Save Changes"}
+              {updateBoard.isPending ? t("saving") : t("save_changes")}
             </button>
           </div>
         </form>

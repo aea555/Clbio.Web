@@ -1,6 +1,7 @@
 "use client";
 
 import { usePathname, useRouter } from "next/navigation";
+import { useTranslations } from "next-intl"; //
 import { useAuthStore } from "@/store/use-auth-store";
 import { useWorkspaceStore } from "@/store/use-workspace-store";
 import { useUnreadNotificationCount, useWorkspaces, useBoardSearch } from "@/hooks/use-queries";
@@ -13,6 +14,7 @@ import { ReadBoardDto } from "@/types/dtos";
 import { ProfileDropdown } from "../dashboard/profile-dropdown";
 
 export function Header() {
+  const t = useTranslations("Header"); //
   const pathname = usePathname();
   const router = useRouter();
   const user = useAuthStore((state) => state.user);
@@ -54,23 +56,23 @@ export function Header() {
 
   const getBreadcrumbs = () => {
     if (pathname.includes("/workspace-invitations")) {
-        return { parent: "Account", parentHref: "/dashboard", current: "Invitations" };
+        return { parent: t("breadcrumbs.account"), parentHref: "/dashboard", current: t("breadcrumbs.invitations") };
     }
     if (pathname.startsWith("/dashboard/settings")) {
-        if (pathname.includes("/general")) return { parent: "Settings", parentHref: "/dashboard/settings", current: "Appearance" };
-        if (pathname.includes("/account")) return { parent: "Settings", parentHref: "/dashboard/settings", current: "Account" };
-        if (pathname.includes("/notifications")) return { parent: "Settings", parentHref: "/dashboard/settings", current: "Notifications" };
-        return { parent: "Dashboard", parentHref: "/dashboard", current: "App Settings" };
+        if (pathname.includes("/general")) return { parent: t("breadcrumbs.settings"), parentHref: "/dashboard/settings", current: t("breadcrumbs.appearance") };
+        if (pathname.includes("/account")) return { parent: t("breadcrumbs.settings"), parentHref: "/dashboard/settings", current: t("breadcrumbs.account") };
+        if (pathname.includes("/notifications")) return { parent: t("breadcrumbs.settings"), parentHref: "/dashboard/settings", current: t("breadcrumbs.notifications") };
+        return { parent: t("breadcrumbs.dashboard"), parentHref: "/dashboard", current: t("breadcrumbs.app_settings") };
     }
 
-    let current = "Boards";
-    if (pathname.includes("/members")) current = "Members";
-    else if (pathname.includes("/audit-logs")) current = "Audit Logs";
-    else if (pathname.includes("/settings")) current = "Settings"; 
-    else if (pathname.includes("/b/")) current = "Board View";
+    let current = t("breadcrumbs.boards");
+    if (pathname.includes("/members")) current = t("breadcrumbs.members");
+    else if (pathname.includes("/audit-logs")) current = t("breadcrumbs.audit_logs");
+    else if (pathname.includes("/settings")) current = t("breadcrumbs.settings"); 
+    else if (pathname.includes("/b/")) current = t("breadcrumbs.board_view");
 
     return { 
-        parent: activeWorkspace?.name || "Dashboard", 
+        parent: activeWorkspace?.name || t("breadcrumbs.dashboard"), 
         parentHref: "/dashboard", 
         current 
     };
@@ -79,16 +81,14 @@ export function Header() {
   const breadcrumbs = getBreadcrumbs();
 
   return (
-    // FIX: Lowered Z-index to z-40 so it sits BELOW the sidebar (z-50) on mobile
     <header className="relative z-40 h-16 border-b border-border-base flex items-center justify-between px-4 md:px-6 bg-card flex-shrink-0 font-sans transition-all duration-300">
       
-      {/* Left: Toggle & Breadcrumbs */}
       <div className="flex items-center gap-4">
         {!isSidebarOpen && (
           <button 
             onClick={toggleSidebar}
             className="hover:cursor-pointer flex items-center justify-center p-2 -ml-2 text-muted-foreground hover:text-foreground hover:bg-background rounded-lg transition-colors"
-            title="Open Sidebar"
+            title={t("open_sidebar")}
           >
             <span className="material-symbols-outlined text-[24px] leading-none">menu</span>
           </button>
@@ -105,7 +105,6 @@ export function Header() {
         </div>
       </div>
 
-      {/* Right Actions */}
       <div className="flex items-center gap-3 md:gap-6">
         
         {/* --- Search Bar --- */}
@@ -118,7 +117,7 @@ export function Header() {
             onChange={(e) => setSearchQuery(e.target.value)}
             onFocus={() => setIsSearchFocused(true)}
             className="pl-10 pr-4 py-2 bg-background border border-border-base focus:border-primary/50 focus:bg-card rounded-full text-sm w-48 lg:w-64 outline-none transition-all placeholder-muted-foreground/60 text-foreground" 
-            placeholder="Search boards..." 
+            placeholder={t("search_placeholder")} 
             type="text"
           />
 
@@ -126,10 +125,10 @@ export function Header() {
           {isSearchFocused && searchQuery.length > 1 && (
             <div className="absolute top-full left-0 right-0 mt-2 bg-popover rounded-xl shadow-xl border border-border-base overflow-hidden min-w-[280px] z-50 animate-in fade-in zoom-in-95 duration-100">
               {isSearching ? (
-                <div className="p-4 text-center text-muted-foreground text-sm">Searching...</div>
+                <div className="p-4 text-center text-muted-foreground text-sm">{t("searching")}</div>
               ) : searchResults && searchResults.length > 0 ? (
                 <ul className="py-2">
-                  <li className="px-4 py-1 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Boards</li>
+                  <li className="px-4 py-1 text-xs font-semibold text-muted-foreground uppercase tracking-wider">{t("results_header_boards")}</li>
                   {searchResults.map((board: ReadBoardDto) => (
                     <li key={board.id}>
                       <button 
@@ -141,7 +140,7 @@ export function Header() {
                         </div>
                         <div className="min-w-0">
                           <p className="text-sm font-medium text-foreground truncate">{board.name}</p>
-                          <p className="text-xs text-muted-foreground truncate">{board.description || "No description"}</p>
+                          <p className="text-xs text-muted-foreground truncate">{board.description || t("no_description")}</p>
                         </div>
                       </button>
                     </li>
@@ -149,7 +148,7 @@ export function Header() {
                 </ul>
               ) : (
                 <div className="p-4 text-center text-muted-foreground text-sm">
-                  No boards found for "{searchQuery}"
+                  {t("no_results", { query: searchQuery })}
                 </div>
               )}
             </div>
@@ -158,7 +157,6 @@ export function Header() {
 
         <div className="h-6 w-px bg-border-base hidden md:block"></div>
 
-        {/* User Profile & Notifications */}
         <div className="flex items-center gap-3">
           
           <div className="relative">
@@ -182,7 +180,6 @@ export function Header() {
             />
           </div>
           
-          {/* Profile Avatar */}
           <div className="relative">
             <button 
               onClick={() => { setIsProfileOpen(!isProfileOpen); setIsNotifOpen(false); }}

@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl"; //
 import { useWorkspaces } from "@/hooks/use-queries";
 import { useWorkspaceStore } from "@/store/use-workspace-store";
 
@@ -10,6 +11,7 @@ interface WorkspaceSwitcherProps {
 }
 
 export function WorkspaceSwitcher({ onCreateClick }: WorkspaceSwitcherProps) {
+  const t = useTranslations("Sidebar.switcher"); //
   const router = useRouter();
   const dropdownRef = useRef<HTMLDivElement>(null);
   
@@ -19,7 +21,7 @@ export function WorkspaceSwitcher({ onCreateClick }: WorkspaceSwitcherProps) {
   const { activeWorkspaceId, setActiveWorkspaceId } = useWorkspaceStore();
   const activeWorkspace = workspaces?.find((w) => w.id === activeWorkspaceId);
 
-  // Close on click outside
+  // Close on click outside (Logic preserved)
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
@@ -52,13 +54,13 @@ export function WorkspaceSwitcher({ onCreateClick }: WorkspaceSwitcherProps) {
           {activeWorkspace?.name?.charAt(0) || "W"}
         </div>
         
-        {/* Workspace Name */}
+        {/* Workspace Name & Status */}
         <div className="flex flex-col items-start min-w-0 flex-1 overflow-hidden">
           <h1 className="text-sm font-semibold truncate w-full text-left text-[#0e141b] dark:text-[#e8edf3]">
-            {isLoading ? "Loading..." : (activeWorkspace?.name || "Select Workspace")}
+            {isLoading ? t("loading") : (activeWorkspace?.name || t("select_workspace"))}
           </h1>
           <span className="text-[10px] text-[#507395] dark:text-[#94a3b8] truncate">
-            {activeWorkspace ? "Active" : "No workspace"}
+            {activeWorkspace ? t("active") : t("no_workspace")}
           </span>
         </div>
 
@@ -72,13 +74,12 @@ export function WorkspaceSwitcher({ onCreateClick }: WorkspaceSwitcherProps) {
 
       {/* Dropdown Menu */}
       {isOpen && (
-        // Added specific background colors here (bg-white / dark:bg-[#1a2430]) to block text behind it
         <div className="absolute top-full left-0 right-0 mt-2 bg-white dark:bg-[#1a2430] rounded-xl shadow-xl border border-[#e8edf3] dark:border-[#3e4d5d] overflow-hidden z-50 animate-in fade-in zoom-in-95 duration-100 origin-top">
            
            {/* Header */}
            <div className="px-3 py-2 border-b border-[#e8edf3] dark:border-[#3e4d5d] bg-[#f8fafb] dark:bg-[#111921]">
               <span className="text-xs font-bold text-[#507395] dark:text-[#94a3b8] uppercase tracking-wider">
-                 My Workspaces
+                 {t("header")}
               </span>
            </div>
 
@@ -117,7 +118,7 @@ export function WorkspaceSwitcher({ onCreateClick }: WorkspaceSwitcherProps) {
                  className="flex w-full hover:cursor-pointer items-center justify-center gap-2 rounded-lg py-2 px-3 bg-primary-light text-primary hover:bg-primary-light/80 transition-colors text-xs font-bold"
               >
                  <span className="material-symbols-outlined text-[16px]">add</span>
-                 Create New Workspace
+                 {t("create_new")}
               </button>
            </div>
         </div>

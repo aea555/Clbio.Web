@@ -1,10 +1,11 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl"; //
 import { ReadBoardDto } from "@/types/dtos";
 import { usePermissions } from "@/providers/permission-provider";
 import { Permission } from "@/lib/rbac/permissions";
-import { EditBoardModal } from "../dashboard/edit-board-modal"; // Reusing your existing modal
+import { EditBoardModal } from "../dashboard/edit-board-modal";
 
 interface BoardHeaderProps {
   board: ReadBoardDto;
@@ -13,6 +14,7 @@ interface BoardHeaderProps {
 }
 
 export function BoardHeader({ board, workspaceId, isArchived }: BoardHeaderProps) {
+  const t = useTranslations("Board.header"); //
   const { can } = usePermissions();
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [showDescription, setShowDescription] = useState(false);
@@ -40,7 +42,7 @@ export function BoardHeader({ board, workspaceId, isArchived }: BoardHeaderProps
             <button
               onClick={() => setShowDescription(!showDescription)}
               className={`flex items-center justify-center p-1.5 rounded-md transition-colors ${showDescription ? "bg-primary-light text-primary" : "text-[#507395] hover:bg-gray-100 dark:hover:bg-[#2d3a4a]"}`}
-              title="Toggle Description"
+              title={t("toggle_description")}
             >
               <span className="material-symbols-outlined text-[20px] leading-none">info</span>
             </button>
@@ -59,10 +61,10 @@ export function BoardHeader({ board, workspaceId, isArchived }: BoardHeaderProps
             <div className="h-6 w-px bg-[#e8edf3] dark:border-[#2d3a4a]"></div>
             <button
               onClick={() => setIsEditModalOpen(true)}
-              className="text-xs font-bold text-[#507395] hover:text-primary transition-colors flex items-center gap-1"
+              className="text-xs font-bold text-[#507395] hover:text-primary transition-colors flex items-center gap-1 hover:cursor-pointer"
             >
               <span className="material-symbols-outlined text-[16px]">edit</span>
-              Edit Board
+              {t("edit_board")}
             </button>
           </>
         )}

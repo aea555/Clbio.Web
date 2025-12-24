@@ -1,13 +1,25 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
+import createIntlMiddleware from "next-intl/middleware";
+
+const intlMiddleware = createIntlMiddleware({
+  locales: ["en", "tr"],
+  defaultLocale: "en",
+  localePrefix: "always"
+});
 
 export function proxy(request: NextRequest) {
+  const response = intlMiddleware(request);
+  if (response) return response;
+
   const accessToken = request.cookies.get("accessToken")?.value;
   const refreshToken = request.cookies.get("refreshToken")?.value;
   const { pathname } = request.nextUrl;
 
-  const authRoutes = ["/auth"];
-  const protectedRoutes = ["/dashboard"];
+  const locale = pathname.split('/')[1];
+
+  const authRoutes = [`/${locale}/auth`];
+  const protectedRoutes = [`/${locale}/dashboard`];
 
   // 1. Define Protected Routes
   const isAuthRoute = authRoutes.some((route) => pathname.startsWith(route));
@@ -15,28 +27,21 @@ export function proxy(request: NextRequest) {
 
   // 2. Redirect Unauthenticated Users
   if (isProtectedRoute && !accessToken && !refreshToken) {
-    const loginUrl = new URL("/auth/login", request.url);
+    const loginUrl = new URL(`/${locale}/auth/login`, request.url);
     loginUrl.searchParams.set("returnUrl", pathname); 
     return NextResponse.redirect(loginUrl);
   }
 
   // 3. Redirect Authenticated Users away from Login
   if (isAuthRoute && (accessToken || refreshToken)) {
-    return NextResponse.redirect(new URL("/dashboard", request.url));
+    return NextResponse.redirect(new URL(`/${locale}/dashboard`, request.url));
   }
 
-  return NextResponse.next();
+  return intlMiddleware(request);
 }
 
 export const config = {
   matcher: [
-    /*
-     * Match all request paths except for the ones starting with:
-     * - api (API routes)
-     * - _next/static (static files)
-     * - _next/image (image optimization files)
-     * - favicon.ico (favicon file)
-     */
-    "/((?!api|_next/static|_next/image|favicon.ico).*)",
+    '/((?!api|_next/static|_next/image|favicon.ico|sounds).*)',
   ],
 };

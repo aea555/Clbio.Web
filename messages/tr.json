@@ -1,0 +1,685 @@
+{
+  "ForgotPassword": {
+    "title_step1": "Şifremi Unuttum",
+    "title_step2": "Altı haneli kodu girin",
+    "title_step3": "Yeni şifre belirleyin",
+    "desc_step1": "E-postanızı girin, size bir sıfırlama bağlantısı gönderelim.",
+    "desc_step2": "E-postanıza gönderilen 6 haneli kodu girin.",
+    "desc_step3": "Şifreler eşleşmiyor.",
+    "remember_password": "Şifreni hatırladın mı?",
+    "sign_in": "Giriş yap",
+    "back_to_login": "Giriş Ekranına Dön",
+    "email_label": "E-posta Adresi",
+    "email_placeholder": "isim@sirket.com",
+    "send_link_button": "Sıfırlama Bağlantısı Gönder",
+    "sending": "Gönderiliyor...",
+    "otp_instruction": "6 haneli kodu şuraya gönderdik:",
+    "otp_placeholder": "000000",
+    "verify_code_button": "Kodu Doğrula",
+    "verifying": "Doğrulanıyor...",
+    "didnt_receive_code": "Kod gelmedi mi? ",
+    "resend_click": "Yeniden göndermek için tıklayın",
+    "new_password_label": "Yeni Şifre",
+    "confirm_password_label": "Şifreyi Onayla",
+    "reset_password_button": "Şifreyi Sıfırla",
+    "resetting": "Sıfırlanıyor...",
+    "toasts": {
+      "reset_code_sent": "Sıfırlama kodu e-postanıza gönderildi",
+      "code_verified": "Kod başarıyla doğrulandı",
+      "password_reset_success": "Şifre başarıyla sıfırlandı!"
+    },
+    "errors": {
+      "invalid_email": "Geçersiz e-posta adresi",
+      "otp_length": "Kod 6 haneli olmalıdır",
+      "passwords_dont_match": "Şifreler eşleşmiyor"
+    }
+  },
+  "Login": {
+    "title": "Tekrar hoş geldin",
+    "description": "Giriş yapmak için lütfen bilgilerinizi girin.",
+    "dont_have_account": "Hesabınız yok mu?",
+    "sign_up": "Kayıt ol",
+    "google_signin": "Google ile devam et",
+    "or_continue_email": "veya e-posta ile devam edin",
+    "email_label": "E-posta Adresi",
+    "email_placeholder": "isim@sirket.com",
+    "password_label": "Şifre",
+    "password_placeholder": "••••••••",
+    "forgot_password": "Şifremi Unuttum?",
+    "signin_button": "Giriş Yap",
+    "signing_in": "Giriş yapılıyor...",
+    "show_password": "Şifreyi göster",
+    "hide_password": "Şifreyi gizle",
+    "toasts": {
+      "welcome": "Tekrar hoş geldin, {name}!",
+      "profile_fail": "Giriş başarılı, ancak kullanıcı profili yüklenemedi.",
+      "verification_required": "Hesap doğrulaması gerekiyor.",
+      "google_fail": "Google girişi başarısız oldu.",
+      "google_credential_fail": "Google girişi kimlik bilgilerini alamadı."
+    },
+    "errors": {
+      "invalid_email": "Lütfen geçerli bir e-posta adresi girin",
+      "password_min": "Şifre en az 6 karakter olmalıdır"
+    }
+  },
+  "Register": {
+    "title": "Hesap oluştur",
+    "description": "Başlamak için bilgilerinizi girin.",
+    "already_have_account": "Zaten hesabınız var mı?",
+    "log_in": "Giriş yap",
+    "google_signup": "Google ile kaydol",
+    "or_continue_email": "veya e-posta ile devam edin",
+    "full_name_label": "Ad Soyad",
+    "full_name_placeholder": "Ahmet Yılmaz",
+    "email_label": "E-posta Adresi",
+    "email_placeholder": "isim@sirket.com",
+    "password_label": "Şifre",
+    "password_placeholder": "••••••••",
+    "confirm_password_label": "Şifreyi Onayla",
+    "confirm_password_placeholder": "••••••••",
+    "create_account_button": "Hesap Oluştur",
+    "creating_account": "Hesap Oluşturuluyor...",
+    "toasts": {
+      "google_fail": "Google ile kayıt başarısız oldu.",
+      "google_signup_fail": "Google kaydı kimlik bilgilerini alamadı.",
+      "welcome_created": "Hesap oluşturuldu! Hoş geldin, {name}!",
+      "profile_load_fail": "Kayıt başarılı ancak profil yüklenemedi.",
+      "registration_failed": "Kayıt işlemi başarısız oldu.",
+      "verify_email": "Hesap başarıyla oluşturuldu! Lütfen e-postanızı doğrulayın.",
+      "account_exists": "Hesap zaten mevcut. Lütfen e-postanızı doğrulayın."
+    },
+    "errors": {
+      "confirm_required": "Lütfen şifrenizi onaylayın",
+      "passwords_dont_match": "Şifreler eşleşmiyor"
+    }
+  },
+  "VerifyEmail": {
+    "title_verify": "E-postanızı doğrulayın",
+    "title_check": "E-postanızı kontrol edin",
+    "desc_verify": "Hesabınızı doğrulamak için e-posta adresinizi girin.",
+    "desc_check_prefix": "6 haneli kodu şuraya gönderdik:",
+    "already_verified": "Zaten doğrulandı mı?",
+    "sign_in": "Giriş yap",
+    "email_label": "E-posta Adresi",
+    "email_placeholder": "isim@sirket.com",
+    "send_code_button": "Doğrulama Kodu Gönder",
+    "sending": "Gönderiliyor...",
+    "verification_code_label": "Doğrulama Kodu",
+    "otp_placeholder": "123456",
+    "verify_button": "Doğrula ve Devam Et",
+    "verifying": "Doğrulanıyor...",
+    "change_email": "E-posta adresini değiştir?",
+    "toasts": {
+      "code_sent_info": "Eğer hesap mevcutsa ve doğrulama gerekiyorsa, kod gönderilmiştir.",
+      "verify_success": "E-posta başarıyla doğrulandı!",
+      "logging_in": "Giriş yapılıyor...",
+      "verify_complete_info": "Doğrulama tamamlandı. Lütfen giriş yapın."
+    },
+    "errors": {
+      "invalid_email": "Lütfen geçerli bir e-posta adresi girin",
+      "otp_length": "Kod tam olarak 6 haneli olmalıdır"
+    }
+  },
+  "NotFound": {
+    "subtitle": "Çalışma alanında mı kayboldun?",
+    "description": "Aradığınız sayfa mevcut değil veya farklı bir koordinata taşınmış.",
+    "go_back": "Geri Git",
+    "dashboard": "Panel"
+  },
+  "Landing": {
+    "nav": {
+      "sign_in": "Giriş Yap",
+      "get_started": "Başla"
+    },
+    "hero": {
+      "badge": "Teknik Gösterim",
+      "title_part1": "Full-Stack",
+      "title_part2": ".NET Mimarisi.",
+      "description": "ASP.NET Core ve Next.js ile geliştirilmiş sağlam bir proje yönetim sistemi. SignalR Hub'ları üzerinden gerçek zamanlı veri yayını ve EF Core ile güçlendirilmiş kalıcı bir veri katmanı içerir.",
+      "live_demo": "Canlı Demo",
+      "frontend_code": "Frontend Kodu",
+      "backend_code": "Backend Kodu"
+    },
+    "features": {
+      "signalr": {
+        "title": "SignalR Entegrasyonu",
+        "desc": ".NET SignalR üzerinden gerçek zamanlı iletişim; canlı UI tepkiselliği için kalıcı bağlantılar kullanılır."
+      },
+      "architecture": {
+        "title": "Clean Architecture",
+        "desc": "Backend; Concern, Repository ve İş Mantığı katmanlarının net bir şekilde ayrıldığı N-Layer desenlerini takip eder."
+      },
+      "security": {
+        "title": "Identity & JWT",
+        "desc": "Güvenli ve ölçeklenebilir API erişimi için ASP.NET Core Identity ve JWT token'ları kullanılarak yapılan stateless kimlik doğrulama."
+      }
+    },
+    "portfolio_note": {
+      "title": "Portfolyo Notu",
+      "desc": "Bu proje, aea555 için teknik bir vitrindir. Özellikle karmaşık state yönetimi ve gerçek zamanlı backend olaylarını işleme konusundaki yüksek full-stack yetkinliğini göstermeyi amaçlar."
+    },
+    "footer": {
+      "copy": "© 2025 aea555 tarafından hazırlanan Mühendislik Vitrini"
+    }
+  },
+  "Dashboard": {
+    "title": "Panolarınız",
+    "subtitle": "Projelerinizi yönetin, görevleri takip edin ve iş birliği yapın.",
+    "no_workspace": "Başlamak için lütfen bir çalışma alanı seçin veya oluşturun.",
+    "create_board": "Pano Oluştur",
+    "create_new_board_tile": "Yeni pano oluştur",
+    "no_description": "Açıklama belirtilmedi.",
+    "sort": {
+      "most_recent": "En Yeni",
+      "alphabetical": "Alfabetik",
+      "last_updated": "Son Güncelleme"
+    },
+    "menu": {
+      "edit": "Düzenle",
+      "delete": "Sil"
+    },
+    "delete_modal": {
+      "title": "Panoyu Sil?",
+      "description": "\"{name}\" panosunu silmek istediğinizden emin misiniz? Bu işlem geri alınamaz ve içindeki tüm görevler kaybolur.",
+      "confirm": "Sil"
+    },
+    "toasts": {
+      "delete_success": "Pano başarıyla silindi"
+    }
+  },
+  "WorkspaceSettings": {
+    "title": "Çalışma Alanı Ayarları",
+    "subtitle": "Çalışma alanı tercihlerinizi yönetin.",
+    "loading": "Ayarlar yükleniyor...",
+    "general_info": "Genel Bilgiler",
+    "name_label": "Çalışma Alanı Adı",
+    "description_label": "Açıklama",
+    "save_changes": "Değişiklikleri Kaydet",
+    "saving": "Kaydediliyor...",
+    "actions_title": "Çalışma Alanı İşlemleri",
+    "actions_subtitle": "Bu çalışma alanının görünürlüğünü ve varlığını yönetin.",
+    "restore_button": "Çalışma Alanını Geri Yükle",
+    "archive_button": "Çalışma Alanını Arşivle",
+    "delete_button": "Çalışma Alanını Sil",
+    "leave_button": "Çalışma Alanından Ayrıl",
+    "modals": {
+      "delete_title": "Çalışma Alanını Sil?",
+      "delete_desc": "\"{name}\" çalışma alanını kalıcı olarak silmek istediğinizden emin misiniz?",
+      "delete_confirm": "Evet, Sil",
+      "archive_title": "Çalışma Alanını Arşivle?",
+      "archive_desc": "\"{name}\" çalışma alanını gizlemek ve salt okunur yapmak için arşivleyin.",
+      "archive_confirm": "Arşivle",
+      "restore_title": "Çalışma Alanını Geri Yükle?",
+      "restore_desc": "\"{name}\" çalışma alanını aktif duruma geri getirmek istiyor musunuz?",
+      "restore_confirm": "Geri Yükle",
+      "leave_title": "Çalışma Alanından Ayrıl?",
+      "leave_desc": "Bu çalışma alanından ayrılmak istediğinizden emin misiniz? Tüm panolara ve görevlere erişiminizi kaybedeceksiniz.",
+      "leave_confirm": "Ayrıl"
+    },
+    "errors": {
+      "name_min": "İsim en az 3 karakter olmalıdır",
+      "name_max": "İsim en fazla 50 karakter olmalıdır",
+      "desc_max": "Açıklama en fazla 200 karakter olmalıdır"
+    }
+  },
+  "WorkspaceMembers": {
+    "title": "Çalışma Alanı Ayarları",
+    "subtitle": "Üyeleri ve rolleri yönetin.",
+    "loading": "Üyeler yükleniyor...",
+    "member_list": "Üye Listesi",
+    "invite_member": "Üye Davet Et",
+    "no_access": "Erişim yok",
+    "current_workspace": "Mevcut Çalışma Alanı",
+    "fallback_member": "bu üye",
+    "table": {
+      "user": "Kullanıcı",
+      "role": "Rol",
+      "joined": "Katılım",
+      "update_role": "Rolü Güncelle",
+      "remove": "Kaldır"
+    },
+    "roles": {
+      "0": "Üye",
+      "1": "Admin",
+      "2": "Sahip"
+    },
+    "modals": {
+      "remove_title": "Üyeyi Kaldır?",
+      "remove_desc": "{name} isimli üyeyi çalışma alanından çıkarmak istediğinizden emin misiniz? Tüm panolara ve görevlere erişimini kaybedecek.",
+      "remove_confirm": "Üyeyi Kaldır",
+      "role_title": "Rolü Güncelle?",
+      "role_desc": "{name} isimli üyenin rolünü {oldRole} rolünden {newRole} rolüne güncellemek istediğinizden emin misiniz?",
+      "role_confirm": "Rolü Güncelle"
+    }
+  },
+  "AuditLogs": {
+    "title": "Çalışma Alanı Ayarları",
+    "subtitle": "Bu çalışma alanındaki tüm etkinlikleri ve güvenlik olaylarını takip edin.",
+    "log_title": "Etkinlik Günlüğü",
+    "refreshing": "Yenileniyor...",
+    "current_workspace": "Mevcut Çalışma Alanı",
+    "table": {
+      "headers": {
+        "actor": "Aktör",
+        "action": "Eylem",
+        "details": "Detaylar",
+        "entity": "Varlık",
+        "date": "Tarih"
+      },
+      "empty": "Henüz bir etkinlik kaydedilmedi.",
+      "actions": {
+        "create": "Oluşturma",
+        "update": "Güncelleme",
+        "delete": "Silme",
+        "other": "Diğer"
+      }
+    },
+    "pagination": {
+      "page_info": "{page} / {total}. Sayfa",
+      "results_info": "{total} sonuçtan {start} - {end} arası gösteriliyor",
+      "prev": "Önceki",
+      "next": "Sonraki"
+    }
+  },
+  "Board": {
+    "add_column": "Yeni liste ekle",
+    "header": {
+      "toggle_description": "Açıklamayı Göster/Gizle",
+      "edit_board": "Panoyu Düzenle"
+    },
+    "create_column": {
+      "title": "Liste Ekle",
+      "label": "Liste Adı",
+      "placeholder": "Örn: Yapılacaklar",
+      "cancel": "İptal",
+      "submit": "Liste Ekle",
+      "adding": "Ekleniyor...",
+      "success": "Liste oluşturuldu!"
+    },
+    "create_task": {
+      "title": "Yeni Görev",
+      "task_title_label": "Görev Başlığı",
+      "task_title_placeholder": "Ne yapılması gerekiyor?",
+      "description_label": "Açıklama",
+      "optional_hint": "(İsteğe bağlı)",
+      "description_placeholder": "Detay ekleyin...",
+      "cancel_button": "İptal",
+      "create_button": "Görev Oluştur"
+    }
+  },
+  "TaskDetail": {
+    "back_to_board": "Panoya Dön",
+    "created_at": "{date} tarihinde oluşturuldu",
+    "in_list": "Listede:",
+    "description": "Açıklama",
+    "attachments": "Ek Dosyalar",
+    "add_file": "Dosya Ekle",
+    "no_attachments": "Henüz dosya eklenmemiş.",
+    "status": "Durum",
+    "details": "Detaylar",
+    "due_date": "Bitiş Tarihi",
+    "no_date_set": "Tarih belirlenmedi",
+    "delete_task_button": "Görevi Sil",
+    "unknown_date": "Bilinmeyen tarih",
+    "invalid_date": "Geçersiz tarih",
+    "status_options": {
+      "todo": "Yapılacak",
+      "in_progress": "Devam Ediyor",
+      "review": "İncelemede",
+      "done": "Tamamlandı"
+    },
+    "modals": {
+      "delete_task_title": "Görevi Sil?",
+      "delete_task_desc": "Bu işlem görevi, yorumları ve ek dosyaları kalıcı olarak silecektir.",
+      "delete_task_confirm": "Görevi Sil",
+      "delete_file_title": "Dosyayı Sil?",
+      "delete_file_desc": "\"{name}\" dosyasını silmek istediğinizden emin misiniz?",
+      "delete_file_confirm": "Dosyayı Sil"
+    }
+  },
+  "PasswordRequirements": {
+    "length": "En az 6 karakter",
+    "uppercase": "En az bir büyük harf",
+    "lowercase": "En az bir küçük harf",
+    "number": "En az bir rakam"
+  },
+  "Column": {
+    "no_tasks": "Görev yok",
+    "drop_tasks": "Görevleri buraya bırakın",
+    "add_task": "Görev Ekle",
+    "delete_modal": {
+      "title": "Listeyi Sil?",
+      "description": "Emin misiniz? Bu listedeki tüm görevler silinecek.",
+      "confirm": "Listeyi Sil"
+    }
+  },
+  "TaskCard": {
+    "assignee_alt": "Sorumlu",
+    "status": {
+      "0": "Atandı",
+      "1": "Devam Ediyor",
+      "2": "İncelemede",
+      "3": "Tamamlandı"
+    }
+  },
+  "AddMemberModal": {
+    "title": "Üye Davet Et",
+    "email_label": "E-posta Adresi",
+    "email_placeholder": "isarkadasi@sirket.com",
+    "role_label": "Rol",
+    "role_member": "Üye",
+    "role_admin": "Admin",
+    "cancel": "İptal",
+    "sending": "Gönderiliyor...",
+    "send_invite": "Davet Gönder"
+  },
+  "ArchivedBanner": {
+    "heading": "Bu çalışma alanı arşivlendi.",
+    "subheading": "Arşivlendiği sürece panoları, görevleri veya ayarları düzenleyemezsiniz.",
+    "action_button": "Çalışma Alanını Geri Yükle",
+    "modal": {
+      "title": "Çalışma Alanını Arşivden Çıkar?",
+      "description": "\"{name}\" çalışma alanını geri yüklemek istiyor musunuz? Panoları ve üyeleri tekrar düzenleyebileceksiniz.",
+      "confirm": "Geri Yükle"
+    }
+  },
+  "CreateBoardModal": {
+    "title": "Yeni Pano Oluştur",
+    "board_title_label": "Pano Başlığı",
+    "board_title_placeholder": "Örn: Q4 Pazarlama Planı",
+    "description_label": "Açıklama",
+    "optional_hint": "(İsteğe bağlı)",
+    "description_placeholder": "Bu pano ne için?",
+    "cancel": "İptal",
+    "creating": "Oluşturuluyor...",
+    "submit": "Pano Oluştur",
+    "errors": {
+      "no_workspace": "Aktif bir çalışma alanı seçilmedi"
+    },
+    "success": "Pano başarıyla oluşturuldu!"
+  },
+  "CreateWorkspaceModal": {
+    "title": "Yeni Çalışma Alanı Oluştur",
+    "name_label": "Çalışma Alanı Adı",
+    "name_placeholder": "Örn: Acme A.Ş.",
+    "desc_label": "Açıklama",
+    "optional_hint": "(İsteğe bağlı)",
+    "desc_placeholder": "Bu ekip ne üzerinde çalışıyor?",
+    "cancel": "İptal",
+    "creating": "Oluşturuluyor...",
+    "submit": "Çalışma Alanı Oluştur",
+    "success": "Çalışma alanı başarıyla oluşturuldu!"
+  },
+  "EditBoardModal": {
+    "title": "Panoyu Düzenle",
+    "name_label": "Pano Adı",
+    "description_label": "Açıklama",
+    "optional_hint": "(İsteğe bağlı)",
+    "cancel": "İptal",
+    "saving": "Kaydediliyor...",
+    "save_changes": "Değişiklikleri Kaydet",
+    "success": "Pano başarıyla güncellendi!"
+  },
+  "ProfileDropdown": {
+    "my_profile": "Profilim",
+    "appearance": "Görünüm",
+    "logout_button": "Çıkış Yap",
+    "fallback_user": "Kullanıcı",
+    "logout_modal": {
+      "title": "Oturumu Kapat",
+      "description": "Oturumu kapatmak istediğinizden emin misiniz?",
+      "confirm": "Çıkış Yap"
+    }
+  },
+  "SettingsTabs": {
+    "general": "Genel",
+    "members": "Üyeler",
+    "audit_logs": "Denetim Kayıtları"
+  },
+  "Header": {
+    "open_sidebar": "Kenar Çubuğunu Aç",
+    "search_placeholder": "Panolarda ara...",
+    "searching": "Aranıyor...",
+    "results_header_boards": "Panolar",
+    "no_description": "Açıklama yok",
+    "no_results": "\"{query}\" için pano bulunamadı",
+    "breadcrumbs": {
+      "account": "Hesap",
+      "invitations": "Davetler",
+      "settings": "Ayarlar",
+      "appearance": "Görünüm",
+      "notifications": "Bildirimler",
+      "app_settings": "Uygulama Ayarları",
+      "boards": "Panolar",
+      "members": "Üyeler",
+      "audit_logs": "Denetim Kayıtları",
+      "board_view": "Pano Görünümü",
+      "dashboard": "Panel"
+    }
+  },
+  "NotificationDropdown": {
+    "title": "Bildirimler",
+    "mark_all_read": "Tümünü okundu işaretle",
+    "empty": "Henüz bildirim yok.",
+    "mark_as_read": "Okundu işaretle",
+    "view_all": "Tüm bildirimleri gör"
+  },
+  "Sidebar": {
+    "cluster_workspace": "Çalışma Alanı",
+    "boards": "Panolar",
+    "members": "Üyeler",
+    "settings": "Ayarlar",
+    "cluster_general": "Genel",
+    "invitations": "Davetler",
+    "app_settings": "Uygulama Ayarları",
+    "help": "Yardım",
+    "logout": "Çıkış Yap",
+    "collapse_sidebar": "Kenar Çubuğunu Daralt",
+    "logout_modal": {
+      "title": "Oturumu Kapat",
+      "description": "Oturumu kapatmak istediğinizden emin misiniz?",
+      "confirm": "Çıkış Yap"
+    },
+    "switcher": {
+      "loading": "Yükleniyor...",
+      "select_workspace": "Çalışma Alanı Seç",
+      "active": "Aktif",
+      "no_workspace": "Çalışma alanı yok",
+      "header": "Çalışma Alanlarım",
+      "create_new": "Yeni Çalışma Alanı Oluştur"
+    }
+  },
+  "TaskActivity": {
+    "title": "Aktivite",
+    "me": "Ben",
+    "input_placeholder": "Bir yorum yazın...",
+    "save": "Kaydet",
+    "delete": "Sil",
+    "delete_modal": {
+      "title": "Yorumu Sil?",
+      "description": "Bu işlem yorumu kalıcı olarak silecektir.",
+      "confirm": "Yorumu Sil"
+    }
+  },
+  "TaskAssignee": {
+    "label": "Sorumlu",
+    "unknown": "Bilinmiyor",
+    "assign_to_me": "Bana ata",
+    "me": "Ben",
+    "remove_assignment": "Atamayı kaldır",
+    "unassigned": "Atanmamış",
+    "search_placeholder": "Üye ara...",
+    "no_members": "Üye bulunamadı."
+  },
+  "TaskDescription": {
+    "placeholder_edit": "Daha detaylı bir açıklama ekleyin...",
+    "placeholder_empty": "Açıklama ekle...",
+    "save": "Kaydet",
+    "cancel": "İptal"
+  },
+  "ConfirmationModal": {
+    "default_confirm": "Onayla",
+    "default_cancel": "İptal"
+  },
+  "NotificationsPage": {
+    "title": "Bildirimler",
+    "subtitle": "Çalışma alanı aktivitelerinizden haberdar olun.",
+    "filter_all": "Tümü",
+    "filter_unread": "Okunmamış",
+    "mark_all_read": "Tümünü okundu işaretle",
+    "empty_state": "Bildirim bulunamadı.",
+    "tooltips": {
+      "mark_read": "Okundu işaretle",
+      "delete": "Sil"
+    },
+    "pagination": {
+      "previous": "Önceki",
+      "next": "Sonraki",
+      "page_info": "Sayfa {page} / {total}"
+    }
+  },
+  "WorkspaceInvitations": {
+    "title": "Çalışma Alanı Davetleri",
+    "subtitle": "Diğer çalışma alanlarına katılmak için bekleyen davetlerinizi yönetin.",
+    "incoming_title": "Gelen Davetler",
+    "empty_state": "Bekleyen davetiniz bulunmuyor.",
+    "page_info": "Sayfa {page} / {total}",
+    "table": {
+      "workspace": "Çalışma Alanı",
+      "invited_by": "Davet Eden",
+      "role": "Rol",
+      "sent": "Gönderilme",
+      "status": "Durum",
+      "actions": "İşlemler"
+    },
+    "roles": {
+      "member": "Üye",
+      "admin": "Yönetici",
+      "owner": "Sahip"
+    },
+    "status": {
+      "pending": "Beklemede",
+      "accepted": "Kabul Edildi",
+      "declined": "Reddedildi"
+    },
+    "actions": {
+      "accept": "Kabul Et",
+      "decline": "Reddet"
+    },
+    "modal": {
+      "accept_title": "Daveti Kabul Et?",
+      "decline_title": "Daveti Reddet?",
+      "accept_desc": "Bu çalışma alanına hemen katılacak ve panolarına erişim sağlayacaksınız.",
+      "decline_desc": "Bu davet listenizden kaldırılacaktır.",
+      "confirm_join": "Çalışma Alanına Katıl",
+      "confirm_decline": "Reddet"
+    },
+    "pagination": {
+      "previous": "Önceki",
+      "next": "Sonraki"
+    },
+    "unknown_workspace": "Bilinmeyen Çalışma Alanı",
+    "system": "Sistem"
+  },
+  "ProfilePage": {
+    "title": "Genel Profil",
+    "subtitle": "Çalışma alanlarınızda başkalarının sizi nasıl göreceğini yönetin.",
+    "delete_modal": {
+      "title": "Profil Resmini Kaldır?",
+      "description": "Profil resminizi kaldırmak istediğinizden emin misiniz? Resminiz adınızın baş harflerine geri dönecektir.",
+      "confirm": "Kaldır"
+    },
+    "crop": {
+      "zoom": "Yakınlaştır",
+      "cancel": "İptal",
+      "apply": "Kırpmayı Uygula"
+    },
+    "avatar": {
+      "preview": "ÖNİZLEME",
+      "change": "Değiştir",
+      "info": "İzin verilen: JPG, PNG, WEBP. Maks 5MB.",
+      "discard": "Önizlemeyi iptal et",
+      "remove_title": "Profil resmini kaldır"
+    },
+    "form": {
+      "display_name": "Görünen Ad",
+      "display_name_info": "Bu isim diğer üyeler tarafından görülecektir.",
+      "email": "E-posta Adresi",
+      "email_info": "E-posta adresi değiştirilemez.",
+      "save": "Değişiklikleri Kaydet",
+      "saving": "Kaydediliyor..."
+    },
+    "messages": {
+      "invalid_file": "Geçersiz dosya.",
+      "crop_failed": "Resim kırpılamadı",
+      "update_failed": "Profil güncellemesi başarısız oldu"
+    }
+  },
+  "NotificationSettings": {
+    "title": "Bildirim Ayarları",
+    "subtitle": "Çalışma alanı uyarılarını ve seslerini yönetin.",
+    "sounds_title": "Bildirim Sesleri",
+    "sounds_subtitle": "Bir bildirim aldığınızda sesli uyarı duyun.",
+    "volume_label": "Uyarı Ses Seviyesi",
+    "select_sound_label": "Uyarı Sesini Seçin",
+    "sounds": {
+      "chime": "Melodi",
+      "pop": "Pop"
+    }
+  },
+  "GeneralSettings": {
+    "title": "Genel Ayarlar",
+    "subtitle": "Çalışma alanı görünümünüzü ve tercihlerinizi özelleştirin.",
+    "appearance": {
+      "title": "Görünüm",
+      "high_contrast": "Yüksek Kontrast",
+      "on": "Açık",
+      "off": "Kapalı",
+      "modes": {
+        "light": "Açık",
+        "dark": "Koyu",
+        "system": "Sistem"
+      }
+    },
+    "bg_styles": {
+      "light_title": "Açık Mod Stili",
+      "dark_title": "Koyu Mod Stili",
+      "themes": {
+        "default": { "dark": "Slate", "dark_desc": "Klasik derin mavi-gri", "light": "Bulut", "light_desc": "Klasik yumuşak beyaz netlik" },
+        "zinc": { "dark": "Çinko", "dark_desc": "Endüstriyel nötr koyu", "light": "Parşömen", "light_desc": "Hafif taba kağıt bitişi" },
+        "midnight": { "dark": "Gece Yarısı", "dark_desc": "Saf OLED siyah", "light": "Alacakaranlık", "light_desc": "Hafif mor-mavi sis" },
+        "darkcrimson": { "name": "Kıpkırmızı", "desc": "Hafif koyu tuğla kırmızısı" },
+        "darkblue": { "name": "Kobalt", "desc": "Hafif derin koyu mavi" }
+      }
+    },
+    "accent": {
+      "title": "Vurgu Rengi",
+      "subtitle": "Çalışma alanınız için bir ana renk seçin.",
+      "colors": {
+        "blue": "Okyanus",
+        "emerald": "Orman",
+        "violet": "Kraliyet",
+        "amber": "Gün Batımı",
+        "rose": "Dut"
+      }
+    }
+  },
+  "SettingsHub": {
+    "title": "Uygulama Ayarları",
+    "subtitle": "Kişisel tercihlerinizi ve uygulama yapılandırmalarınızı yönetin.",
+    "menu": {
+      "account": {
+        "title": "Hesap",
+        "description": "Profil bilgilerinizi, avatarınızı ve e-postanızı yönetin."
+      },
+      "appearance": {
+        "title": "Görünüm",
+        "description": "Tema modlarını ve vurgu renklerini özelleştirin."
+      },
+      "notifications": {
+        "title": "Bildirimler",
+        "description": "Uyarıları ve güncellemeleri nasıl alacağınızı yapılandırın."
+      }
+    }
+  }
+}
