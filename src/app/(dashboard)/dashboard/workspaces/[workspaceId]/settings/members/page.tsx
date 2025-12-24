@@ -193,6 +193,7 @@ export default function WorkspaceMembersPage() {
                         <div className="flex items-center gap-3">
 
                           <UserAvatar
+                            workspaceId={workspaceId}
                             src={member.userAvatarUrl}
                             name={member.userDisplayName}
                             isOnline={isOnline}

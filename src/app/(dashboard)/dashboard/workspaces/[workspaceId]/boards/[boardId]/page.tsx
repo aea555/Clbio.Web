@@ -98,9 +98,11 @@ export default function BoardPage() {
 
     const activeId = active.id;
     const overId = over.id;
+
+    if (activeId === overId) return;
+
     const isActiveTask = active.data.current?.type === "Task";
     const isOverTask = over.data.current?.type === "Task";
-    const isOverColumn = over.data.current?.type === "Column";
 
     if (!isActiveTask) return;
 
@@ -108,6 +110,7 @@ export default function BoardPage() {
       setTasks((prev) => {
         const activeIndex = prev.findIndex((t) => t.id === activeId);
         const overIndex = prev.findIndex((t) => t.id === overId);
+
         if (prev[activeIndex].columnId !== prev[overIndex].columnId) {
           const newTasks = [...prev];
           newTasks[activeIndex].columnId = prev[overIndex].columnId;
@@ -117,6 +120,7 @@ export default function BoardPage() {
       });
     }
 
+    const isOverColumn = over.data.current?.type === "Column";
     if (isOverColumn) {
       setTasks((prev) => {
         const activeIndex = prev.findIndex((t) => t.id === activeId);
@@ -174,8 +178,8 @@ export default function BoardPage() {
   }
 
   if (!board) {
-    notFound(); 
-    return null; 
+    notFound();
+    return null;
   }
 
   return (

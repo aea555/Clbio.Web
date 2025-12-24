@@ -6,14 +6,18 @@ import { useCommentMutations } from "@/hooks/use-mutations";
 import { useAuthStore } from "@/store/use-auth-store";
 import { formatDistanceToNow } from "date-fns";
 import { UserAvatar } from "@/components/ui/user-avatar"; // Added component
+import { ConfirmationModal } from "../ui/confirmation-modal";
+import { usePermissions } from "@/providers/permission-provider";
 
 export function TaskActivity({ taskId, workspaceId, isArchived = false }: { taskId: string, workspaceId: string, isArchived?: boolean }) {
    const { user } = useAuthStore();
+   const { can } = usePermissions();
    const { data: comments, isLoading } = useComments(workspaceId, taskId);
    const { createComment, deleteComment } = useCommentMutations(workspaceId, taskId);
    const [newComment, setNewComment] = useState("");
+   const [isDeleteCommentModalOpen, setIsDeleteCommentModalOpen] = useState(false);
+   const [commentIdToDelete, setCommentIdToDelete] = useState("");
 
-   // 1. Extract Author IDs for Presence Check
    const authorIds = useMemo(() => {
       // Get unique IDs to prevent duplicate checks
       const ids = comments?.map(c => c.authorId).filter(Boolean) || [];
@@ -31,8 +35,32 @@ export function TaskActivity({ taskId, workspaceId, isArchived = false }: { task
       });
    };
 
+   const handleDeleteCommentModalClick = (id: string) => {
+      setIsDeleteCommentModalOpen(prev => !prev);
+      setCommentIdToDelete(prev => (prev == id ? "" : id));
+   }
+
+   const handleDelete = () => {
+      if (isArchived) return;
+      if (commentIdToDelete){
+         deleteComment.mutate(commentIdToDelete);
+         handleDeleteCommentModalClick("");
+      }
+   }
+
    return (
       <div className="space-y-6">
+         <ConfirmationModal 
+            isOpen={isDeleteCommentModalOpen} 
+            onClose={() => handleDeleteCommentModalClick("")} 
+            onConfirm={handleDelete} 
+            title="Delete Comment?" 
+            description="This will permanently delete the comment." 
+            confirmText="Delete Comment" 
+            variant="warning" 
+            isLoading={deleteComment.isPending} 
+         />
+
          <div className="flex justify-between items-center">
             <h3 className="font-bold text-[#0e141b] dark:text-[#e8edf3] flex items-center gap-2">
                <span className="material-symbols-outlined text-[20px]">format_list_bulleted</span>
@@ -45,6 +73,7 @@ export function TaskActivity({ taskId, workspaceId, isArchived = false }: { task
             <div className="flex gap-3">
                <div className="flex-shrink-0">
                   <UserAvatar
+                     workspaceId={workspaceId}
                      src={user?.avatarUrl}
                      name={user?.displayName || "Me"}
                      size="md"
@@ -83,6 +112,7 @@ export function TaskActivity({ taskId, workspaceId, isArchived = false }: { task
                   {/* Author Avatar with Presence */}
                   <div className="flex-shrink-0">
                      <UserAvatar
+                        workspaceId={workspaceId}
                         src={comment.authorAvatarUrl}
                         name={comment.authorDisplayName}
                         isOnline={onlineUserIds?.includes(comment.authorId)}
@@ -106,7 +136,7 @@ export function TaskActivity({ taskId, workspaceId, isArchived = false }: { task
                         {/* Show delete if own comment */}
                         {!isArchived && user?.id === comment.authorId && (
                            <button
-                              onClick={() => deleteComment.mutate(comment.id)}
+                              onClick={() => handleDeleteCommentModalClick(comment.id)}
                               className="hover:cursor-pointer text-xs text-[#507395] hover:text-red-500 underline opacity-0 group-hover:opacity-100 transition-opacity"
                            >
                               Delete

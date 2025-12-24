@@ -10,6 +10,7 @@ import {
 } from "@/types/dtos";
 import { toast } from "sonner";
 import { useEffect } from "react";
+import { HubConnectionState } from "@microsoft/signalr";
 
 export function useWorkspaceRealtime(workspaceId: string) {
   const { connection, isConnected } = useSocket();
@@ -24,8 +25,10 @@ export function useWorkspaceRealtime(workspaceId: string) {
         .catch(err => console.error(`Failed to join workspace ${workspaceId}`, err));
 
       return () => {
-        connection.invoke("LeaveWorkspace", workspaceId)
-          .catch(err => console.error(`Failed to leave workspace ${workspaceId}`, err));
+        if (connection.state === HubConnectionState.Connected) {
+          connection.invoke("LeaveWorkspace", workspaceId)
+            .catch(err => console.error(`Failed to leave workspace ${workspaceId}`, err));
+        }
       };
     }
   }, [connection, isConnected, workspaceId]);
@@ -48,27 +51,27 @@ export function useWorkspaceRealtime(workspaceId: string) {
     toast.success("Workspace updated");
   });
 
-  useSocketEventListener("WorkspaceArchived", (data: { Id: string }) => {
+  useSocketEventListener("WorkspaceArchived", (data: { id: string }) => {
     queryClient.invalidateQueries({ queryKey: ["workspaces"] });
-    queryClient.invalidateQueries({ queryKey: ["workspaces", "detail", data.Id] });
-    if (data.Id === workspaceId) {
+    queryClient.invalidateQueries({ queryKey: ["workspaces", "detail", data.id] });
+    if (data.id === workspaceId) {
       toast.warning("This workspace has been archived.");
     }
   });
 
-  useSocketEventListener("WorkspaceUnarchived", (data: { Id: string }) => {
+  useSocketEventListener("WorkspaceUnarchived", (data: { id: string }) => {
     queryClient.invalidateQueries({ queryKey: ["workspaces"] });
-    queryClient.invalidateQueries({ queryKey: ["workspaces", "detail", data.Id] });
-    if (data.Id === workspaceId) {
+    queryClient.invalidateQueries({ queryKey: ["workspaces", "detail", data.id] });
+    if (data.id === workspaceId) {
       toast.info("This workspace has been restored.");
     }
   });
 
-  useSocketEventListener("WorkspaceDeleted", (data: { Id: string }) => {
-    queryClient.removeQueries({ queryKey: ["workspaces", "detail", data.Id] });
+  useSocketEventListener("WorkspaceDeleted", (data: { id: string }) => {
+    queryClient.removeQueries({ queryKey: ["workspaces", "detail", data.id] });
     queryClient.invalidateQueries({ queryKey: ["workspaces"] });
 
-    if (data.Id === workspaceId) {
+    if (data.id === workspaceId) {
       toast.error("This workspace has been deleted.");
     }
   });
@@ -101,9 +104,7 @@ export function useWorkspaceRealtime(workspaceId: string) {
     queryClient.invalidateQueries({ queryKey: ["workspaces", "members", workspaceId] });
   });
 
-  useSocketEventListener("UserLeftWorkspace", (data: { Id: string }) => {
-    // Note: The event payload key seems to vary in your snippets (Id vs userId). 
-    // I'm using the one from the "Workspace" section logic.
+  useSocketEventListener("UserLeftWorkspace", (data: { id: string }) => {
     queryClient.invalidateQueries({ queryKey: ["workspaces", "members", workspaceId] });
   });
 
@@ -165,16 +166,16 @@ export function useWorkspaceRealtime(workspaceId: string) {
   // =========================================================
 
   // Note: Backend must send boardId for us to update the board list efficiently
-  useSocketEventListener("TaskCreated", (task: ReadTaskItemDto, boardId: string) => {
+  useSocketEventListener("TaskCreated", (data: {task: ReadTaskItemDto, boardId: string}) => {
     // 1. Update Board List: ["tasks", "board", boardId]
-    queryClient.setQueryData(["tasks", "board", boardId], (oldData: ReadTaskItemDto[] | undefined) => {
-      if (!oldData) return [task];
-      if (oldData.some(t => t.id === task.id)) return oldData;
-      return [...oldData, task];
+    queryClient.setQueryData(["tasks", "board", data.boardId], (oldData: ReadTaskItemDto[] | undefined) => {
+      if (!oldData) return [data.task];
+      if (oldData.some(t => t.id === data.task.id)) return oldData;
+      return [...oldData, data.task];
     });
 
     // 2. Update Detail: ["tasks", "detail", taskId]
-    queryClient.setQueryData(["tasks", "detail", task.id], task);
+    queryClient.setQueryData(["tasks", "detail", data.task.id], data.task);
   });
 
   useSocketEventListener("TaskUpdated", (data: { task: ReadTaskItemDto; boardId: string }) => {

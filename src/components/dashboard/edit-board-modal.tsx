@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useBoardMutations } from "@/hooks/use-mutations";
@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import { UpdateBoardDto, updateBoardSchema } from "@/lib/schemas/schemas";
 import { ReadBoardDto } from "@/types/dtos";
 import { getErrorMessage } from "@/lib/error-utils";
+import { createPortal } from "react-dom";
 
 interface EditBoardModalProps {
   isOpen: boolean;
@@ -18,6 +19,7 @@ interface EditBoardModalProps {
 
 export function EditBoardModal({ isOpen, onClose, board, workspaceId }: EditBoardModalProps) {
   const { updateBoard } = useBoardMutations(workspaceId);
+  const [mounted, setMounted] = useState(false);
 
   const {
     register,
@@ -30,6 +32,8 @@ export function EditBoardModal({ isOpen, onClose, board, workspaceId }: EditBoar
 
   // Populate form when board opens
   useEffect(() => {
+    setMounted(true);
+
     if (isOpen && board) {
       reset({
         id: board.id,
@@ -57,9 +61,9 @@ export function EditBoardModal({ isOpen, onClose, board, workspaceId }: EditBoar
     );
   };
 
-  if (!isOpen || !board) return null;
+  if (!isOpen || !board || !mounted) return null;
 
-  return (
+  return createPortal(
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
       <div 
         className="bg-white dark:bg-[#1a2430] rounded-xl shadow-2xl w-full max-w-md border border-[#e8edf3] dark:border-[#2d3a4a] overflow-hidden animate-in zoom-in-95 duration-200"
@@ -70,7 +74,7 @@ export function EditBoardModal({ isOpen, onClose, board, workspaceId }: EditBoar
           <h3 className="text-lg font-bold text-[#0e141b] dark:text-[#e8edf3]">Edit Board</h3>
           <button 
             onClick={onClose}
-            className="text-[#507395] hover:text-[#0e141b] dark:hover:text-white transition-colors"
+            className="text-[#507395] hover:cursor-pointer hover:text-[#0e141b] dark:hover:text-white transition-colors"
           >
             <span className="material-symbols-outlined text-[20px]">close</span>
           </button>
@@ -114,20 +118,20 @@ export function EditBoardModal({ isOpen, onClose, board, workspaceId }: EditBoar
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 rounded-lg text-sm font-medium text-[#507395] hover:bg-gray-100 dark:hover:bg-[#2d3a4a] transition-colors"
+              className="px-4 py-2 hover:cursor-pointer rounded-lg text-sm font-medium text-[#507395] hover:bg-gray-100 dark:hover:bg-[#2d3a4a] transition-colors"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={updateBoard.isPending || !isDirty}
-              className="flex items-center gap-2 px-5 py-2 rounded-lg bg-primary text-white text-sm font-bold shadow-sm hover:bg-primary-hover transition-colors disabled:opacity-70 disabled:cursor-not-allowed"
+              className="flex hover:cursor-pointer items-center gap-2 px-5 py-2 rounded-lg bg-primary text-white text-sm font-bold shadow-sm hover:bg-primary-hover transition-colors disabled:opacity-70 disabled:cursor-not-allowed"
             >
               {updateBoard.isPending ? "Saving..." : "Save Changes"}
             </button>
           </div>
         </form>
       </div>
-    </div>
+    </div>, document.body
   );
 }

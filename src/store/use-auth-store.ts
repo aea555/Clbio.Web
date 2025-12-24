@@ -69,8 +69,13 @@ export const useAuthStore = create<AuthState>()(
        * Prevents stale flags surviving refresh.
        */
       partialize: (state) => ({
-        user: state.user,
         isAuthenticated: state.isAuthenticated,
+        user: state.user ? {
+          id: state.user.id,
+          email: state.user.email,
+          displayName: state.user.displayName,
+          avatarUrl: state.user.avatarUrl,
+        } : null,
       }),
     }
   )

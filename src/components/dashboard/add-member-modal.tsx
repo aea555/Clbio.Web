@@ -3,12 +3,14 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useWorkspaceMutations } from "@/hooks/use-mutations";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { CreateWorkspaceMemberDto, createWorkspaceMemberSchema } from "@/lib/schemas/schemas";
 import { WorkspaceRole } from "@/types/enums";
+import { createPortal } from "react-dom";
 
 export function AddMemberModal({ workspaceId, isOpen, onClose }: { workspaceId: string; isOpen: boolean; onClose: () => void }) {
   const { inviteMember } = useWorkspaceMutations(workspaceId);
+  const [mounted, setMounted] = useState(false);
 
   const {
     register,
@@ -25,6 +27,7 @@ export function AddMemberModal({ workspaceId, isOpen, onClose }: { workspaceId: 
   });
 
   useEffect(() => {
+    setMounted(true);
     if (isOpen) {
       reset({
         workspaceId: workspaceId,
@@ -48,9 +51,9 @@ export function AddMemberModal({ workspaceId, isOpen, onClose }: { workspaceId: 
     );
   };
 
-  if (!isOpen) return null;
+  if (!isOpen || !mounted) return null;
 
-  return (
+  return createPortal(
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
       <div className="bg-white dark:bg-[#1a2430] rounded-xl shadow-2xl w-full max-w-md border border-[#e8edf3] dark:border-[#2d3a4a] overflow-hidden animate-in zoom-in-95 duration-200">
         
@@ -124,6 +127,6 @@ export function AddMemberModal({ workspaceId, isOpen, onClose }: { workspaceId: 
           </div>
         </form>
       </div>
-    </div>
+    </div>, document.body
   );
 }

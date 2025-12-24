@@ -175,7 +175,7 @@ export default function TaskDetailPage() {
             )}
 
             {isArchived && workspace && (
-                <div className="relative z-10">
+                <div className="relative z-20">
                     <ArchivedBanner workspaceId={workspaceId} workspaceName={workspace.name} />
                 </div>
             )}

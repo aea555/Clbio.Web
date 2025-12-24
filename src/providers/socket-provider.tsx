@@ -25,14 +25,13 @@ export default function SocketProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     // Only connect if the user is authenticated
     if (!isAuthenticated) {
-        if (connection) {
-            connection.stop();
-            setConnection(null);
-            setIsConnected(false);
-        }
-        return;
+      if (connection) {
+        connection.stop();
+        setConnection(null);
+        setIsConnected(false);
+      }
+      return;
     }
-
 
     const newConnection = new signalR.HubConnectionBuilder()
       .withUrl(HUB_URL, {
@@ -40,6 +39,7 @@ export default function SocketProvider({ children }: { children: ReactNode }) {
         accessTokenFactory: async () => {
           try {
             const response = await fetch("/api/auth/token");
+            if (!response.ok) throw new Error("Could not fetch token");
             const data = await response.json();
             return data.accessToken || "";
           } catch {
@@ -50,25 +50,54 @@ export default function SocketProvider({ children }: { children: ReactNode }) {
         skipNegotiation: true,
         transport: signalR.HttpTransportType.WebSockets,
       })
-      .withAutomaticReconnect()
+      .withAutomaticReconnect({
+        nextRetryDelayInMilliseconds: retryContext => {
+          if (retryContext.previousRetryCount < 3) return 2000;
+          if (retryContext.previousRetryCount < 10) return 5000;
+          return 30000;
+        }
+      })
       .configureLogging(signalR.LogLevel.Warning)
       .build();
 
-    newConnection.start()
-      .then(() => {
-        console.log("🟢 SignalR Connected");
+    const startConnection = async () => {
+      try {
+        await newConnection.start();
+        console.log("🟢 SignalR Connected: ", newConnection.connectionId);
         setIsConnected(true);
-      })
-      .catch((err) => console.error("🔴 SignalR Connection Error:", err));
+      } catch (err) {
+        const error = err as Error;
+        if (error.name && error.name === 'AbortError' || error.message.includes("stop() was called")) {
+          return;
+        }
+        console.error("🔴 SignalR Connection Error:", err);
+        setTimeout(startConnection, 5000);
+      }
+    };
 
-    newConnection.onclose(() => setIsConnected(false));
-    newConnection.onreconnecting(() => setIsConnected(false));
-    newConnection.onreconnected(() => setIsConnected(true));
+    startConnection();
+
+    newConnection.onreconnecting(() => {
+      console.warn("🟡 SignalR Reconnecting...");
+      setIsConnected(false);
+    });
+
+    newConnection.onreconnected((connectionId) => {
+      console.log("🟢 SignalR Reconnected. New ID:", connectionId);
+      setIsConnected(true);
+    });
+
+    newConnection.onclose(() => {
+      console.error("🔴 SignalR Connection Closed");
+      setIsConnected(false);
+    });
 
     setConnection(newConnection);
 
     return () => {
-      newConnection.stop();
+      if (newConnection.state !== signalR.HubConnectionState.Disconnected) {
+        newConnection.stop();
+      }
     };
   }, [isAuthenticated]);
 
