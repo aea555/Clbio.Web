@@ -68,9 +68,10 @@ export function TaskAssignee({ task, workspaceId, boardId, isArchived = false }:
             <label className="text-xs text-[#507395] block mb-1 font-bold uppercase tracking-wider">Assignee</label>
             <div className="flex items-center gap-2 opacity-80 p-1.5 -ml-1.5">
                  <UserAvatar 
+                    workspaceId={workspaceId}
                     src={avatarUrl} 
                     name={displayName} 
-                    isOnline={false} // Don't show online status if archived (optional decision)
+                    isOnline={false} 
                     size="sm"
                  />
                  <span className="text-sm font-medium text-[#0e141b] dark:text-[#e8edf3]">{displayName}</span>
@@ -107,6 +108,7 @@ export function TaskAssignee({ task, workspaceId, boardId, isArchived = false }:
                <div className="flex items-center justify-between group p-1.5 -ml-1.5 rounded-lg hover:bg-gray-50 dark:hover:bg-[#2d3a4a]">
                   <div className="flex items-center gap-2">
                      <UserAvatar 
+                        workspaceId={workspaceId}
                         src={user?.avatarUrl} 
                         name={user?.displayName || "Me"} 
                         isOnline={true} // You are always online to yourself
@@ -132,6 +134,7 @@ export function TaskAssignee({ task, workspaceId, boardId, isArchived = false }:
             <label className="text-xs text-[#507395] block mb-1 font-bold uppercase tracking-wider">Assignee</label>
             <div className="flex items-center gap-2 opacity-80 p-1.5 -ml-1.5">
                  <UserAvatar 
+                    workspaceId={workspaceId}
                     src={avatarUrl} 
                     name={displayName} 
                     isOnline={isAssigneeOnline}
@@ -157,6 +160,7 @@ export function TaskAssignee({ task, workspaceId, boardId, isArchived = false }:
             {task.assigneeId ? (
                 <>
                     <UserAvatar 
+                        workspaceId={workspaceId}
                         src={avatarUrl} 
                         name={displayName} 
                         isOnline={isAssigneeOnline}
@@ -215,6 +219,7 @@ export function TaskAssignee({ task, workspaceId, boardId, isArchived = false }:
                                 }`}
                             >
                                 <UserAvatar 
+                                    workspaceId={workspaceId}
                                     src={member.userAvatarUrl} 
                                     name={member.userDisplayName} 
                                     isOnline={onlineUserIds?.includes(member.userId)}

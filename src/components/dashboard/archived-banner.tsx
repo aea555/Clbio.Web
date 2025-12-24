@@ -4,6 +4,8 @@ import { useWorkspaceMutations } from "@/hooks/use-mutations";
 import { useState } from "react";
 import { ConfirmationModal } from "@/components/ui/confirmation-modal";
 import { useWorkspaceStore } from "@/store/use-workspace-store";
+import { usePermissions } from "@/providers/permission-provider";
+import { Permission } from "@/lib/rbac/permissions";
 
 interface ArchivedBannerProps {
   workspaceId: string;
@@ -13,7 +15,8 @@ interface ArchivedBannerProps {
 export function ArchivedBanner({ workspaceId, workspaceName }: ArchivedBannerProps) {
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const { activeWorkspaceId } = useWorkspaceStore();
-  
+  const { can, isOwner } = usePermissions();
+
   const { unarchiveWorkspace } = useWorkspaceMutations(activeWorkspaceId || "");
 
   const handleUnarchive = () => {
@@ -47,13 +50,13 @@ export function ArchivedBanner({ workspaceId, workspaceName }: ArchivedBannerPro
             </p>
           </div>
         </div>
-        
-        <button
+
+        {can(Permission.ArchiveWorkspace) && <button
           onClick={() => setIsConfirmOpen(true)}
           className="px-4 hover:cursor-pointer py-1.5 bg-white dark:bg-transparent border border-amber-300 dark:border-amber-700 text-amber-700 dark:text-amber-300 text-xs font-bold rounded-lg hover:bg-amber-100 dark:hover:bg-amber-900/40 transition-colors shadow-sm"
         >
           Restore Workspace
-        </button>
+        </button>}
       </div>
     </>
   );

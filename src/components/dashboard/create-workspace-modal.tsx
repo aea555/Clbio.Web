@@ -5,14 +5,15 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { useWorkspaceMutations } from "@/hooks/use-mutations";
 import { toast } from "sonner";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useWorkspaceStore } from "@/store/use-workspace-store";
 import { CreateWorkspaceDto, createWorkspaceSchema } from "@/lib/schemas/schemas";
+import { createPortal } from "react-dom";
 
 export function CreateWorkspaceModal({ isOpen, onClose}: { isOpen: boolean; onClose: () => void }) {
   const { activeWorkspaceId, setActiveWorkspaceId } = useWorkspaceStore();
-  
   const { createWorkspace } = useWorkspaceMutations(activeWorkspaceId || "");
+  const [mounted, setMounted] = useState(false);
 
   const {
     register,
@@ -24,6 +25,8 @@ export function CreateWorkspaceModal({ isOpen, onClose}: { isOpen: boolean; onCl
   });
 
   useEffect(() => {
+    setMounted(true);
+
     if (isOpen) reset();
   }, [isOpen, reset]);
 
@@ -47,9 +50,9 @@ export function CreateWorkspaceModal({ isOpen, onClose}: { isOpen: boolean; onCl
     );
   };
 
-  if (!isOpen) return null;
+  if (!isOpen || !mounted) return null;
 
-  return (
+  return createPortal(
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
       <div 
         className="bg-white dark:bg-[#1a2430] rounded-xl shadow-2xl w-full max-w-md border border-[#e8edf3] dark:border-[#2d3a4a] overflow-hidden animate-in zoom-in-95 duration-200"
@@ -106,7 +109,7 @@ export function CreateWorkspaceModal({ isOpen, onClose}: { isOpen: boolean; onCl
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 rounded-lg text-sm font-medium text-[#507395] hover:bg-gray-100 dark:hover:bg-[#2d3a4a] transition-colors"
+              className="px-4 py-2 hover:cursor-pointer rounded-lg text-sm font-medium text-[#507395] hover:bg-gray-100 dark:hover:bg-[#2d3a4a] transition-colors"
             >
               Cancel
             </button>
@@ -114,7 +117,7 @@ export function CreateWorkspaceModal({ isOpen, onClose}: { isOpen: boolean; onCl
               type="submit"
               disabled={createWorkspace.isPending}
               /* FIX: Dynamic Background and Hover */
-              className="flex items-center gap-2 px-5 py-2 rounded-lg bg-primary text-white text-sm font-bold shadow-sm hover:bg-primary-hover transition-colors disabled:opacity-70 disabled:cursor-not-allowed"
+              className="flex hover:cursor-pointer items-center gap-2 px-5 py-2 rounded-lg bg-primary text-white text-sm font-bold shadow-sm hover:bg-primary-hover transition-colors disabled:opacity-70 disabled:cursor-not-allowed"
             >
               {createWorkspace.isPending ? (
                 <>
@@ -128,6 +131,6 @@ export function CreateWorkspaceModal({ isOpen, onClose}: { isOpen: boolean; onCl
           </div>
         </form>
       </div>
-    </div>
+    </div>, document.body
   );
 }

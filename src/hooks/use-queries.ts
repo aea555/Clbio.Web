@@ -10,6 +10,7 @@ import { activityLogService } from "@/services/activity-log-service";
 import { authService } from "@/services/auth-service";
 import { presenceService } from "@/services/presence-service";
 import { workspaceInvitationService } from "@/services/workspace-invitation-service";
+import { fileService } from "@/services/file-service";
 
 // ============================================================================
 // WORKSPACES
@@ -204,5 +205,13 @@ export function useOnlinePresence(userIds: string[]) {
     
     // Keep data fresh-ish but allow background updates
     staleTime: 5000, 
+  });
+}
+
+export function useViewFile(workspaceId: string, key: string){
+  return useQuery({
+    queryKey: ["presignedFileUrl", workspaceId, key],
+    queryFn: () => fileService.view(workspaceId!, key!),
+    enabled: !!workspaceId && !!key
   });
 }

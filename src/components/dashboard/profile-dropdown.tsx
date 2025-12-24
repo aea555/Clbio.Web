@@ -98,7 +98,7 @@ export function ProfileDropdown({ isOpen, onClose }: ProfileDropdownProps) {
                 My Profile
             </Link>
              <Link
-                href="/dashboard/settings/general"
+                href="/dashboard/settings/theme"
                 onClick={onClose}
                 className="flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium text-foreground hover:bg-background transition-colors"
             >

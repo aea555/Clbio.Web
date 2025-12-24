@@ -158,6 +158,10 @@ export interface ReadWorkspaceInvitationDto extends ResponseDtoBase
 	expiresAt: string;
 }
 
+export interface ViewPresignedUrlDto {
+	url: string;
+}
+
 export interface PaginationMeta {
 	totalCount: number;
 	page: number;

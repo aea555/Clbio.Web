@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 
 interface ConfirmationModalProps {
   isOpen: boolean;
@@ -25,9 +26,10 @@ export function ConfirmationModal({
   variant = "primary",
   isLoading = false,
 }: ConfirmationModalProps) {
-  
+  const [mounted, setMounted] = useState(false);
   // Close on Escape key
   useEffect(() => {
+    setMounted(true);
     const handleEscape = (e: KeyboardEvent) => {
       if (e.key === "Escape") onClose();
     };
@@ -35,7 +37,7 @@ export function ConfirmationModal({
     return () => window.removeEventListener("keydown", handleEscape);
   }, [isOpen, onClose]);
 
-  if (!isOpen) return null;
+  if (!isOpen || !mounted) return null;
 
   // Variant Styles
   const confirmBtnStyles = {
@@ -45,20 +47,19 @@ export function ConfirmationModal({
     warning: "bg-amber-500 hover:bg-amber-600 text-white",
   };
 
-  return (
+  return createPortal(
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
-      <div 
+      <div
         className="bg-white dark:bg-[#1a2430] rounded-xl shadow-2xl w-full max-w-sm border border-[#e8edf3] dark:border-[#2d3a4a] overflow-hidden animate-in zoom-in-95 duration-200"
-        onClick={(e) => e.stopPropagation()} 
+        onClick={(e) => e.stopPropagation()}
       >
         <div className="p-6 text-center">
           {/* Icon based on variant */}
-          <div className={`mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full ${
-            variant === 'danger' ? 'bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400' : 
-            variant === 'warning' ? 'bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400' :
-            /* FIX: Replaced bg-blue-100/text-blue-600 with dynamic primary theme */
-            'bg-primary-light text-primary'
-          }`}>
+          <div className={`mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full ${variant === 'danger' ? 'bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400' :
+              variant === 'warning' ? 'bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400' :
+                /* FIX: Replaced bg-blue-100/text-blue-600 with dynamic primary theme */
+                'bg-primary-light text-primary'
+            }`}>
             <span className="material-symbols-outlined text-[28px]">
               {variant === 'danger' ? 'warning' : variant === 'warning' ? 'priority_high' : 'info'}
             </span>
@@ -88,6 +89,5 @@ export function ConfirmationModal({
           </button>
         </div>
       </div>
-    </div>
-  );
+    </div>, document.body);
 }

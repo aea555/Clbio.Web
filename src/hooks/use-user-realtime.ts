@@ -54,8 +54,6 @@ export function useUserRealtime() {
   };
 
   const handleWorkspaceSignal = (type: WorkspaceSignalType, data: any) => {
-    console.log(`Workspace signal received [${type}]:`, data);
-
     // Case A: New Invitation Received
     if (type === "Invitation") {
       queryClient.invalidateQueries({ queryKey: ["workspace-invitations"] });

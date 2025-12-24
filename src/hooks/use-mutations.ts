@@ -32,7 +32,6 @@ export function useUserMutations() {
   const uploadAvatar = useMutation({
     mutationFn: (file: File) => userService.uploadAvatar(file),
 
-    // 🔒 Lock sync + cancel in-flight /me refetches
     onMutate: async () => {
       setAvatarUpdating(true);
 
@@ -42,8 +41,6 @@ export function useUserMutations() {
     },
 
     onSuccess: (data) => {
-      console.log("🟢 Upload Success. Backend URL:", data.url);
-
       const newAvatarUrl = data.url;
 
       const currentUser =
@@ -58,11 +55,12 @@ export function useUserMutations() {
       const updatedUser: ReadUserDto = {
         ...currentUser,
         avatarUrl: newAvatarUrl,
-        updatedAt: new Date().toISOString(), // 🔥 ensures timestamp dominance
+        updatedAt: new Date().toISOString(), 
       };
 
       // Update React Query cache (prevents immediate rollback)
       queryClient.setQueryData(["users", "me"], updatedUser);
+      queryClient.setQueryData(["presignedFileUrl"], newAvatarUrl);
 
       // Update Zustand store (authoritative for UI)
       setUser(updatedUser);
@@ -139,7 +137,6 @@ export function useWorkspaceMutations(workspaceId: string) {
   const createWorkspace = useMutation({
     mutationFn: workspaceService.create,
     onSuccess: (newWorkspace) => {
-      console.log("Create Workspace Response:", newWorkspace);
       queryClient.setQueryData(["workspaces"], (oldData: any) => {
         const currentList = Array.isArray(oldData) ? oldData : [];
         if (currentList.find((w: any) => w.id === newWorkspace?.id)) {
@@ -156,7 +153,7 @@ export function useWorkspaceMutations(workspaceId: string) {
     mutationFn: ({ id, data }: { id: string; data: any }) =>
       workspaceService.update(id, data),
     onSuccess: (updatedWorkspace) => {
-      queryClient.invalidateQueries({ queryKey: ["workspaceById", updatedWorkspace?.id] });
+      queryClient.invalidateQueries({ queryKey: ["workspaces", "detail", updatedWorkspace?.id] });
       toast.success("Workspace updated");
     },
     onError: (error: any) => toast.error(getErrorMessage(error)),
@@ -166,7 +163,6 @@ export function useWorkspaceMutations(workspaceId: string) {
     mutationFn: workspaceService.delete,
     onSuccess: (works) => {
       queryClient.invalidateQueries({ queryKey: ["workspaces"] });
-      queryClient.invalidateQueries({ queryKey: ["workspaceById"] });
       toast.success("Workspace deleted");
     },
     onError: (error: any) => toast.error(getErrorMessage(error)),
@@ -583,7 +579,7 @@ export function useAttachmentMutations(workspaceId: string, taskId: string) {
   const uploadAttachment = useMutation({
     mutationFn: (files: File[]) => attachmentService.upload(workspaceId, taskId, files),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["attachments", taskId] });
+      queryClient.invalidateQueries({ queryKey: ["attachments", workspaceId, taskId] });
       queryClient.invalidateQueries({ queryKey: ["tasks", "detail", taskId] });
       toast.success("File uploaded");
     },
