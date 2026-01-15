@@ -314,6 +314,7 @@
     "description": "Description",
     "attachments": "Attachments",
     "add_file": "Add File",
+    "uploading": "Uploading...",
     "no_attachments": "No attachments yet.",
     "status": "Status",
     "details": "Details",
@@ -645,11 +646,32 @@
       "light_title": "Light Mode Style",
       "dark_title": "Dark Mode Style",
       "themes": {
-        "default": { "dark": "Slate", "dark_desc": "Classic deep blue-grey", "light": "Cloud", "light_desc": "Classic soft white clarity" },
-        "zinc": { "dark": "Zinc", "dark_desc": "Industrial neutral dark", "light": "Parchment", "light_desc": "Faint tan paper finish" },
-        "midnight": { "dark": "Midnight", "dark_desc": "Pure OLED black", "light": "Twilight", "light_desc": "Faint purple-blue mist" },
-        "darkcrimson": { "name": "Crimson", "desc": "Faint dark brick red" },
-        "darkblue": { "name": "Cobalt", "desc": "Faint deep dark blue" }
+        "default": {
+          "dark": "Slate",
+          "dark_desc": "Classic deep blue-grey",
+          "light": "Cloud",
+          "light_desc": "Classic soft white clarity"
+        },
+        "zinc": {
+          "dark": "Zinc",
+          "dark_desc": "Industrial neutral dark",
+          "light": "Parchment",
+          "light_desc": "Faint tan paper finish"
+        },
+        "midnight": {
+          "dark": "Midnight",
+          "dark_desc": "Pure OLED black",
+          "light": "Twilight",
+          "light_desc": "Faint purple-blue mist"
+        },
+        "darkcrimson": {
+          "name": "Crimson",
+          "desc": "Faint dark brick red"
+        },
+        "darkblue": {
+          "name": "Cobalt",
+          "desc": "Faint deep dark blue"
+        }
       }
     },
     "accent": {
