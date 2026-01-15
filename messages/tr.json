@@ -314,6 +314,7 @@
     "description": "Açıklama",
     "attachments": "Ek Dosyalar",
     "add_file": "Dosya Ekle",
+    "uploading": "Yükleniyor...",
     "no_attachments": "Henüz dosya eklenmemiş.",
     "status": "Durum",
     "details": "Detaylar",
@@ -645,11 +646,32 @@
       "light_title": "Açık Mod Stili",
       "dark_title": "Koyu Mod Stili",
       "themes": {
-        "default": { "dark": "Slate", "dark_desc": "Klasik derin mavi-gri", "light": "Bulut", "light_desc": "Klasik yumuşak beyaz netlik" },
-        "zinc": { "dark": "Çinko", "dark_desc": "Endüstriyel nötr koyu", "light": "Parşömen", "light_desc": "Hafif taba kağıt bitişi" },
-        "midnight": { "dark": "Gece Yarısı", "dark_desc": "Saf OLED siyah", "light": "Alacakaranlık", "light_desc": "Hafif mor-mavi sis" },
-        "darkcrimson": { "name": "Kıpkırmızı", "desc": "Hafif koyu tuğla kırmızısı" },
-        "darkblue": { "name": "Kobalt", "desc": "Hafif derin koyu mavi" }
+        "default": {
+          "dark": "Slate",
+          "dark_desc": "Klasik derin mavi-gri",
+          "light": "Bulut",
+          "light_desc": "Klasik yumuşak beyaz netlik"
+        },
+        "zinc": {
+          "dark": "Çinko",
+          "dark_desc": "Endüstriyel nötr koyu",
+          "light": "Parşömen",
+          "light_desc": "Hafif taba kağıt bitişi"
+        },
+        "midnight": {
+          "dark": "Gece Yarısı",
+          "dark_desc": "Saf OLED siyah",
+          "light": "Alacakaranlık",
+          "light_desc": "Hafif mor-mavi sis"
+        },
+        "darkcrimson": {
+          "name": "Kıpkırmızı",
+          "desc": "Hafif koyu tuğla kırmızısı"
+        },
+        "darkblue": {
+          "name": "Kobalt",
+          "desc": "Hafif derin koyu mavi"
+        }
       }
     },
     "accent": {

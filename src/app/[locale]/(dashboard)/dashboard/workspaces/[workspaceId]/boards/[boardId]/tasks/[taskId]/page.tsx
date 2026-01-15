@@ -254,8 +254,19 @@ export default function TaskDetailPage() {
 
                                 {!isArchived && can(Permission.CreateAttachment) && (
                                     <>
-                                        <button onClick={() => fileInputRef.current?.click()} className="hover:cursor-pointer text-xs font-bold text-primary hover:underline">
-                                            {t("add_file")}
+                                        <button
+                                            onClick={() => fileInputRef.current?.click()}
+                                            disabled={uploadAttachment.isPending}
+                                            className="hover:cursor-pointer text-xs font-bold text-primary hover:underline disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1"
+                                        >
+                                            {uploadAttachment.isPending ? (
+                                                <>
+                                                    <span className="material-symbols-outlined animate-spin text-[14px]">progress_activity</span>
+                                                    {t("uploading")}
+                                                </>
+                                            ) : (
+                                                t("add_file")
+                                            )}
                                         </button>
                                         <input type="file" multiple className="hidden" ref={fileInputRef} onChange={handleFileUpload} />
                                     </>
