@@ -186,20 +186,21 @@ export function Header() {
 
   return (
     <header className="relative z-40 border-b border-border-base bg-card flex-shrink-0 font-sans transition-all duration-300">
-      {/* Main header row */}
-      <div className="h-14 flex items-center justify-between px-4 md:px-6">
-        <div className="flex items-center gap-4">
+      {/* Main header row - icons always visible */}
+      <div className="h-14 flex items-center justify-between px-4 md:px-6 gap-2">
+        <div className="flex items-center gap-4 min-w-0 flex-1">
           {!isSidebarOpen && (
             <button
               onClick={toggleSidebar}
-              className="hover:cursor-pointer flex items-center justify-center p-2 -ml-2 text-muted-foreground hover:text-foreground hover:bg-background rounded-lg transition-colors"
+              className="hover:cursor-pointer flex items-center justify-center p-2 -ml-2 text-muted-foreground hover:text-foreground hover:bg-background rounded-lg transition-colors flex-shrink-0"
               title={t("open_sidebar")}
             >
               <span className="material-symbols-outlined text-[24px] leading-none">menu</span>
             </button>
           )}
 
-          <div className="flex items-center gap-1.5 text-sm text-muted-foreground overflow-hidden">
+          {/* Desktop breadcrumbs - inline */}
+          <div className="hidden md:flex items-center gap-1.5 text-sm text-muted-foreground overflow-hidden min-w-0">
             {breadcrumbs.map((item, index) => (
               <div key={index} className="flex items-center gap-1.5 min-w-0">
                 {index > 0 && (
@@ -208,21 +209,36 @@ export function Header() {
                 {item.href ? (
                   <Link
                     href={item.href}
-                    className="hover:text-primary hover:cursor-pointer transition-colors truncate max-w-[120px] sm:max-w-[200px]"
+                    className="hover:text-primary hover:cursor-pointer transition-colors truncate max-w-[150px] lg:max-w-[200px]"
                   >
                     {item.label}
                   </Link>
                 ) : (
-                  <span className="text-foreground font-medium truncate max-w-[120px] sm:max-w-[200px]">
+                  <span className="text-foreground font-medium truncate max-w-[200px]">
                     {item.label}
                   </span>
                 )}
               </div>
             ))}
           </div>
+
+          {/* Mobile - show only first breadcrumb item inline */}
+          <div className="md:hidden flex items-center gap-1.5 text-sm text-muted-foreground min-w-0">
+            {breadcrumbs[0] && (
+              <Link
+                href={breadcrumbs[0].href || "/dashboard"}
+                className="hover:text-primary hover:cursor-pointer transition-colors truncate max-w-[120px]"
+              >
+                {breadcrumbs[0].label}
+              </Link>
+            )}
+            {breadcrumbs.length > 1 && (
+              <span className="material-symbols-outlined text-base flex-shrink-0">chevron_right</span>
+            )}
+          </div>
         </div>
 
-        <div className="flex items-center gap-3 md:gap-6">
+        <div className="flex items-center gap-3 md:gap-6 flex-shrink-0">
           {/* Desktop Search Bar */}
           <div className="relative group hidden md:block w-48 lg:w-64" ref={desktopSearchRef}>
             <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground group-focus-within:text-primary transition-colors text-[20px]">
@@ -291,7 +307,32 @@ export function Header() {
         </div>
       </div>
 
-      {/* Mobile Search Row - appears below header on small screens */}
+      {/* Mobile Breadcrumb Row - shows remaining breadcrumb items */}
+      {breadcrumbs.length > 1 && (
+        <div className="md:hidden px-4 pb-2 flex items-center gap-1.5 text-sm text-muted-foreground overflow-hidden">
+          {breadcrumbs.slice(1).map((item, index) => (
+            <div key={index} className="flex items-center gap-1.5 min-w-0">
+              {index > 0 && (
+                <span className="material-symbols-outlined text-base flex-shrink-0">chevron_right</span>
+              )}
+              {item.href ? (
+                <Link
+                  href={item.href}
+                  className="hover:text-primary hover:cursor-pointer transition-colors truncate max-w-[100px]"
+                >
+                  {item.label}
+                </Link>
+              ) : (
+                <span className="text-foreground font-medium truncate max-w-[120px]">
+                  {item.label}
+                </span>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Mobile Search Row - appears below breadcrumbs on small screens */}
       <div className="md:hidden px-4 pb-3" ref={mobileSearchRef}>
         <div className="relative group w-full">
           <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground group-focus-within:text-primary transition-colors text-[20px]">

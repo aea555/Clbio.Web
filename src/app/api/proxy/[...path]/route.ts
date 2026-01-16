@@ -22,11 +22,11 @@ async function handle(
       // FIX A: For files, read as ArrayBuffer to preserve binary data
       // This allows us to re-use the 'body' variable if we need to retry on 401
       body = await request.arrayBuffer();
-      
+
       // FIX B: Pass the exact Content-Type header from the client.
       // This is crucial because it contains the 'boundary=...' string.
       headers["Content-Type"] = incomingContentType;
-      
+
       // Optional: Pass content-length if available
       if (request.headers.has("content-length")) {
         headers["Content-Length"] = request.headers.get("content-length");
@@ -65,80 +65,115 @@ async function handle(
 
     return NextResponse.json(response.data);
   } catch (error: any) {
-    
+
     // 3. Handle 401 (Refresh Logic)
     if (error.response?.status === 401) {
-       const cookieStore = await cookies();
-       let newRefresh = cookieStore.get("refreshToken")?.value;
+      const cookieStore = await cookies();
+      let newRefresh = cookieStore.get("refreshToken")?.value;
 
-       if (!newRefresh) {
-         return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-       }
+      if (!newRefresh) {
+        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      }
 
-       try {
-         const refreshResponse: AxiosResponse<ApiResponse<TokenResponseDto>> = await axios.post(
-           `${process.env.NEXT_PUBLIC_API_URL}/auth/refresh`,
-           { refreshToken: newRefresh }
-         );
+      try {
+        // RETRY LOGIC FOR REFRESH
+        let refreshResponse: AxiosResponse<ApiResponse<TokenResponseDto>> | null = null;
+        let refreshError: any = null;
+        const MAX_RETRIES = 3;
 
-         const apiResponse = refreshResponse.data;
-         const { accessToken, refreshToken } = apiResponse.data || {};
+        for (let i = 0; i < MAX_RETRIES; i++) {
+          try {
+            refreshResponse = await axios.post(
+              `${process.env.NEXT_PUBLIC_API_URL}/auth/refresh`,
+              { refreshToken: newRefresh }
+            );
+            // If successful, break the loop
+            refreshError = null;
+            break;
+          } catch (err: any) {
+            refreshError = err;
+            const status = err.response?.status;
 
-         if (!accessToken || !refreshToken) {
-            return NextResponse.json({ error: "Invalid Token Response" }, { status: 500 });
-         }
-         newAccess = accessToken;
-         newRefresh = refreshToken;
+            // If it's a client error (400-499), it's likely a valid rejection (invalid token).
+            // Don't retry, fail immediately.
+            if (status && status >= 400 && status < 500) {
+              console.error("Refresh failed with 4xx error:", status, err.response?.data);
+              break;
+            }
 
-         // B. Retry Original Request
-         headers["Authorization"] = `Bearer ${newAccess}`;
+            // If it's a server error (5xx) or network error, wait and retry
+            console.warn(`Refresh attempt ${i + 1} failed. Retrying...`, err.message);
+            if (i < MAX_RETRIES - 1) {
+              await new Promise(resolve => setTimeout(resolve, 500)); // Wait 500ms
+            }
+          }
+        }
 
-         const retryResponse = await axios({
-            method: request.method,
-            url: url,
-            data: body, // Reuse the ArrayBuffer body
-            headers: headers,
-            params: new URL(request.url).searchParams,
-            maxBodyLength: Infinity,
-            maxContentLength: Infinity,
-         });
+        if (refreshError || !refreshResponse) {
+          throw refreshError || new Error("Refresh failed after retries");
+        }
 
-         const nextResponse = NextResponse.json(retryResponse.data);
+        const apiResponse = refreshResponse.data;
+        const { accessToken, refreshToken } = apiResponse.data || {};
 
-         const isProduction = process.env.NODE_ENV === "production";
-         const isSecure = isProduction && !request.url.includes("localhost");
-         
-         nextResponse.cookies.set("accessToken", newAccess, {
-            httpOnly: true,
-            secure: isSecure,
-            sameSite: "lax",
-            path: "/",
-            maxAge: 15 * 60, 
-         });
+        if (!accessToken || !refreshToken) {
+          console.error("Invalid token response structure", apiResponse);
+          return NextResponse.json({ error: "Invalid Token Response" }, { status: 500 });
+        }
+        newAccess = accessToken;
+        newRefresh = refreshToken;
 
-         nextResponse.cookies.set("refreshToken", newRefresh, {
-            httpOnly: true,
-            secure: isSecure,
-            sameSite: "lax",
-            path: "/",
-            maxAge: 7 * 24 * 60 * 60, 
-         });
+        // B. Retry Original Request
+        headers["Authorization"] = `Bearer ${newAccess}`;
 
-         return nextResponse;
+        const retryResponse = await axios({
+          method: request.method,
+          url: url,
+          data: body, // Reuse the ArrayBuffer body
+          headers: headers,
+          params: new URL(request.url).searchParams,
+          maxBodyLength: Infinity,
+          maxContentLength: Infinity,
+        });
 
-       } catch (refreshError) {
-         const response = NextResponse.json(
-           { error: "Session Expired. Please login again." }, 
-           { status: 401 }
-         );
-         response.cookies.delete("accessToken");
-         response.cookies.delete("refreshToken");
-         return response;
-       }
+        const nextResponse = NextResponse.json(retryResponse.data);
+
+        const isProduction = process.env.NODE_ENV === "production";
+        const isSecure = isProduction && !request.url.includes("localhost");
+
+        nextResponse.cookies.set("accessToken", newAccess, {
+          httpOnly: true,
+          secure: isSecure,
+          sameSite: "lax",
+          path: "/",
+          maxAge: 15 * 60,
+        });
+
+        nextResponse.cookies.set("refreshToken", newRefresh, {
+          httpOnly: true,
+          secure: isSecure,
+          sameSite: "lax",
+          path: "/",
+          maxAge: 7 * 24 * 60 * 60,
+        });
+
+        return nextResponse;
+
+      } catch (finalError: any) {
+        console.error("Final Refresh Error:", finalError.message, finalError.response?.data);
+
+        const response = NextResponse.json(
+          { error: "Session Expired. Please login again." },
+          { status: 401 }
+        );
+        response.cookies.delete("accessToken");
+        response.cookies.delete("refreshToken");
+        return response;
+      }
     }
 
     return NextResponse.json(
-      error.response?.data || { error: "Proxy Error" }, 
+      error.response?.data || { error: "Proxy Error" },
       { status: error.response?.status || 500 }
     );
   }
